@@ -19,11 +19,25 @@
 %DCData_lib( IPUMS )
 
 
+data hhwts;
+	set ipums.acs_2012_16_dc;
+	if pernum = 1;
+	if gq in (1,2);
+	keep serial hhwt;
+run;
+
+proc sort data = hhwts; by serial; run;
+
+
 data pretables;
 	set ipums.acs_2012_16_dc;
 	keep largeunit serial hhwt pernum hhtype numprec race hispan age hhincome isadult isschoolage
          issenior isdis
      ;
+
+	 /*only households*/
+	if gq in (1,2);
+
     /*large unit*/
 	if numprec >= 4 then largeunit = 1;
 		else largeunit = 0;
@@ -59,6 +73,25 @@ data pretables;
 
 run;
 
+
+proc summary data = pretables;
+	class serial;
+	var isschoolage;
+	output out= pretables_collapse sum=;
+run;
+
+
+proc sort data = pretables_collapse; by serial; run;
+
+data pretables_collapse_w;
+	merge pretables_collapse hhwts;
+	by serial;
+run;
+
+proc freq data = pretables_collapse_w;
+	tables isschoolage;
+	weight hhwt;
+run;
 
 
 
