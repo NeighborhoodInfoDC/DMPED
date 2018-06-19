@@ -74,18 +74,18 @@ data pretables;
     /*income category according to HUD definition*/
 
 	if (numprec = 1 and hhincome <= 24650) or (numprec=2 and hhincome <= 28150) or  (numprec=3 and hhincome <= 31540)
-       or (numprec=4 and hhincome <= 35,150) or (numprec=5 and hhincome <= 38,000) or (numprec=6 and hhincome <= 40,800) 
-       or (numprec=7 and hhincome <= 43,600) or (numprec=8 and hhincome <= 46,400) then hudincome30=1;                                                                               
+       or (numprec=4 and hhincome <= 35150) or (numprec=5 and hhincome <= 38000) or (numprec=6 and hhincome <= 40800) 
+       or (numprec=7 and hhincome <= 43600) or (numprec=8 and hhincome <= 46400) then hudincome30=1;                                                                               
 	   else hudincome30 = 0;
 
-	if (numprec = 1 and hhincome <= 41,050) or (numprec=2 and hhincome <= 46,900  ) or  (numprec=3 and hhincome <= 52,750)
-       or (numprec=4 and hhincome <= 58,600) or (numprec=5 and hhincome <= 63,300) or (numprec=6 and hhincome <= 68,000 ) 
-       or (numprec=7 and hhincome <= 72,700) or (numprec=8 and hhincome <= 77,400) then hudincome50=1;                                                                               
+	if (numprec = 1 and hhincome <= 41050) or (numprec=2 and hhincome <= 46900  ) or  (numprec=3 and hhincome <= 5750)
+       or (numprec=4 and hhincome <= 58600) or (numprec=5 and hhincome <= 63300) or (numprec=6 and hhincome <= 68000 ) 
+       or (numprec=7 and hhincome <= 72700) or (numprec=8 and hhincome <= 77400) then hudincome50=1;                                                                               
 	   else hudincome50 = 0;
 	    
- 	if (numprec = 1 and hhincome <= 54,250) or (numprec=2 and hhincome <= 62,000 ) or  (numprec=3 and hhincome <= 69,750)
-       or (numprec=4 and hhincome <= 77,450) or (numprec=5 and hhincome <= 83,650) or (numprec=6 and hhincome <= 89,850) 
-       or (numprec=7 and hhincome <= 96,050) or (numprec=8 and hhincome <= 102,250) then hudincome80=1;                                                                               
+ 	if (numprec = 1 and hhincome <= 54250) or (numprec=2 and hhincome <= 62000 ) or  (numprec=3 and hhincome <= 69750)
+       or (numprec=4 and hhincome <= 77450) or (numprec=5 and hhincome <= 83650) or (numprec=6 and hhincome <= 89850) 
+       or (numprec=7 and hhincome <= 96050) or (numprec=8 and hhincome <= 102250) then hudincome80=1;                                                                               
 	   else hudincome80 = 0;
 
    /*income category according to DC Council*/
