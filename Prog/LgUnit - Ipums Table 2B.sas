@@ -32,7 +32,8 @@ proc sort data = hhwts; by serial; run;
 data pretables;
 	set ipums.acs_2012_16_dc;
 	keep largeunit serial hhwt pernum hhtype numprec race hispan age hhincome isadult isschoolage
-         issenior isdis
+         issenior isdis raceW raceB raceH
+		 hudincome30 hudincome50 dcincome80
      ;
 
 	 /*only households*/
@@ -103,6 +104,29 @@ data pretables;
        or (numprec=4 and hhincome <= 108600*0.8) or (numprec=5 and hhincome <= 108600*0.8*1.1) or (numprec=6 and hhincome <= 108600*0.8*1.2 ) 
        or (numprec=7 and hhincome <= 108600*0.8*1.3) or (numprec=8 and hhincome <= 108600*0.8*1.4) then dcincome80=1;                                                                               
 	   else dcincome80 = 0;
+
+
+	/* Race variables */
+	if pernum = 1 then do;
+		if race=1 and hispan=0 then raceW=1;
+			else raceW=0;
+		if hispan > 0 then raceH=1;
+			else raceH=0;
+		if race=3 then raceI=1;
+			else raceI=0;
+		if race=2 then raceB=1;
+			else raceB=0;
+		if race in (4,5,6) then raceA=1;
+			else raceA=0;
+		if race=7 then raceO=1;
+			else raceO=0;	
+		if race in (8,9) then raceM=1;
+			else raceM=0;
+		if race in (3,7,8,9) then raceIOM=1;
+			else raceIOM=0;
+		if race >2 then raceAIOM=1;
+			else raceAIOM=0;
+	end;
    
 run;
 
@@ -110,7 +134,8 @@ run;
 proc summary data = pretables;
 	class serial;
 	var isschoolage largeunit isadult isschoolage
-         issenior isdis ;
+         issenior isdis raceW raceB raceH
+		 hudincome30 hudincome50 dcincome80;
 	output out= pretables_collapse sum=;
 run;
 
