@@ -33,7 +33,8 @@ data pretables;
 	set ipums.acs_2012_16_dc;
 	keep largeunit serial hhwt pernum hhtype numprec race hispan age hhincome isadult isschoolage
          issenior isdis raceW raceB raceH
-		 hudincome30 hudincome50 dcincome80
+		 hudincome30 hudincome50 dcincome80 
+		 nonrelative
      ;
 
 	 /*only households*/
