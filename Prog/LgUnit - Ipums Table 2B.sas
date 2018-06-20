@@ -46,9 +46,13 @@ data pretables;
 	/*adult*/
 	if age>=18 then isadult = 1;
 	    else isadult = 0;
+
+	/*adult but not senior*/
+	if 18<=age<65 then nonsenioradult = 1;
+        else nonsenioradult = 0;
    
 	/*seniors*/
-    if age>65 then issenior = 1;
+    if age>=65 then issenior = 1;
 	    else issenior = 0;
 
     /*schoolage children*/
@@ -127,6 +131,11 @@ data pretables;
 		if race >2 then raceAIOM=1;
 			else raceAIOM=0;
 	end;
+
+  /*flag for nonrelative living together*/
+
+     if related = 1115 or related = 1241 or related = 1260 then nonrelative = 1;
+	     else nonrelative = 0;
    
 run;
 
