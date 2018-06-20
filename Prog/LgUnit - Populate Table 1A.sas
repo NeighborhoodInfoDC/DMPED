@@ -45,3 +45,17 @@ data xACS;
 	set ACS.Acs_2012_16_dc_sum_tr_city;
 	keep ; 
 run;
+
+
+/**** Pull data from Ncdb_master_update ****/
+
+data ncdb1980;
+	set ncdb.Ncdb_master_update;
+	if statecd = "11";
+
+	keep geo2010 renthsgunits1bdrm_1980;
+
+	renthsgunits1bdrm_1980 = bdrnt18;
+
+run;
+
