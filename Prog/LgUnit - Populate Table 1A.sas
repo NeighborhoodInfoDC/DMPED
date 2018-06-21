@@ -34,7 +34,7 @@ run;
 
 data x2000;
 	set ncdb.ncdb_sum_city;
-	keep city numhsgunits_2000 numhsgunits1bdrm_2000 numhsgunits2bdrms_2000 numhsgunits3bdrms_2000 
+	keep city numhsgunits_2000 numhsgunits0bdrms_2000 numhsgunits1bdrm_2000 numhsgunits2bdrms_2000 numhsgunits3bdrms_2000 
 	numhsgunits4bdrms_2000 numhsgunits5plusbdrms_2000;
 run;
 
@@ -46,16 +46,19 @@ data xACS;
 	keep ; 
 run;
 
+data RenterOcc1980;
+	set ncdb.ncdb_master_update;
+	
+	If stated = "11";
 
-/**** Pull data from Ncdb_master_update ****/
+	Keep Geo2010 bdrnt08 bdrnt18 bdrnt28 bdrnt38 bdrnt48
+	bdrnt58;	
 
-data ncdb1980;
-	set ncdb.Ncdb_master_update;
-	if statecd = "11";
+	rename bdrnt08=renthsgunits0bdrms_1980;
+	rename bdrnt18=renthsgunits1bdrm_1980;
+	rename bdrnt28=renthsgunits2bdrms_1980;
+	rename bdrnt38=renthsgunits3bdrms_1980;
+	rename bdrnt48=renthsgunits4bdrms_1980;
+	rename bdrnt58=renthsgunits5plusbdrms_1980; 
 
-	keep geo2010 renthsgunits1bdrm_1980;
-
-	renthsgunits1bdrm_1980 = bdrnt18;
-
-run;
-
+run; 
