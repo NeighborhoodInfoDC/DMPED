@@ -25,7 +25,7 @@ run;
 
 data SF_Condo;
      set merged;
-	 if ui_proptype="10" or "11";
+	 where ui_proptype="10" or ui_proptype="11";
 run;
 
 
@@ -156,7 +156,7 @@ run;
   run;
 
 
-  **** Diagnostics ****;
+/**** Diagnostics ****;
 
   proc sort data=Parcel_base_who_owns_SF_Condo (where=(Ownercat not in ( '010', '020', '030' )))
     out=Parcel_base_who_owns_SF_Condo_diagnostic;
@@ -172,7 +172,7 @@ run;
   run;
 
   ods tagsets.excelxp close;
-  ods listing;
+  ods listing;*/
   
   
   **** Finalize data set ****;
@@ -192,4 +192,6 @@ run;
   freqvars=OwnerCat Owner_occ_sale
   );
 
-%mend Parcel_base_who_owns_SF_Condo;
+%mend Parcel_base_who_owns;
+
+%Parcel_base_who_owns;
