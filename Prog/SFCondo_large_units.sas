@@ -204,22 +204,40 @@ run;
 %SF_Condo_who_owns;
 
 
-proc export data=Parcel_base_who_owns_SF_Condo
-	outfile="L:\Libraries\DMPED\Data\SF_Condo_Who_Owns.csv"
-	dbms=csv replace;
-	run;
-
-proc freq data=Parcel_base_who_owns_SF_Condo;
+/*output SF/Condo by sales year by owner/reter/senior credit*/
+proc freq data=Parcel_base_who_owns_SF_Condo (where=(saleyear>=2000));
   tables saleyear*hstd_code;
+  output out=SF_Condo_HomeStead;
   run;
+  proc export data=SF_Condo_HomeStead
+   outfile='L:\Libraries\DMPED\SF_Condo_HomeStead.csv'
+   dbms=csv
+   replace;
+run;
 
-proc freq data=Parcel_base_who_owns_SF_Condo;
+
+/*output SF/Condo by sales year by owner category*/
+proc freq data=Parcel_base_who_owns_SF_Condo (where=(saleyear>=2000));
  tables saleyear*Ownercat;
+ output out=SF_Condo_OwnerCat;
  run;
-proc sort data=Parcel_base_who_owns_SF_Condo;
+proc export data=SF_Condo_OwnerCat
+   outfile='L:\Libraries\DMPED\SF_Condo_OwnerCat.csv'
+   dbms=csv
+   replace;
+run;
+
+/*output SF/Condo by sales year by building age*/
+proc sort data=Parcel_base_who_owns_SF_Condo (where=(saleyear>=2000));
 by saleyear Buildingage;
 run;
  proc means median data=Parcel_base_who_owns_SF_Condo;
  by saleyear;
  var Buildingage;
- run;
+ output out=SF_Condo_BuildingAge;
+run;
+proc export data=SF_Condo_BuildingAge
+   outfile='L:\Libraries\DMPED\SF_Condo_BuildingAge.csv'
+   dbms=csv
+   replace;
+run;
