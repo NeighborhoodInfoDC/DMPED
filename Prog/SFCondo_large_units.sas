@@ -29,7 +29,7 @@ data SF_Condo;
 run;
 
 
-%macro Parcel_base_who_owns( RegExpFile=Owner type codes reg expr.txt, Finalize=Y, Revisions= );
+%macro SF_Condo_who_owns( RegExpFile=Owner type codes reg expr.txt, Finalize=Y, Revisions= );
   %local MaxExp Outlib parcel_base_file_dtmf dtm dtmf;
    %let MaxExp     = 480000;  /** NOTE: This number should be larger than the number of rows in the above spreadsheet **/
 
@@ -149,7 +149,7 @@ run;
     
     format OwnerCat $owncat.;
     
-    keep ssl premiseadd premiseadd_std premiseadd_m hstd_code OwnerCat 
+    keep ssl premiseadd premiseadd_std premiseadd_m hstd_code OwnerCat AYB SALEDATE
          Ownername_full owneraddress owneraddress_std owneraddress_m address3 
          ui_proptype in_last_ownerpt Owner_occ_sale mix1txtype mix2txtype;
 
@@ -176,6 +176,13 @@ run;
   
   
   **** Finalize data set ****;
+
+ data Parcel_base_who_owns_SF_Condo;
+  set Parcel_base_who_owns_SF_Condo;
+  Buildingage = 2018 - AYB;
+  saleyear = year(SALEDATE);   
+ run;
+
   
   %Finalize_data_set( 
   /** Finalize data set parameters **/
@@ -192,6 +199,27 @@ run;
   freqvars=OwnerCat Owner_occ_sale
   );
 
-%mend Parcel_base_who_owns;
+%mend SF_Condo_who_owns;
 
-%Parcel_base_who_owns;
+%SF_Condo_who_owns;
+
+
+proc export data=Parcel_base_who_owns_SF_Condo
+	outfile="L:\Libraries\DMPED\Data\SF_Condo_Who_Owns.csv"
+	dbms=csv replace;
+	run;
+
+proc freq data=Parcel_base_who_owns_SF_Condo;
+  tables saleyear*hstd_code;
+  run;
+
+proc freq data=Parcel_base_who_owns_SF_Condo;
+ tables saleyear*Ownercat;
+ run;
+proc sort data=Parcel_base_who_owns_SF_Condo;
+by saleyear Buildingage;
+run;
+ proc means median data=Parcel_base_who_owns_SF_Condo;
+ by saleyear;
+ var Buildingage;
+ run;
