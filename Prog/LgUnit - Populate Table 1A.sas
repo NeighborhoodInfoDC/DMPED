@@ -42,12 +42,14 @@ run;
 
 data xACS_2006_10; 
 	set acs.acs_2006_10_dc_sum_tr_city;
-	keep ;
+	keep city numhsgunits0bd_2006_10 numhsgunits1bd_2006_10 numhsgunits2bd_2006_10 numhsgunits3bd_2006_10 numhsgunits3plusbd_2006_10
+	numhsgunits4bd_2006_10 numhsgunits5plusbd_2006_10;
 run;
 
 data xACS_2012_16;
 	set ACS.Acs_2012_16_dc_sum_tr_city;
-	keep ; 
+	keep city numhsgunits0bd_2012_16 numhsgunits1bd_2012_16 numhsgunits2bd_2012_16 numhsgunits3bd_2012_16 numhsgunits3plusbd_2012_16
+	numhsgunits4bd_2012_16 numhsgunits5plusbd_2012_16; 
 run;
 
 data RenterOcc1980;
@@ -56,7 +58,8 @@ data RenterOcc1980;
 	If statecd = "11";
 
 	Keep Geo2010 bdrnt08 bdrnt18 bdrnt28 bdrnt38 bdrnt48
-	bdrnt58 ownhsgunits0bdrms_1980 ;	
+	bdrnt58 ownhsgunits0bdrms_1980 ownhsgunits1bdrm_1980 ownhsgunits2bdrms_1980 ownhsgunits3bdrms_1980 ownhsgunits4bdrms_1980 
+	ownhsgunits5plusbdrms_1980;	
 
 	rename bdrnt08=renthsgunits0bdrms_1980;
 	rename bdrnt18=renthsgunits1bdrm_1980;
@@ -66,6 +69,11 @@ data RenterOcc1980;
 	rename bdrnt58=renthsgunits5plusbdrms_1980; 
 
 	ownhsgunits0bdrms_1980 = bdocc08 - bdrnt08;
+	ownhsgunits1bdrm_1980 = bdocc18 - bdrnt18;
+	ownhsgunits2bdrms_1980 = bdocc28 - bdrnt28;
+	ownhsgunits3bdrms_1980 = bdocc38 - bdrnt38;
+	ownhsgunits4bdrms_1980 = bdocc48 - bdrnt48;
+	ownhsgunits5plusbdrms_1980 = bdocc58 - bdrnt58;
 
 run; 
 data RenterOcc1990;
@@ -74,7 +82,8 @@ data RenterOcc1990;
 	If statecd = "11";
 
 	Keep Geo2010 bdrnt09 bdrnt19 bdrnt29 bdrnt39 bdrnt49
-	bdrnt59;	
+	bdrnt59 ownhsgunits0bdrms_1990 ownhsgunits1bdrm_1990 ownhsgunits2bdrms_1990 ownhsgunits3bdrms_1990 ownhsgunits4bdrms_1990 
+	ownhsgunits5plusbdrms_1990;	
 
 	rename bdrnt09=renthsgunits0bdrms_1990;
 	rename bdrnt19=renthsgunits1bdrm_1990;
@@ -82,6 +91,13 @@ data RenterOcc1990;
 	rename bdrnt39=renthsgunits3bdrms_1990;
 	rename bdrnt49=renthsgunits4bdrms_1990;
 	rename bdrnt59=renthsgunits5plusbdrms_1990; 
+
+	ownhsgunits0bdrms_1990 = bdocc09 - bdrnt09;
+	ownhsgunits1bdrm_1990 = bdocc19 - bdrnt19;
+	ownhsgunits2bdrms_1990 = bdocc29 - bdrnt29;
+	ownhsgunits3bdrms_1990 = bdocc39 - bdrnt39;
+	ownhsgunits4bdrms_1990 = bdocc49 - bdrnt49;
+	ownhsgunits5plusbdrms_1990 = bdocc59 - bdrnt59;
 
 run; 
 data RenterOcc2000;
@@ -99,5 +115,35 @@ data RenterOcc2000;
 	rename bdrnt40=renthsgunits4bdrms_2000;
 	rename bdrnt50=renthsgunits5plusbdrms_2000; 
 
+	ownhsgunits0bdrms_2000 = bdocc00 - bdrnt00;
+	ownhsgunits1bdrm_2000 = bdocc10 - bdrnt10;
+	ownhsgunits2bdrms_2000 = bdocc20 - bdrnt20;
+	ownhsgunits3bdrms_2000 = bdocc30 - bdrnt30;
+	ownhsgunits4bdrms_2000 = bdocc40 - bdrnt40;
+	ownhsgunits5plusbdrms_2000 = bdocc50 - bdrnt50;
+
 run; 
+
+data RenterOcc2006_10;
+	set acs.acs_2006_10_dc_sum_tr_city;
+	Keep city numrentocchu0bd_2006_10 numrentocchu1bd_2006_10 numrentocchu2bd_2006_10 numrentocchu3bd_2006_10
+	numrentocchu3plusbd_2006_10 numrentocchu4bd_2006_10 numrentocchu5plusbd_2006_10 numownocchu0bd_2006_10 numownocchu1bd_2006_10
+	numownocchu2bd_2006_10 numownocchu3bd_2006_10 numownocchu3plusbd_2006_10 numownocchu4bd_2006_10 numownocchu5plusbd_2006_10;
+	run;
+
+data RenterOcc2012_16;
+	set ACS.Acs_2012_16_dc_sum_tr_city;
+	Keep city numrentocchu0bd_2012_16 numrentocchu1bd_2012_16 numrentocchu2bd_2012_16 numrentocchu3bd_2012_16
+	numrentocchu3plusbd_2012_16 numrentocchu4bd_2012_16 numrentocchu5plusbd_2012_16 numownocchu0bd_2012_16 numownocchu1bd_2012_16
+	numownocchu2bd_2012_16 numownocchu3bd_2012_16 numownocchu3plusbd_2012_16 numownocchu4bd_2012_16 numownocchu5plusbd_2012_16;
+	run;
+data RentOcc3plusbd2006_10;
+	set acs.acs_2006_10_dc_sum_tr_city;
+	Keep city numrtohu3bunder500_2006_10 numrtohu3b500to749_2006_10 numrtohu3b750to999_2006_10 numrtohu3b1000plus_2006_10;
+	run;
+data RentOcc3plusbd2012_16;
+	set ACS.Acs_2012_16_dc_sum_tr_city;
+	Keep city numrtohu3bunder500_2012_16 numrtohu3b500to749_2012_16 numrtohu3b750to999_2012_16 numrtohu3b1000plus_2012_16
+	numrtohu3b1000to1499_2012_16 numrtohu3b1500plus_2012_16;
+	run;
 
