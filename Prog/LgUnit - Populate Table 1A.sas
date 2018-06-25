@@ -40,10 +40,12 @@ data x2000;
 	numhsgunits4bdrms_2000 numhsgunits5plusbdrms_2000;
 run;
 
-data x2010; ** Skip for now **;
+data xACS_2006_10; 
+	set acs.acs_2006_10_dc_sum_tr_city;
+	keep ;
 run;
 
-data xACS;
+data xACS_2012_16;
 	set ACS.Acs_2012_16_dc_sum_tr_city;
 	keep ; 
 run;
@@ -54,7 +56,7 @@ data RenterOcc1980;
 	If statecd = "11";
 
 	Keep Geo2010 bdrnt08 bdrnt18 bdrnt28 bdrnt38 bdrnt48
-	bdrnt58;	
+	bdrnt58 ownhsgunits0bdrms_1980 ;	
 
 	rename bdrnt08=renthsgunits0bdrms_1980;
 	rename bdrnt18=renthsgunits1bdrm_1980;
@@ -62,6 +64,8 @@ data RenterOcc1980;
 	rename bdrnt38=renthsgunits3bdrms_1980;
 	rename bdrnt48=renthsgunits4bdrms_1980;
 	rename bdrnt58=renthsgunits5plusbdrms_1980; 
+
+	ownhsgunits0bdrms_1980 = bdocc08 - bdrnt08;
 
 run; 
 data RenterOcc1990;
@@ -96,19 +100,4 @@ data RenterOcc2000;
 	rename bdrnt50=renthsgunits5plusbdrms_2000; 
 
 run; 
-data Occupied1980;
-	set ncdb.ncdb_master_update;
 
-	If statecd = "11";
-
-	Keep Geo2010 bdocc08 bdocc18 bdocc28 bdocc38 bdocc48 
-	bdocc58;
-
-	rename bdocc08=ownhsgunits0bdrms_1980;
-	rename bdocc18=ownhsgunits1bdrm_1980;
-	rename bdocc28=ownhsgunits2bdrms_1980;
-	rename bdocc38=ownhsgunits3bdrms_1980;
-	rename bdocc48=ownhsgunits4bdrms_1980;
-	rename bdocc58=ownhsgunits5plusbdrms_1980;
-
-	run;
