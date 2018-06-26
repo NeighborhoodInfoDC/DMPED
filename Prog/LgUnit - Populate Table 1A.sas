@@ -20,46 +20,26 @@
 %DCData_lib( ACS )
 
 
-data x1980;
-	set ncdb.ncdb_sum_city ncdb.ncdb_master_update;
-	keep city bdtot08 numhsgunits_1980 numhsgunits1bdrm_1980 numhsgunits2bdrms_1980 numhsgunits3bdrms_1980 
+/* 1980 data */
+
+data ;
+	set ncdb.ncdb_sum_city /*ncdb.ncdb_master_update*/;
+	keep city numhsgunits_1980 numhsgunits1bdrm_1980 numhsgunits2bdrms_1980 numhsgunits3bdrms_1980 
 	numhsgunits4bdrms_1980 numhsgunits5plusbdrms_1980;
-	rename bdtot08=numhsgunits0bdrms_1980;
 run;
 
-data x1990;
-	set ncdb.ncdb_sum_city ncdb.ncdb_master_update;
-	keep city bdtot09 numhsgunits_1990 numhsgunits1bdrm_1990 numhsgunits2bdrms_1990 numhsgunits3bdrms_1990 
-	numhsgunits4bdrms_1990 numhsgunits5plusbdrms_1990;
-	rename bdtot09=numhsgunits0bdrms_1990;
-run;
-
-data x2000;
-	set ncdb.ncdb_sum_city;
-	keep city numhsgunits_2000 numhsgunits0bdrms_2000 numhsgunits1bdrm_2000 numhsgunits2bdrms_2000 numhsgunits3bdrms_2000 
-	numhsgunits4bdrms_2000 numhsgunits5plusbdrms_2000;
-run;
-
-data xACS_2006_10; 
-	set acs.acs_2006_10_dc_sum_tr_city;
-	keep city numhsgunits0bd_2006_10 numhsgunits1bd_2006_10 numhsgunits2bd_2006_10 numhsgunits3bd_2006_10 numhsgunits3plusbd_2006_10
-	numhsgunits4bd_2006_10 numhsgunits5plusbd_2006_10;
-run;
-
-data xACS_2012_16;
-	set ACS.Acs_2012_16_dc_sum_tr_city;
-	keep city numhsgunits0bd_2012_16 numhsgunits1bd_2012_16 numhsgunits2bd_2012_16 numhsgunits3bd_2012_16 numhsgunits3plusbd_2012_16
-	numhsgunits4bd_2012_16 numhsgunits5plusbd_2012_16; 
-run;
-
-data RenterOcc1980;
+data RenterOcc1980; /* Summarize */
 	set ncdb.ncdb_master_update;
 	
 	If statecd = "11";
 
-	Keep Geo2010 bdrnt08 bdrnt18 bdrnt28 bdrnt38 bdrnt48
+	city = "1";
+
+	Keep Geo2010 city bdrnt08 bdrnt18 bdrnt28 bdrnt38 bdrnt48 bdtot08
 	bdrnt58 ownhsgunits0bdrms_1980 ownhsgunits1bdrm_1980 ownhsgunits2bdrms_1980 ownhsgunits3bdrms_1980 ownhsgunits4bdrms_1980 
 	ownhsgunits5plusbdrms_1980;	
+
+	rename bdtot08=numhsgunits0bdrms_1980;
 
 	rename bdrnt08=renthsgunits0bdrms_1980;
 	rename bdrnt18=renthsgunits1bdrm_1980;
@@ -76,12 +56,40 @@ data RenterOcc1980;
 	ownhsgunits5plusbdrms_1980 = bdocc58 - bdrnt58;
 
 run; 
-data RenterOcc1990;
+
+
+proc summary data = RenterOcc1980;
+	class city;
+	var renthsgunits0bdrms_1980 renthsgunits1bdrm_1980;
+	output out = RenterOcc1980_new (where = (_type_ = 1 )) sum = ;
+run;
+
+
+data m1980;
+	merge x1980 RenterOcc1980_new ;
+	by city ;
+	drop _type_ _freq_ ;
+run;
+
+
+
+/* 1990 data */
+
+data x1990;
+	set ncdb.ncdb_sum_city ncdb.ncdb_master_update;
+	keep city bdtot09 numhsgunits_1990 numhsgunits1bdrm_1990 numhsgunits2bdrms_1990 numhsgunits3bdrms_1990 
+	numhsgunits4bdrms_1990 numhsgunits5plusbdrms_1990;
+	rename bdtot09=numhsgunits0bdrms_1990;
+run;
+
+data RenterOcc1990; /* Summarize */
 	set ncdb.ncdb_master_update;
 	
 	If statecd = "11";
 
-	Keep Geo2010 bdrnt09 bdrnt19 bdrnt29 bdrnt39 bdrnt49
+	city = "1";
+
+	Keep Geo2010 city bdrnt09 bdrnt19 bdrnt29 bdrnt39 bdrnt49
 	bdrnt59 ownhsgunits0bdrms_1990 ownhsgunits1bdrm_1990 ownhsgunits2bdrms_1990 ownhsgunits3bdrms_1990 ownhsgunits4bdrms_1990 
 	ownhsgunits5plusbdrms_1990;	
 
@@ -100,12 +108,24 @@ data RenterOcc1990;
 	ownhsgunits5plusbdrms_1990 = bdocc59 - bdrnt59;
 
 run; 
-data RenterOcc2000;
+
+
+/* 2000 data */
+
+data x2000;
+	set ncdb.ncdb_sum_city;
+	keep city numhsgunits_2000 numhsgunits0bdrms_2000 numhsgunits1bdrm_2000 numhsgunits2bdrms_2000 numhsgunits3bdrms_2000 
+	numhsgunits4bdrms_2000 numhsgunits5plusbdrms_2000;
+run;
+
+data RenterOcc2000; /* Summarize */
 	set ncdb.ncdb_master_update;
 	
 	If statecd = "11";
 
-	Keep Geo2010 bdrnt00 bdrnt10 bdrnt20 bdrnt30 bdrnt40
+	city = "1";
+
+	Keep Geo2010 city bdrnt00 bdrnt10 bdrnt20 bdrnt30 bdrnt40
 	bdrnt50;	
 
 	rename bdrnt00=renthsgunits0bdrms_2000;
@@ -123,6 +143,21 @@ data RenterOcc2000;
 	ownhsgunits5plusbdrms_2000 = bdocc50 - bdrnt50;
 
 run; 
+
+
+/* ACS data */
+data xACS_2006_10; 
+	set acs.acs_2006_10_dc_sum_tr_city;
+	keep city numhsgunits0bd_2006_10 numhsgunits1bd_2006_10 numhsgunits2bd_2006_10 numhsgunits3bd_2006_10 numhsgunits3plusbd_2006_10
+	numhsgunits4bd_2006_10 numhsgunits5plusbd_2006_10;
+run;
+
+data xACS_2012_16;
+	set ACS.Acs_2012_16_dc_sum_tr_city;
+	keep city numhsgunits0bd_2012_16 numhsgunits1bd_2012_16 numhsgunits2bd_2012_16 numhsgunits3bd_2012_16 numhsgunits3plusbd_2012_16
+	numhsgunits4bd_2012_16 numhsgunits5plusbd_2012_16; 
+run;
+
 
 data RenterOcc2006_10;
 	set acs.acs_2006_10_dc_sum_tr_city;
