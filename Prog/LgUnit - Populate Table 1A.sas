@@ -22,7 +22,7 @@
 
 /* 1980 data */
 
-data ;
+data x1980 ;
 	set ncdb.ncdb_sum_city /*ncdb.ncdb_master_update*/;
 	keep city numhsgunits_1980 numhsgunits1bdrm_1980 numhsgunits2bdrms_1980 numhsgunits3bdrms_1980 
 	numhsgunits4bdrms_1980 numhsgunits5plusbdrms_1980;
@@ -60,13 +60,14 @@ run;
 
 proc summary data = RenterOcc1980;
 	class city;
-	var renthsgunits0bdrms_1980 renthsgunits1bdrm_1980;
-	output out = RenterOcc1980_new (where = (_type_ = 1 )) sum = ;
+	var numhsgunits0bdrms_1980 renthsgunits0bdrms_1980 renthsgunits1bdrm_1980 renthsgunits2bdrms_1980 renthsgunits3bdrms_1980 renthsgunits4bdrms_1980
+	renthsgunits5plusbdrms_1980 ownhsgunits0bdrms_1980 ownhsgunits1bdrm_1980 ownhsgunits2bdrms_1980 ownhsgunits3bdrms_1980 ownhsgunits4bdrms_1980 
+	ownhsgunits5plusbdrms_1980;
+	output out = RenterOwnerOcc1980_new (where = (_type_ = 1 )) sum = ;
 run;
 
-
 data m1980;
-	merge x1980 RenterOcc1980_new ;
+	merge x1980 RenterOwnerOcc1980_new ;
 	by city ;
 	drop _type_ _freq_ ;
 run;
@@ -76,11 +77,10 @@ run;
 /* 1990 data */
 
 data x1990;
-	set ncdb.ncdb_sum_city ncdb.ncdb_master_update;
-	keep city bdtot09 numhsgunits_1990 numhsgunits1bdrm_1990 numhsgunits2bdrms_1990 numhsgunits3bdrms_1990 
+	set ncdb.ncdb_sum_city /*ncdb.ncdb_master_update*/;
+	keep city numhsgunits_1990 numhsgunits1bdrm_1990 numhsgunits2bdrms_1990 numhsgunits3bdrms_1990 
 	numhsgunits4bdrms_1990 numhsgunits5plusbdrms_1990;
-	rename bdtot09=numhsgunits0bdrms_1990;
-run;
+	run;
 
 data RenterOcc1990; /* Summarize */
 	set ncdb.ncdb_master_update;
@@ -89,9 +89,11 @@ data RenterOcc1990; /* Summarize */
 
 	city = "1";
 
-	Keep Geo2010 city bdrnt09 bdrnt19 bdrnt29 bdrnt39 bdrnt49
+	Keep Geo2010 city bdtot09 bdrnt09 bdrnt19 bdrnt29 bdrnt39 bdrnt49
 	bdrnt59 ownhsgunits0bdrms_1990 ownhsgunits1bdrm_1990 ownhsgunits2bdrms_1990 ownhsgunits3bdrms_1990 ownhsgunits4bdrms_1990 
 	ownhsgunits5plusbdrms_1990;	
+
+	rename bdtot09=numhsgunits0bdrms_1990;
 
 	rename bdrnt09=renthsgunits0bdrms_1990;
 	rename bdrnt19=renthsgunits1bdrm_1990;
@@ -108,12 +110,24 @@ data RenterOcc1990; /* Summarize */
 	ownhsgunits5plusbdrms_1990 = bdocc59 - bdrnt59;
 
 run; 
+proc summary data = RenterOcc1990;
+	class city;
+	var numhsgunits0bdrms_1990 renthsgunits0bdrms_1990 renthsgunits1bdrm_1990 renthsgunits2bdrms_1990 renthsgunits3bdrms_1990 renthsgunits4bdrms_1990
+	renthsgunits5plusbdrms_1990 ownhsgunits0bdrms_1990 ownhsgunits1bdrm_1990 ownhsgunits2bdrms_1990 ownhsgunits3bdrms_1990 ownhsgunits4bdrms_1990 
+	ownhsgunits5plusbdrms_1990;
+	output out = RenterOwnerOcc1990_new (where = (_type_ = 1 )) sum = ;
+run;
 
+data m1990;
+	merge x1990 RenterOwnerOcc1990_new ;
+	by city ;
+	drop _type_ _freq_ ;
+run;
 
 /* 2000 data */
 
 data x2000;
-	set ncdb.ncdb_sum_city;
+	set ncdb.ncdb_sum_city /*ncdb.ncdb_master_update*/;
 	keep city numhsgunits_2000 numhsgunits0bdrms_2000 numhsgunits1bdrm_2000 numhsgunits2bdrms_2000 numhsgunits3bdrms_2000 
 	numhsgunits4bdrms_2000 numhsgunits5plusbdrms_2000;
 run;
@@ -126,7 +140,10 @@ data RenterOcc2000; /* Summarize */
 	city = "1";
 
 	Keep Geo2010 city bdrnt00 bdrnt10 bdrnt20 bdrnt30 bdrnt40
-	bdrnt50;	
+	bdrnt50 ownhsgunits0bdrms_2000 ownhsgunits1bdrm_2000 ownhsgunits2bdrms_2000 ownhsgunits3bdrms_2000 ownhsgunits4bdrms_2000 
+	ownhsgunits5plusbdrms_2000;	
+	
+	rename bdtot00=numhsgunits0bdrms_2000;
 
 	rename bdrnt00=renthsgunits0bdrms_2000;
 	rename bdrnt10=renthsgunits1bdrm_2000;
@@ -143,7 +160,19 @@ data RenterOcc2000; /* Summarize */
 	ownhsgunits5plusbdrms_2000 = bdocc50 - bdrnt50;
 
 run; 
+proc summary data = RenterOcc2000;
+	class city;
+	var numhsgunits0bdrms_2000 renthsgunits0bdrms_2000 renthsgunits1bdrm_2000 renthsgunits2bdrms_2000 renthsgunits3bdrms_2000 renthsgunits4bdrms_2000
+	renthsgunits5plusbdrms_2000 ownhsgunits0bdrms_2000 ownhsgunits1bdrm_2000 ownhsgunits2bdrms_2000 ownhsgunits3bdrms_2000 ownhsgunits4bdrms_2000 
+	ownhsgunits5plusbdrms_2000;
+	output out = RenterOwnerOcc2000_new (where = (_type_ = 1 )) sum = ;
+run;
 
+data m2000;
+	merge x2000 RenterOwnerOcc2000_new ;
+	by city ;
+	drop _type_ _freq_ ;
+run;
 
 /* ACS data */
 data xACS_2006_10; 
