@@ -155,17 +155,17 @@ run;
   run;
 
 
-/**** Diagnostics ****;
+**** Diagnostics ****;
 
-  proc sort data=Parcel_base_who_owns_SF_Condo (where=(Ownercat not in ( '010', '020', '030' )))
-    out=Parcel_base_who_owns_SF_Condo_diagnostic;
+  proc sort data=Sales_who_owns_SF_Condo (where=(Ownercat not in ( '010', '020', '030' )))
+    out=Sales_diagnostic;
     by OwnerCat;
   run;
 
   ods listing close;
-  ods tagsets.excelxp file="&_dcdata_default_path\RealProp\Prog\Updates\Parcel_base_who_owns_SF_Condo_diagnostic.xls" style=Minimal options(sheet_interval='Bygroup' );
+  ods tagsets.excelxp file="&_dcdata_default_path\DMPED\Prog\Sales_diagnostic.xls" style=Minimal options(sheet_interval='Bygroup' );
 
-  proc freq data=Parcel_base_who_owns_SF_Condo_diagnostic;
+  proc freq data=Sales_diagnostic;
     by OwnerCat;
     tables Ownername_full / missing;
   run;
@@ -177,7 +177,7 @@ run;
  *create variables needed for analysis;
 
  data Sales_who_owns_SF_Condo1;
-  set Sales_who_owns_SF_Condo (where=cama in ("ResPt" "CondoP")); *dropping observations that appear in COMM PT cama file (no bedroom info). 
+  set Sales_who_owns_SF_Condo (where=(cama in ("ResPt" "CondoP"))); *dropping observations that appear in COMM PT cama file (no bedroom info). 
 
   BldgAgeGT2000=.;
   if AYB >= 2000 then BldgAgeGT2000=1;
@@ -330,4 +330,3 @@ run;
 
 %create_annual( out_ds=SFCondo_year_2017, unit=year, rpt_end_dt='31mar2018'd, label="Annual SF-Condo Parcels for Large Units Study", revisions=New file. )
 
-options symbolgen;
