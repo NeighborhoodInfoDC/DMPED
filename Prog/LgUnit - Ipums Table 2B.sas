@@ -28,11 +28,13 @@ run;
 
 proc sort data = hhwts; by serial; run;
 
-%let cvars = allhh largeunit isadult isschoolage
+%let cvars = allhh largeunit isschoolage isadult iskid
          issenior isdis raceW raceB raceH raceAPI raceO
-		 hudincome30 hudincome50 dcincome80 
-		 nonrelative before1gen before2gen after1gen
+		 hudincome30 hudincome50 hudincome80 
+		 before1gen before2gen after1gen
 		 ;
+
+%let mvars = hher_age kid_age isadult iskid;
 
 data pretables;
 	set ipums.acs_2012_16_dc;
@@ -43,6 +45,9 @@ data pretables;
 	/* All households */
 	allhh = 1;
 
+	/*householder age */
+	if pernum = 1 then hher_age = age;
+
     /*large unit*/
 	if numprec >= 4 then largeunit = 1;
 		else largeunit = 0;
@@ -50,6 +55,8 @@ data pretables;
 	/*adult*/
 	if age>=18 then isadult = 1;
 	    else isadult = 0;
+
+	numadults = isadult;
 
 	/*adult but not senior*/
 	if 18<=age<65 then nonsenioradult = 1;
@@ -62,6 +69,14 @@ data pretables;
     /*schoolage children*/
     if 6<age<18 then isschoolage = 1;
 	    else isschoolage = 0;
+
+	/*all kids */
+	if age <18 then iskid = 1;
+		else iskid =0;
+
+	if iskid = 1 then kid_age = age;
+
+	numkids = iskid;
 
 	/*Disability*/
 	isdis= 0;
@@ -127,18 +142,16 @@ data pretables;
 
 	/* Race variables */
 	if pernum = 1 then do;
-		if race=1 and hispan=0 then raceW=1;
-			else raceW=0;
 		if hispan > 0 then raceH=1;
 			else raceH=0;
-		if race=3 then raceI=1;
-			else raceI=0;
-		if race=2 then raceB=1;
+		if race=1 and hispan=0 then raceW=1;
+			else raceW=0;
+		if race=2 and hispan=0 then raceB=1;
 			else raceB=0;
-		if race in (4,5,6) then raceAPI=1;
-			else raceA=0;
-		if race in (3,7,8,9) then raceO=1;
-			else raceIOM=0;
+		if race in (4,5,6) and hispan=0 then raceAPI=1;
+			else raceAPI=0;
+		if race in (3,7,8,9) and hispan=0 then raceO=1;
+			else raceO=0;
 
 	end;
 
@@ -148,7 +161,7 @@ data pretables;
 	     else nonrelative = 0;
 
 
-	keep &cvars.
+	keep &cvars. &mvars. nonrelative numkids numadults
 		  serial hhwt pernum hhtype numprec race hispan age hhincome;
   
 run;
@@ -156,15 +169,25 @@ run;
 
 proc summary data = pretables;
 	class serial;
-	var &cvars.;
-	output out= pretables_collapse sum=;
+	var &cvars. nonrelative numkids numadults;
+	output out= pretables_s sum=;
 run;
 
 
-proc sort data = pretables_collapse; by serial; run;
+proc sort data = pretables_s; by serial; run;
 
-data pretables_collapse_w;
-	merge pretables_collapse hhwts;
+
+proc summary data = pretables;
+	class serial;
+	var &mvars.;
+	output out= pretables_m median=;
+run;
+
+proc sort data = pretables_m; by serial; run;
+
+
+data pretables_collapse;
+	merge pretables_s  pretables_m hhwts;
 	by serial;
 	if serial ^= .;
 
@@ -184,17 +207,58 @@ data pretables_collapse_w;
 	%mend onezero;
 	%onezero;
 
+	/* Flag 3+ generation households */
 	numgens = sum(of before1gen before2gen after1gen);
 	if numgens >=2 then multigen = 1;
 		else multigen = 0;
+
+	/* Flag "group houses" */
+	if nonrelative >= 3 then grouphouse = 1;
+		else grouphouse = 0;
 
 
 run;
 
 
-proc summary data = pretables_collapse_w;
+proc summary data = pretables_collapse;
 	class largeunit;
-	var allhh raceW raceB raceH raceAPI raceO;
+	var allhh raceW raceB raceH raceAPI raceO hudincome30 hudincome50 hudincome80 multigen grouphouse issenior isdis;
 	weight hhwt;
 	output out = table2b_pre sum=;
+run;
+
+data table2b_pcts;
+	set table2b_pre;
+
+	pct_raceW = raceW / allhh;
+	pct_raceB = raceB / allhh;
+	pct_raceH = raceH / allhh;
+	pct_raceAPI = raceAPI / allhh;
+	pct_raceO = raceO / allhh;
+
+	pct_hudincome30 = hudincome30 / allhh;
+	pct_hudincome50 = hudincome50 / allhh;
+	pct_hudincome80 = hudincome80 / allhh;
+
+	pct_issenior = issenior / allhh;
+	pct_isdis = isdis / allhh;
+	pct_multigen = multigen / allhh;
+	pct_grouphouse = grouphouse / allhh;
+
+run;
+
+
+proc summary data = pretables_collapse;
+	class largeunit;
+	var &mvars.;
+	weight hhwt;
+	output out = table2b_m median=;
+run;
+
+
+proc summary data = pretables_collapse;
+	class largeunit;
+	var numkids numadults;
+	weight hhwt;
+	output out = table2b_n median=;
 run;
