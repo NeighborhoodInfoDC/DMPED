@@ -28,17 +28,20 @@ run;
 
 proc sort data = hhwts; by serial; run;
 
+%let cvars = allhh largeunit isadult isschoolage
+         issenior isdis raceW raceB raceH raceAPI raceO
+		 hudincome30 hudincome50 dcincome80 
+		 nonrelative before1gen before2gen after1gen
+		 ;
 
 data pretables;
 	set ipums.acs_2012_16_dc;
-	keep largeunit serial hhwt pernum hhtype numprec race hispan age hhincome isadult isschoolage
-         issenior isdis raceW raceB raceH
-		 hudincome30 hudincome50 dcincome80 
-		 nonrelative
-     ;
 
 	 /*only households*/
 	if gq in (1,2);
+
+	/* All households */
+	allhh = 1;
 
     /*large unit*/
 	if numprec >= 4 then largeunit = 1;
@@ -76,6 +79,17 @@ data pretables;
 
 	/*3 generation household*/
 
+	/* Child or stepchild */
+	if relate in (3,4) then before1gen = 1;
+		else before1gen = 0;
+
+	/* Grandchild */
+	if relate in (9) then before2gen = 1;
+		else before2gen = 0;
+
+	/* Parent or stepparent*/
+	if relate in (5,6) then after1gen = 1;
+		else after1gen = 0;
 
     /*income category according to HUD definition*/
 
@@ -121,31 +135,28 @@ data pretables;
 			else raceI=0;
 		if race=2 then raceB=1;
 			else raceB=0;
-		if race in (4,5,6) then raceA=1;
+		if race in (4,5,6) then raceAPI=1;
 			else raceA=0;
-		if race=7 then raceO=1;
-			else raceO=0;	
-		if race in (8,9) then raceM=1;
-			else raceM=0;
-		if race in (3,7,8,9) then raceIOM=1;
+		if race in (3,7,8,9) then raceO=1;
 			else raceIOM=0;
-		if race >2 then raceAIOM=1;
-			else raceAIOM=0;
+
 	end;
 
   /*flag for nonrelative living together*/
 
      if related = 1115 or related = 1241 or related = 1260 then nonrelative = 1;
 	     else nonrelative = 0;
-   
+
+
+	keep &cvars.
+		  serial hhwt pernum hhtype numprec race hispan age hhincome;
+  
 run;
 
 
 proc summary data = pretables;
 	class serial;
-	var isschoolage largeunit isadult isschoolage
-         issenior isdis raceW raceB raceH
-		 hudincome30 hudincome50 dcincome80;
+	var &cvars.;
 	output out= pretables_collapse sum=;
 run;
 
@@ -155,16 +166,35 @@ proc sort data = pretables_collapse; by serial; run;
 data pretables_collapse_w;
 	merge pretables_collapse hhwts;
 	by serial;
+	if serial ^= .;
+
+	%macro onezero();
+		%let varlist = &cvars.;
+			%let i = 1;
+				%do %until (%scan(&varlist,&i,' ')=);
+					%let var=%scan(&varlist,&i,' ');
+			if &var. >= 1 then &var. = 1;
+		%let i=%eval(&i + 1);
+				%end;
+			%let i = 1;
+				%do %until (%scan(&varlist,&i,' ')=);
+					%let var=%scan(&varlist,&i,' ');
+		%let i=%eval(&i + 1);
+				%end;
+	%mend onezero;
+	%onezero;
+
+	numgens = sum(of before1gen before2gen after1gen);
+	if numgens >=2 then multigen = 1;
+		else multigen = 0;
+
+
 run;
 
-proc freq data = pretables_collapse_w;
-	tables isschoolage;
+
+proc summary data = pretables_collapse_w;
+	class largeunit;
+	var allhh raceW raceB raceH raceAPI raceO;
 	weight hhwt;
+	output out = table2b_pre sum=;
 run;
-
-proc freq data = pretables (where=(pernum=1));
-	tables race*largeunit;
-	weight hhwt;
-run;
-
-
