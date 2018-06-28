@@ -347,6 +347,8 @@ data xACS_2006_10;
 	numowneroccupiedhu_2006_10 numownocchu0bd_2006_10 numownocchu1bd_2006_10
 	numownocchu2bd_2006_10 numownocchu3bd_2006_10 numownocchu3plusbd_2006_10 numownocchu4bd_2006_10 numownocchu5plusbd_2006_10
 
+	numrtohu3bunder500_2006_10 numrtohu3b500to749_2006_10 numrtohu3b750to999_2006_10 numrtohu3b1000plus_2006_10
+
 	pct3brall_2006_10 pct3brrent_2006_10 pct3brown_2006_10
 
 	;
@@ -371,6 +373,12 @@ proc transpose data=xACS_2006_10 out=table2006_10_&geo.;
 	id &geo.; 
 run; 
 
+proc transpose data=xACS_2006_10 out=table2006_10_rent_&geo.;
+	var pct3brrent_2006_10 numrtohu3bunder500_2006_10 numrtohu3b500to749_2006_10 numrtohu3b750to999_2006_10 numrtohu3b1000plus_2006_10
+	 	;
+	id &geo.; 
+run; 
+
 
 data xACS_2012_16; 
 	set acs.acs_2012_16_dc_sum_tr&geo_suffix.;
@@ -387,6 +395,9 @@ data xACS_2012_16;
 
 	numowneroccupiedhu_2012_16 numownocchu0bd_2012_16 numownocchu1bd_2012_16
 	numownocchu2bd_2012_16 numownocchu3bd_2012_16 numownocchu3plusbd_2012_16 numownocchu4bd_2012_16 numownocchu5plusbd_2012_16
+
+	numrtohu3bunder500_2012_16 numrtohu3b500to749_2012_16 numrtohu3b750to999_2012_16 numrtohu3b1000plus_2012_16
+	numrtohu3b1000to1499_2012_16 numrtohu3b1500plus_2012_16
 
 	pct3brall_2012_16 pct3brrent_2012_16 pct3brown_2012_16
 
@@ -408,16 +419,32 @@ proc transpose data=xACS_2012_16 out=table2012_16_&geo.;
 	numowneroccupiedhu_2012_16 numownocchu0bd_2012_16 numownocchu1bd_2012_16 numownocchu2bd_2012_16 numownocchu3bd_2012_16
 	numownocchu4bd_2012_16 numownocchu5plusbd_2012_16 pct3brown_2012_16
 	 	;
+	id &geo.; 
+run; 
 
+proc transpose data=xACS_2012_16 out=table2012_16_rent_&geo.;
+	var pct3brrent_2012_16 numrtohu3bunder500_2012_16 numrtohu3b500to749_2012_16 numrtohu3b750to999_2012_16 numrtohu3b1000plus_2012_16
+	numrtohu3b1000to1499_2012_16 numrtohu3b1500plus_2012_16
+	 	;
 	id &geo.; 
 run; 
 
 
 %mend table1a;
 %table1a (city);
+%table1a (ward2012);
+
+
+data table_stack;
+	set table1980_city table1990_city table2000_city Table2006_10_city Table2012_16_city;
+run;
 
 
 
+
+
+
+/*
 data xACS_2012_16;
 	set ACS.Acs_2012_16_dc_sum_tr&geo_suffix.;
 	keep &geo. numhsgunits0bd_2012_16 numhsgunits1bd_2012_16 numhsgunits2bd_2012_16 numhsgunits3bd_2012_16 numhsgunits3plusbd_2012_16
@@ -452,3 +479,4 @@ data RentOcc3plusbd2012_16;
 	numrtohu3b1000to1499_2012_16 numrtohu3b1500plus_2012_16;
 	run;
 
+*/
