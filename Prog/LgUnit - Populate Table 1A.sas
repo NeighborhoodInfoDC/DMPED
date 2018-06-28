@@ -310,9 +310,13 @@ data m2000;
 	by &geo. ;
 	drop _type_ _freq_ ;
 
-	pct3brall_2000 = sum(of numhsgunits3bdrms_2000 numhsgunits4bdrms_2000 numhsgunits5plusbdrms_2000) / numhsgunits_2000;
-	pct3brrent_2000 = sum(of renthsgunits3bdrms_2000 renthsgunits4bdrms_2000 renthsgunits5plusbdrms_2000) / renthsgunits_2000;
-	pct3brown_2000 = sum(of ownhsgunits3bdrms_2000 ownhsgunits4bdrms_2000 ownhsgunits5plusbdrms_2000) / ownhsgunits_2000;
+	numhsgunits3plusbd_2000 = sum(of numhsgunits3bdrms_2000 numhsgunits4bdrms_2000 numhsgunits5plusbdrms_2000);
+	renthsgunits3plusbd_2000 = sum(of renthsgunits3bdrms_2000 renthsgunits4bdrms_2000 renthsgunits5plusbdrms_2000);
+	ownhsgunits3plusbd_2000 = sum(of ownhsgunits3bdrms_2000 ownhsgunits4bdrms_2000 ownhsgunits5plusbdrms_2000);
+
+	pct3brall_2000 = numhsgunits3plusbd_2000 / numhsgunits_2000;
+	pct3brrent_2000 = renthsgunits3plusbd_2000 / renthsgunits_2000;
+	pct3brown_2000 = ownhsgunits3plusbd_2000 / ownhsgunits_2000;
 run;
 
 proc transpose data=m2000 out=table2000_&geo.;
@@ -330,7 +334,7 @@ proc transpose data=m2000 out=table2000_&geo.;
 run; 
 
 
-/* ACS data */
+/* ACS 2006-10 */
 data xACS_2006_10; 
 	set acs.acs_2006_10_dc_sum_tr&geo_suffix.;
 
@@ -379,6 +383,7 @@ proc transpose data=xACS_2006_10 out=table2006_10_rent_&geo.;
 	id &geo.; 
 run; 
 
+/* ACS 2012-16 */
 
 data xACS_2012_16; 
 	set acs.acs_2012_16_dc_sum_tr&geo_suffix.;
@@ -430,6 +435,42 @@ proc transpose data=xACS_2012_16 out=table2012_16_rent_&geo.;
 run; 
 
 
+/* Combined files for change variables */
+data allyear_&geo.;
+	merge m2000 xACS_2006_10 xACS_2012_16;
+	by &geo.;
+
+	ch_3brall_2000_to_2012_16 = numhsgunits3bd_2012_16 - numhsgunits3bdrms_2000;
+	ch_4brall_2000_to_2012_16 = NumHsgUnits4bd_2012_16 - NumHsgUnits4Bdrms_2000;
+	ch_5brall_2000_to_2012_16 = NumRentOccHU5plusbd_2012_16 - NumHsgUnits5plusBdrms_2000;
+
+	pct_ch_tot_2000_to_2006_10 = (numhsgunits_2006_10 - numhsgunits_2000) / numhsgunits_2006_10;
+	pct_ch_3p_2000_to_2006_10 = (numhsgunits3plusbd_2006_10 - numhsgunits3plusbd_2000) / numhsgunits3plusbd_2006_10;
+
+	pct_ch_tot_2006_10_to_2012_16 = (numhsgunits_2012_16 - numhsgunits_2006_10) / numhsgunits_2012_16;
+	pct_ch_3p_2006_10_to_2012_16 = (numhsgunits3plusbd_2012_16 - numhsgunits3plusbd_2006_10) / numhsgunits3plusbd_2012_16;
+
+	label ch_3brall_2000_to_2012_16 = "Change in Units with 3 bedrooms 2000 to 2012-16"
+		  ch_4brall_2000_to_2012_16 = "Change in Units with 4 bedrooms 2000 to 2012-16"
+		  ch_5brall_2000_to_2012_16 = "Change in Units with 5+ bedrooms 2000 to 2012-16"
+		  pct_ch_tot_2000_to_2006_10 = "Pct. change in total housing units 2000 to 2006-10"
+		  pct_ch_3p_2000_to_2006_10 = "Pct. change in units with 3+ bedrooms 2000 to 2006-10" 
+		  pct_ch_tot_2006_10_to_2012_16 = "Pct. change in total housing units 2006-10 to 2012-16" 
+		  pct_ch_3p_2006_10_to_2012_16 = "Pct. change in units with 3+ bedrooms 2006-10 to 2012-16"
+		  ;
+
+run;
+
+proc transpose data=allyear_&geo. out=table_ch_&geo.;
+	var ch_3brall_2000_to_2012_16 ch_4brall_2000_to_2012_16 ch_5brall_2000_to_2012_16
+		pct_ch_tot_2000_to_2006_10 pct_ch_3p_2000_to_2006_10
+		pct_ch_tot_2006_10_to_2012_16 pct_ch_3p_2006_10_to_2012_16
+	 	;
+	id &geo.; 
+run; 
+
+
+
 %mend table1a;
 %table1a (city);
 %table1a (ward2012);
@@ -437,11 +478,13 @@ run;
 /* Combine all data into a single file */
 
 data table_city_stack;
-	set table1980_city table1990_city table2000_city Table2006_10_city Table2012_16_city Table2006_10_rent_city Table2012_16_rent_city;
+	set table1980_city table1990_city table2000_city Table2006_10_city Table2012_16_city Table_ch_city 
+		Table2006_10_rent_city Table2012_16_rent_city;
 run;
 
 data table_ward2012_stack;
-	set table1980_ward2012 table1990_ward2012 table2000_ward2012 Table2006_10_ward2012 Table2012_16_ward2012 Table2006_10_rent_ward2012 Table2012_16_rent_ward2012;
+	set table1980_ward2012 table1990_ward2012 table2000_ward2012 Table2006_10_ward2012 Table2012_16_ward2012 Table_ch_ward2012 
+		Table2006_10_rent_ward2012 Table2012_16_rent_ward2012;
 run;
 
 proc sort data = table_city_stack; by _name_; run;
