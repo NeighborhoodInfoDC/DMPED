@@ -32,6 +32,7 @@ proc sort data = hhwts; by serial; run;
          issenior isdis raceW raceB raceH raceAPI raceO
 		 hudincome30 hudincome50 hudincome80 
 		 before1gen before2gen after1gen
+		 movedless1 moved2to10 moved10plus
 		 ;
 
 %let mvars = hher_age kid_age isadult iskid;
@@ -159,6 +160,34 @@ data pretables;
 
      if related = 1115 or related = 1241 or related = 1260 then nonrelative = 1;
 	     else nonrelative = 0;
+
+
+	/* Moved-in */
+	if year in (2016) then do;
+
+	if movedin in (1,2,3) then movedless1 = 1;
+		else movedless1 = 0;
+
+	if movedin in (4) then moved2to10 = 1;
+		else moved2to10 = 0;
+
+	if movedin in (5,6,7) then moved10plus = 1;
+		else moved10plus = 0;
+
+	end;
+
+	else if year in (2000) then do;
+
+	if movedin in (1,2) then movedless1 = 1;
+		else movedless1 = 0;
+
+	if movedin in (2,3,4,5) then moved2to10 = 1;
+		else moved2to10 = 0;
+
+	if movedin in (6,7,8) then moved10plus = 1;
+		else moved10plus = 0;
+
+	end; 
 
 
 	keep &cvars. &mvars. nonrelative numkids numadults
