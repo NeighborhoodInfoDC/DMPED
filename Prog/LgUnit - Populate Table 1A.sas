@@ -105,7 +105,6 @@ run;
 data m1980;
 	merge x1980 RenterOwnerOcc1980_new ;
 	by &geo. ;
-	drop _type_ _freq_ ;
 
 	pct3brall_1980 = sum(of numhsgunits3bdrms_1980 numhsgunits4bdrms_1980 numhsgunits5plusbdrms_1980) / numhsgunits_1980;
 	pct3brrent_1980 = sum(of renthsgunits3bdrms_1980 renthsgunits4bdrms_1980 renthsgunits5plusbdrms_1980) / renthsgunits_1980;
@@ -217,7 +216,6 @@ run;
 data m1990;
 	merge x1990 RenterOwnerOcc1990_new ;
 	by &geo. ;
-	drop _type_ _freq_ ;
 
 	pct3brall_1990 = sum(of numhsgunits3bdrms_1990 numhsgunits4bdrms_1990 numhsgunits5plusbdrms_1990) / numhsgunits_1990;
 	pct3brrent_1990 = sum(of renthsgunits3bdrms_1990 renthsgunits4bdrms_1990 renthsgunits5plusbdrms_1990) / renthsgunits_1990;
@@ -331,7 +329,6 @@ run;
 data m2000;
 	merge x2000 RenterOwnerOcc2000_new ;
 	by &geo. ;
-	drop _type_ _freq_ ;
 
 	numhsgunits3plusbd_2000 = sum(of numhsgunits3bdrms_2000 numhsgunits4bdrms_2000 numhsgunits5plusbdrms_2000);
 	renthsgunits3plusbd_2000 = sum(of renthsgunits3bdrms_2000 renthsgunits4bdrms_2000 renthsgunits5plusbdrms_2000);
@@ -546,7 +543,7 @@ run;
 /* Export final file */
 
 proc export data = table_all_final
-   outfile="D:\DCData\Libraries\DMPED\Prog\table1a_raw.csv"
+   outfile="L:\Libraries\DMPED\Prog\table1a_raw.csv"
    dbms=csv
    replace;
 run;
