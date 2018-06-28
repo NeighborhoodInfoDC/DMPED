@@ -29,6 +29,8 @@
 
 /* 1980 data */
 
+%macro table1a (geo);
+
 data x1980 ;
 	set ncdb.ncdb_sum&geo_suffix. /*ncdb.ncdb_master_update*/;
 	keep &geo. numhsgunits_1980 numhsgunits1bdrm_1980 numhsgunits2bdrms_1980 numhsgunits3bdrms_1980 
@@ -64,21 +66,49 @@ data RenterOcc1980; /* Summarize */
 
 run; 
 
+%let summaryvars80 = numhsgunits0bdrms_1980 renthsgunits0bdrms_1980 renthsgunits1bdrm_1980 renthsgunits2bdrms_1980 renthsgunits3bdrms_1980 renthsgunits4bdrms_1980
+	renthsgunits5plusbdrms_1980 ownhsgunits0bdrms_1980 ownhsgunits1bdrm_1980 ownhsgunits2bdrms_1980 ownhsgunits3bdrms_1980 ownhsgunits4bdrms_1980 
+	ownhsgunits5plusbdrms_1980;
+
+%if &geo_name. = WARD2012 %then %do;
+
+	    %Transform_geo_data(
+		 dat_ds_name=RenterOcc1980,
+		 dat_org_geo=geo2010,
+		 dat_count_vars=&summaryvars80.,
+		 dat_prop_vars=,
+		 wgt_ds_name=General.Wt_tr10_ward12,
+		 wgt_org_geo=geo2010,
+		 wgt_new_geo=&geo_var,
+		 wgt_id_vars=,
+		 wgt_wgt_var=popwt,
+		 out_ds_name=RenterOwnerOcc1980_new,
+		 out_ds_label=%str(NCDB 1980 summary by &geo.),
+		 calc_vars=,
+		 calc_vars_labels=,
+		 keep_nonmatch=N,
+		 show_warnings=10,
+		 print_diag=Y,
+		 full_diag=N,
+		 mprint=Y
+	    )
+%end;
+
+%else %do;
 
 proc summary data = RenterOcc1980;
 	class &geo.;
-	var numhsgunits0bdrms_1980 renthsgunits0bdrms_1980 renthsgunits1bdrm_1980 renthsgunits2bdrms_1980 renthsgunits3bdrms_1980 renthsgunits4bdrms_1980
-	renthsgunits5plusbdrms_1980 ownhsgunits0bdrms_1980 ownhsgunits1bdrm_1980 ownhsgunits2bdrms_1980 ownhsgunits3bdrms_1980 ownhsgunits4bdrms_1980 
-	ownhsgunits5plusbdrms_1980;
+	var &summaryvars80.;
 	output out = RenterOwnerOcc1980_new (where = (_type_ = 1 )) sum = ;
 run;
+
+%end;
 
 data m1980;
 	merge x1980 RenterOwnerOcc1980_new ;
 	by &geo. ;
 	drop _type_ _freq_ ;
 run;
-
 
 
 /* 1990 data */
@@ -117,19 +147,52 @@ data RenterOcc1990; /* Summarize */
 	ownhsgunits5plusbdrms_1990 = bdocc59 - bdrnt59;
 
 run; 
-proc summary data = RenterOcc1990;
-	class &geo.;
-	var numhsgunits0bdrms_1990 renthsgunits0bdrms_1990 renthsgunits1bdrm_1990 renthsgunits2bdrms_1990 renthsgunits3bdrms_1990 renthsgunits4bdrms_1990
+
+%let summaryvars90 = numhsgunits0bdrms_1990 renthsgunits0bdrms_1990 renthsgunits1bdrm_1990 renthsgunits2bdrms_1990 renthsgunits3bdrms_1990 renthsgunits4bdrms_1990
 	renthsgunits5plusbdrms_1990 ownhsgunits0bdrms_1990 ownhsgunits1bdrm_1990 ownhsgunits2bdrms_1990 ownhsgunits3bdrms_1990 ownhsgunits4bdrms_1990 
 	ownhsgunits5plusbdrms_1990;
+
+%if &geo_name. = WARD2012 %then %do;
+
+	    %Transform_geo_data(
+		 dat_ds_name=RenterOcc1990,
+		 dat_org_geo=geo2010,
+		 dat_count_vars=&summaryvars90.,
+		 dat_prop_vars=,
+		 wgt_ds_name=General.Wt_tr10_ward12,
+		 wgt_org_geo=geo2010,
+		 wgt_new_geo=&geo_var,
+		 wgt_id_vars=,
+		 wgt_wgt_var=popwt,
+		 out_ds_name=RenterOwnerOcc1990_new,
+		 out_ds_label=%str(NCDB 1980 summary by &geo.),
+		 calc_vars=,
+		 calc_vars_labels=,
+		 keep_nonmatch=N,
+		 show_warnings=10,
+		 print_diag=Y,
+		 full_diag=N,
+		 mprint=Y
+	    )
+%end;
+
+%else %do;
+
+proc summary data = RenterOcc1990;
+	class &geo.;
+	var &summaryvars90.;
 	output out = RenterOwnerOcc1990_new (where = (_type_ = 1 )) sum = ;
 run;
+
+%end;
 
 data m1990;
 	merge x1990 RenterOwnerOcc1990_new ;
 	by &geo. ;
 	drop _type_ _freq_ ;
 run;
+
+
 
 /* 2000 data */
 
@@ -139,7 +202,7 @@ data x2000;
 	numhsgunits4bdrms_2000 numhsgunits5plusbdrms_2000;
 run;
 
-data RenterOcc2000; /* Summarize */
+data RenterOcc2000; 
 	set ncdb.ncdb_master_update;
 	
 	If statecd = "11";
@@ -167,19 +230,55 @@ data RenterOcc2000; /* Summarize */
 	ownhsgunits5plusbdrms_2000 = bdocc50 - bdrnt50;
 
 run; 
-proc summary data = RenterOcc2000;
-	class &geo.;
-	var numhsgunits0bdrms_2000 renthsgunits0bdrms_2000 renthsgunits1bdrm_2000 renthsgunits2bdrms_2000 renthsgunits3bdrms_2000 renthsgunits4bdrms_2000
+
+
+%let summaryvars00 = numhsgunits0bdrms_2000 renthsgunits0bdrms_2000 renthsgunits1bdrm_2000 renthsgunits2bdrms_2000 renthsgunits3bdrms_2000 renthsgunits4bdrms_2000
 	renthsgunits5plusbdrms_2000 ownhsgunits0bdrms_2000 ownhsgunits1bdrm_2000 ownhsgunits2bdrms_2000 ownhsgunits3bdrms_2000 ownhsgunits4bdrms_2000 
 	ownhsgunits5plusbdrms_2000;
+
+%if &geo_name. = WARD2012 %then %do;
+
+	    %Transform_geo_data(
+		 dat_ds_name=RenterOcc2000,
+		 dat_org_geo=geo2010,
+		 dat_count_vars=&summaryvars00.,
+		 dat_prop_vars=,
+		 wgt_ds_name=General.Wt_tr10_ward12,
+		 wgt_org_geo=geo2010,
+		 wgt_new_geo=&geo_var,
+		 wgt_id_vars=,
+		 wgt_wgt_var=popwt,
+		 out_ds_name=RenterOwnerOcc2000_new,
+		 out_ds_label=%str(NCDB 1980 summary by &geo.),
+		 calc_vars=,
+		 calc_vars_labels=,
+		 keep_nonmatch=N,
+		 show_warnings=10,
+		 print_diag=Y,
+		 full_diag=N,
+		 mprint=Y
+	    )
+%end;
+
+%else %do;
+
+proc summary data = RenterOcc2000;
+	class &geo.;
+	var &summaryvars00.;
 	output out = RenterOwnerOcc2000_new (where = (_type_ = 1 )) sum = ;
 run;
+
+%end;
 
 data m2000;
 	merge x2000 RenterOwnerOcc2000_new ;
 	by &geo. ;
 	drop _type_ _freq_ ;
 run;
+
+%mend table1a;
+%table1a (ward2012);
+
 
 /* ACS data */
 data xACS_2006_10; 
