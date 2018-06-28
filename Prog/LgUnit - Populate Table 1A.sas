@@ -111,6 +111,17 @@ data m1980;
 	pct3brrent_1980 = sum(of renthsgunits3bdrms_1980 renthsgunits4bdrms_1980 renthsgunits5plusbdrms_1980) / renthsgunits_1980;
 	pct3brown_1980 = sum(of ownhsgunits3bdrms_1980 ownhsgunits4bdrms_1980 ownhsgunits5plusbdrms_1980) / ownhsgunits_1980;
 
+	label pct3brall_1980 = "Pct. of All Units with 3+ bedrooms"
+		  pct3brrent_1980 = "Pct. of Rental  Units with 3+ bedrooms"
+		  ownhsgunits0bdrms_1980 = "Owner-occupied housing units with 0 bedrooms"
+		  ownhsgunits1bdrm_1980 = "Owner-occupied housing units with 1 bedrooms"
+		  ownhsgunits2bdrms_1980 = "Owner-occupied housing units with 2 bedrooms"
+		  ownhsgunits3bdrms_1980 = "Owner-occupied housing units with 3 bedrooms"
+		   ownhsgunits4bdrms_1980 = "Owner-occupied housing units with 4 bedrooms"
+		  ownhsgunits5plusbdrms_1980 = "Owner-occupied housing units with 5+ bedrooms"
+		  pct3brown_1980 = "Pct. of Owner Units with 3+ bedrooms"
+	;
+
 run;
 
 proc transpose data=m1980 out=table1980_&geo.;
@@ -211,6 +222,18 @@ data m1990;
 	pct3brall_1990 = sum(of numhsgunits3bdrms_1990 numhsgunits4bdrms_1990 numhsgunits5plusbdrms_1990) / numhsgunits_1990;
 	pct3brrent_1990 = sum(of renthsgunits3bdrms_1990 renthsgunits4bdrms_1990 renthsgunits5plusbdrms_1990) / renthsgunits_1990;
 	pct3brown_1990 = sum(of ownhsgunits3bdrms_1990 ownhsgunits4bdrms_1990 ownhsgunits5plusbdrms_1990) / ownhsgunits_1990;
+
+	label pct3brall_1990 = "Pct. of All Units with 3+ bedrooms"
+		  pct3brrent_1990 = "Pct. of Rental  Units with 3+ bedrooms"
+		  ownhsgunits0bdrms_1990 = "Owner-occupied housing units with 0 bedrooms"
+		  ownhsgunits1bdrm_1990 = "Owner-occupied housing units with 1 bedrooms"
+		  ownhsgunits2bdrms_1990 = "Owner-occupied housing units with 2 bedrooms"
+		  ownhsgunits3bdrms_1990 = "Owner-occupied housing units with 3 bedrooms"
+		  ownhsgunits4bdrms_1990 = "Owner-occupied housing units with 4 bedrooms"
+		  ownhsgunits5plusbdrms_1990 = "Owner-occupied housing units with 5+ bedrooms"
+		  pct3brown_1990 = "Pct. of Owner Units with 3+ bedrooms"
+	;
+
 run;
 
 proc transpose data=m1990 out=table1990_&geo.;
@@ -317,6 +340,17 @@ data m2000;
 	pct3brall_2000 = numhsgunits3plusbd_2000 / numhsgunits_2000;
 	pct3brrent_2000 = renthsgunits3plusbd_2000 / renthsgunits_2000;
 	pct3brown_2000 = ownhsgunits3plusbd_2000 / ownhsgunits_2000;
+
+	label pct3brall_2000 = "Pct. of All Units with 3+ bedrooms"
+		  pct3brrent_2000 = "Pct. of Rental  Units with 3+ bedrooms"
+		  ownhsgunits0bdrms_2000 = "Owner-occupied housing units with 0 bedrooms"
+		  ownhsgunits1bdrm_2000 = "Owner-occupied housing units with 1 bedrooms"
+		  ownhsgunits2bdrms_2000 = "Owner-occupied housing units with 2 bedrooms"
+		  ownhsgunits3bdrms_2000 = "Owner-occupied housing units with 3 bedrooms"
+		  ownhsgunits4bdrms_2000 = "Owner-occupied housing units with 4 bedrooms"
+		  ownhsgunits5plusbdrms_2000 = "Owner-occupied housing units with 5+ bedrooms"
+		  pct3brown_2000 = "Pct. of Owner Units with 3+ bedrooms"
+	;
 run;
 
 proc transpose data=m2000 out=table2000_&geo.;
@@ -360,6 +394,11 @@ data xACS_2006_10;
 	pct3brall_2006_10 = numhsgunits3plusbd_2006_10 / numhsgunits_2006_10;
 	pct3brrent_2006_10 = numrentocchu3plusbd_2006_10 / numrenteroccupiedhu_2006_10;
 	pct3brown_2006_10 = numownocchu3plusbd_2006_10 / numowneroccupiedhu_2006_10;
+
+	label pct3brall_2006_10 = "Pct. of All Units with 3+ bedrooms"
+		  pct3brrent_2006_10 = "Pct. of Rental Units with 3+ bedrooms" 
+		  pct3brown_2006_10 = "Pct. of Owner Units with 3+ bedrooms" 
+	;
 
 run;
 
@@ -411,6 +450,11 @@ data xACS_2012_16;
 	pct3brall_2012_16 = numhsgunits3plusbd_2012_16 / numhsgunits_2012_16;
 	pct3brrent_2012_16 = numrentocchu3plusbd_2012_16 / numrenteroccupiedhu_2012_16;
 	pct3brown_2012_16 = numownocchu3plusbd_2012_16 / numowneroccupiedhu_2012_16;
+
+	label pct3brall_2012_16 = "Pct. of All Units with 3+ bedrooms"
+		  pct3brrent_2012_16 = "Pct. of Rental Units with 3+ bedrooms" 
+		  pct3brown_2012_16 = "Pct. of Owner Units with 3+ bedrooms" 
+	;
 
 run;
 
@@ -495,6 +539,7 @@ proc sort data = table_ward2012_stack; by SortNo; run;
 data table_all_final;
 	merge table_city_stack table_ward2012_stack;
 	by SortNo;
+	drop SortNo;
 run;
 
 
