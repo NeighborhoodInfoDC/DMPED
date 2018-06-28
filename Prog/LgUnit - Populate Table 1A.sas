@@ -44,18 +44,17 @@ data RenterOcc1980; /* Summarize */
 
 	city = "1";
 
-	Keep Geo2010 city bdrnt08 bdrnt18 bdrnt28 bdrnt38 bdrnt48 bdtot08
-	bdrnt58 ownhsgunits0bdrms_1980 ownhsgunits1bdrm_1980 ownhsgunits2bdrms_1980 ownhsgunits3bdrms_1980 ownhsgunits4bdrms_1980 
-	ownhsgunits5plusbdrms_1980;	
-
 	rename bdtot08=numhsgunits0bdrms_1980;
 
+	rename rntocc8 =renthsgunits_1980;
 	rename bdrnt08=renthsgunits0bdrms_1980;
 	rename bdrnt18=renthsgunits1bdrm_1980;
 	rename bdrnt28=renthsgunits2bdrms_1980;
 	rename bdrnt38=renthsgunits3bdrms_1980;
 	rename bdrnt48=renthsgunits4bdrms_1980;
 	rename bdrnt58=renthsgunits5plusbdrms_1980; 
+
+	rename ownocc8 = ownhsgunits_1980;
 
 	ownhsgunits0bdrms_1980 = bdocc08 - bdrnt08;
 	ownhsgunits1bdrm_1980 = bdocc18 - bdrnt18;
@@ -66,8 +65,8 @@ data RenterOcc1980; /* Summarize */
 
 run; 
 
-%let summaryvars80 = numhsgunits0bdrms_1980 renthsgunits0bdrms_1980 renthsgunits1bdrm_1980 renthsgunits2bdrms_1980 renthsgunits3bdrms_1980 renthsgunits4bdrms_1980
-	renthsgunits5plusbdrms_1980 ownhsgunits0bdrms_1980 ownhsgunits1bdrm_1980 ownhsgunits2bdrms_1980 ownhsgunits3bdrms_1980 ownhsgunits4bdrms_1980 
+%let summaryvars80 = numhsgunits0bdrms_1980 renthsgunits_1980 renthsgunits0bdrms_1980 renthsgunits1bdrm_1980 renthsgunits2bdrms_1980 renthsgunits3bdrms_1980 renthsgunits4bdrms_1980
+	renthsgunits5plusbdrms_1980 ownhsgunits_1980 ownhsgunits0bdrms_1980 ownhsgunits1bdrm_1980 ownhsgunits2bdrms_1980 ownhsgunits3bdrms_1980 ownhsgunits4bdrms_1980 
 	ownhsgunits5plusbdrms_1980;
 
 %if &geo_name. = WARD2012 %then %do;
@@ -108,7 +107,26 @@ data m1980;
 	merge x1980 RenterOwnerOcc1980_new ;
 	by &geo. ;
 	drop _type_ _freq_ ;
+
+	pct3brall_1980 = sum(of numhsgunits3bdrms_1980 numhsgunits4bdrms_1980 numhsgunits5plusbdrms_1980) / numhsgunits_1980;
+	pct3brrent_1980 = sum(of renthsgunits3bdrms_1980 renthsgunits4bdrms_1980 renthsgunits5plusbdrms_1980) / renthsgunits_1980;
+	pct3brown_1980 = sum(of ownhsgunits3bdrms_1980 ownhsgunits4bdrms_1980 ownhsgunits5plusbdrms_1980) / ownhsgunits_1980;
+
 run;
+
+proc transpose data=m1980 out=table1980_&geo.;
+	var numhsgunits_1980 numhsgunits0bdrms_1980 numhsgunits1bdrm_1980 numhsgunits2bdrms_1980 numhsgunits3bdrms_1980 
+	numhsgunits4bdrms_1980 numhsgunits5plusbdrms_1980 pct3brall_1980
+
+	renthsgunits_1980 renthsgunits0bdrms_1980 renthsgunits1bdrm_1980 renthsgunits2bdrms_1980 renthsgunits3bdrms_1980 
+	renthsgunits4bdrms_1980 renthsgunits5plusbdrms_1980 pct3brrent_1980
+
+	ownhsgunits_1980 ownhsgunits0bdrms_1980 ownhsgunits1bdrm_1980 ownhsgunits2bdrms_1980 ownhsgunits3bdrms_1980 
+	ownhsgunits4bdrms_1980  ownhsgunits5plusbdrms_1980 pct3brown_1980
+	 	;
+
+	id &geo.; 
+run; 
 
 
 /* 1990 data */
@@ -125,10 +143,6 @@ data RenterOcc1990; /* Summarize */
 	If statecd = "11";
 
 	city = "1";
-
-	Keep Geo2010 &geo. bdtot09 bdrnt09 bdrnt19 bdrnt29 bdrnt39 bdrnt49
-	bdrnt59 ownhsgunits0bdrms_1990 ownhsgunits1bdrm_1990 ownhsgunits2bdrms_1990 ownhsgunits3bdrms_1990 ownhsgunits4bdrms_1990 
-	ownhsgunits5plusbdrms_1990;	
 
 	rename bdtot09=numhsgunits0bdrms_1990;
 
@@ -190,7 +204,25 @@ data m1990;
 	merge x1990 RenterOwnerOcc1990_new ;
 	by &geo. ;
 	drop _type_ _freq_ ;
+
+	pct3brall_1990 = sum(of numhsgunits3bdrms_1990 numhsgunits4bdrms_1990 numhsgunits5plusbdrms_1990) / numhsgunits_1990;
+	pct3brrent_1990 = sum(of renthsgunits3bdrms_1990 renthsgunits4bdrms_1990 renthsgunits5plusbdrms_1990) / renthsgunits_1990;
+	pct3brown_1990 = sum(of ownhsgunits3bdrms_1990 ownhsgunits4bdrms_1990 ownhsgunits5plusbdrms_1990) / ownhsgunits_1990;
 run;
+
+proc transpose data=m1990 out=table1990_&geo.;
+	var numhsgunits_1990 numhsgunits0bdrms_1990 numhsgunits1bdrm_1990 numhsgunits2bdrms_1990 numhsgunits3bdrms_1990 
+	numhsgunits4bdrms_1990 numhsgunits5plusbdrms_1990 pct3brall_1990
+
+	renthsgunits_1990 renthsgunits0bdrms_1990 renthsgunits1bdrm_1990 renthsgunits2bdrms_1990 renthsgunits3bdrms_1990 
+	renthsgunits4bdrms_1990 renthsgunits5plusbdrms_1990 pct3brrent_1990
+
+	ownhsgunits_1990 ownhsgunits0bdrms_1990 ownhsgunits1bdrm_1990 ownhsgunits2bdrms_1990 ownhsgunits3bdrms_1990 
+	ownhsgunits4bdrms_1990  ownhsgunits5plusbdrms_1990 pct3brown_1990
+	 	;
+
+	id &geo.; 
+run; 
 
 
 
@@ -208,10 +240,6 @@ data RenterOcc2000;
 	If statecd = "11";
 
 	city = "1";
-
-	Keep Geo2010 &geo. bdrnt00 bdrnt10 bdrnt20 bdrnt30 bdrnt40
-	bdrnt50 ownhsgunits0bdrms_2000 ownhsgunits1bdrm_2000 ownhsgunits2bdrms_2000 ownhsgunits3bdrms_2000 ownhsgunits4bdrms_2000 
-	ownhsgunits5plusbdrms_2000;	
 	
 	rename bdtot00=numhsgunits0bdrms_2000;
 
@@ -274,7 +302,26 @@ data m2000;
 	merge x2000 RenterOwnerOcc2000_new ;
 	by &geo. ;
 	drop _type_ _freq_ ;
+
+	pct3brall_2000 = sum(of numhsgunits3bdrms_2000 numhsgunits4bdrms_2000 numhsgunits5plusbdrms_2000) / numhsgunits_2000;
+	pct3brrent_2000 = sum(of renthsgunits3bdrms_2000 renthsgunits4bdrms_2000 renthsgunits5plusbdrms_2000) / renthsgunits_2000;
+	pct3brown_2000 = sum(of ownhsgunits3bdrms_2000 ownhsgunits4bdrms_2000 ownhsgunits5plusbdrms_2000) / ownhsgunits_2000;
 run;
+
+proc transpose data=m2000 out=table2000_&geo.;
+	var numhsgunits_2000 numhsgunits0bdrms_2000 numhsgunits1bdrm_2000 numhsgunits2bdrms_2000 numhsgunits3bdrms_2000 
+	numhsgunits4bdrms_2000 numhsgunits5plusbdrms_2000 pct3brall_2000
+
+	renthsgunits_2000 renthsgunits0bdrms_2000 renthsgunits1bdrm_2000 renthsgunits2bdrms_2000 renthsgunits3bdrms_2000 
+	renthsgunits4bdrms_2000 renthsgunits5plusbdrms_2000 pct3brrent_2000
+
+	ownhsgunits_2000 ownhsgunits0bdrms_2000 ownhsgunits1bdrm_2000 ownhsgunits2bdrms_2000 ownhsgunits3bdrms_2000 
+	ownhsgunits4bdrms_2000  ownhsgunits5plusbdrms_2000 pct3brown_2000
+	 	;
+
+	id &geo.; 
+run; 
+
 
 %mend table1a;
 %table1a (ward2012);
