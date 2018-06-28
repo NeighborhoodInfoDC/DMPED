@@ -434,49 +434,32 @@ run;
 %table1a (city);
 %table1a (ward2012);
 
+/* Combine all data into a single file */
 
-data table_stack;
-	set table1980_city table1990_city table2000_city Table2006_10_city Table2012_16_city;
+data table_city_stack;
+	set table1980_city table1990_city table2000_city Table2006_10_city Table2012_16_city Table2006_10_rent_city Table2012_16_rent_city;
+run;
+
+data table_ward2012_stack;
+	set table1980_ward2012 table1990_ward2012 table2000_ward2012 Table2006_10_ward2012 Table2012_16_ward2012 Table2006_10_rent_ward2012 Table2012_16_rent_ward2012;
+run;
+
+proc sort data = table_city_stack; by _name_; run;
+proc sort data = table_ward2012_stack; by _name_; run;
+
+data table_all_final;
+	merge table_city_stack table_ward2012_stack;
+	by _name_;
 run;
 
 
+/* Export final file */
 
-
-
-
-/*
-data xACS_2012_16;
-	set ACS.Acs_2012_16_dc_sum_tr&geo_suffix.;
-	keep &geo. numhsgunits0bd_2012_16 numhsgunits1bd_2012_16 numhsgunits2bd_2012_16 numhsgunits3bd_2012_16 numhsgunits3plusbd_2012_16
-	numhsgunits4bd_2012_16 numhsgunits5plusbd_2012_16; 
+proc export data = table_all_final
+   outfile="D:\DCData\Libraries\DMPED\Prog\table1a_raw.csv"
+   dbms=csv
+   replace;
 run;
 
 
-data RenterOcc2006_10;
-	set acs.acs_2006_10_dc_sum_tr&geo_suffix.;
-	Keep &geo. 
-	run;
-
-data RenterOcc2012_16;
-	set ACS.Acs_2012_16_dc_sum_tr&geo_suffix.;
-	Keep &geo. numrentocchu0bd_2012_16 numrentocchu1bd_2012_16 numrentocchu2bd_2012_16 numrentocchu3bd_2012_16
-	numrentocchu3plusbd_2012_16 numrentocchu4bd_2012_16 numrentocchu5plusbd_2012_16 numownocchu0bd_2012_16 numownocchu1bd_2012_16
-	numownocchu2bd_2012_16 numownocchu3bd_2012_16 numownocchu3plusbd_2012_16 numownocchu4bd_2012_16 numownocchu5plusbd_2012_16;
-	run;
-
-
-
-
-
-
-data RentOcc3plusbd2006_10;
-	set acs.acs_2006_10_dc_sum_tr&geo_suffix.;
-	Keep &geo. numrtohu3bunder500_2006_10 numrtohu3b500to749_2006_10 numrtohu3b750to999_2006_10 numrtohu3b1000plus_2006_10;
-	run;
-data RentOcc3plusbd2012_16;
-	set ACS.Acs_2012_16_dc_sum_tr&geo_suffix.;
-	Keep city numrtohu3bunder500_2012_16 numrtohu3b500to749_2012_16 numrtohu3b750to999_2012_16 numrtohu3b1000plus_2012_16
-	numrtohu3b1000to1499_2012_16 numrtohu3b1500plus_2012_16;
-	run;
-
-*/
+/* End of program */
