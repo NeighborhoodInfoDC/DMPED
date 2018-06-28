@@ -19,22 +19,21 @@
 %DCData_lib( NCDB )
 %DCData_lib( ACS )
 
-%let geo = ward2012;
+
+/* 1980 data */
+
+%macro table1a (geo);
 
 %let geo_name = %upcase( &geo );
   %let geo_var = %sysfunc( putc( &geo_name, $geoval. ) );
   %let geo_suffix = %sysfunc( putc( &geo_name, $geosuf. ) );
   %let geo_label = %sysfunc( putc( &geo_name, $geodlbl. ) );
 
-
-/* 1980 data */
-
-%macro table1a (geo);
-
 data x1980 ;
-	set ncdb.ncdb_sum&geo_suffix. /*ncdb.ncdb_master_update*/;
+	set ncdb.ncdb_sum&geo_suffix.;
 	keep &geo. numhsgunits_1980 numhsgunits1bdrm_1980 numhsgunits2bdrms_1980 numhsgunits3bdrms_1980 
 	numhsgunits4bdrms_1980 numhsgunits5plusbdrms_1980;
+	city ="1";
 run;
 
 data RenterOcc1980; /* Summarize */
@@ -132,12 +131,13 @@ run;
 /* 1990 data */
 
 data x1990;
-	set ncdb.ncdb_sum&geo_suffix. /*ncdb.ncdb_master_update*/;
+	set ncdb.ncdb_sum&geo_suffix. ;
 	keep &geo. numhsgunits_1990 numhsgunits1bdrm_1990 numhsgunits2bdrms_1990 numhsgunits3bdrms_1990 
 	numhsgunits4bdrms_1990 numhsgunits5plusbdrms_1990;
+	city ="1";
 	run;
 
-data RenterOcc1990; /* Summarize */
+data RenterOcc1990; 
 	set ncdb.ncdb_master_update;
 	
 	If statecd = "11";
@@ -146,12 +146,15 @@ data RenterOcc1990; /* Summarize */
 
 	rename bdtot09=numhsgunits0bdrms_1990;
 
+	rename rntocc9 =renthsgunits_1990;
 	rename bdrnt09=renthsgunits0bdrms_1990;
 	rename bdrnt19=renthsgunits1bdrm_1990;
 	rename bdrnt29=renthsgunits2bdrms_1990;
 	rename bdrnt39=renthsgunits3bdrms_1990;
 	rename bdrnt49=renthsgunits4bdrms_1990;
 	rename bdrnt59=renthsgunits5plusbdrms_1990; 
+
+	rename ownocc9 = ownhsgunits_1990;
 
 	ownhsgunits0bdrms_1990 = bdocc09 - bdrnt09;
 	ownhsgunits1bdrm_1990 = bdocc19 - bdrnt19;
@@ -162,8 +165,8 @@ data RenterOcc1990; /* Summarize */
 
 run; 
 
-%let summaryvars90 = numhsgunits0bdrms_1990 renthsgunits0bdrms_1990 renthsgunits1bdrm_1990 renthsgunits2bdrms_1990 renthsgunits3bdrms_1990 renthsgunits4bdrms_1990
-	renthsgunits5plusbdrms_1990 ownhsgunits0bdrms_1990 ownhsgunits1bdrm_1990 ownhsgunits2bdrms_1990 ownhsgunits3bdrms_1990 ownhsgunits4bdrms_1990 
+%let summaryvars90 = numhsgunits0bdrms_1990 renthsgunits_1990 renthsgunits0bdrms_1990 renthsgunits1bdrm_1990 renthsgunits2bdrms_1990 renthsgunits3bdrms_1990 renthsgunits4bdrms_1990
+	renthsgunits5plusbdrms_1990 ownhsgunits_1990 ownhsgunits0bdrms_1990 ownhsgunits1bdrm_1990 ownhsgunits2bdrms_1990 ownhsgunits3bdrms_1990 ownhsgunits4bdrms_1990 
 	ownhsgunits5plusbdrms_1990;
 
 %if &geo_name. = WARD2012 %then %do;
@@ -232,6 +235,7 @@ data x2000;
 	set ncdb.ncdb_sum&geo_suffix. /*ncdb.ncdb_master_update*/;
 	keep &geo. numhsgunits_2000 numhsgunits0bdrms_2000 numhsgunits1bdrm_2000 numhsgunits2bdrms_2000 numhsgunits3bdrms_2000 
 	numhsgunits4bdrms_2000 numhsgunits5plusbdrms_2000;
+	city ="1";
 run;
 
 data RenterOcc2000; 
@@ -243,12 +247,15 @@ data RenterOcc2000;
 	
 	rename bdtot00=numhsgunits0bdrms_2000;
 
+	rename rntocc0 =renthsgunits_2000;
 	rename bdrnt00=renthsgunits0bdrms_2000;
 	rename bdrnt10=renthsgunits1bdrm_2000;
 	rename bdrnt20=renthsgunits2bdrms_2000;
 	rename bdrnt30=renthsgunits3bdrms_2000;
 	rename bdrnt40=renthsgunits4bdrms_2000;
 	rename bdrnt50=renthsgunits5plusbdrms_2000; 
+
+	rename ownocc0 = ownhsgunits_2000;
 
 	ownhsgunits0bdrms_2000 = bdocc00 - bdrnt00;
 	ownhsgunits1bdrm_2000 = bdocc10 - bdrnt10;
@@ -260,8 +267,8 @@ data RenterOcc2000;
 run; 
 
 
-%let summaryvars00 = numhsgunits0bdrms_2000 renthsgunits0bdrms_2000 renthsgunits1bdrm_2000 renthsgunits2bdrms_2000 renthsgunits3bdrms_2000 renthsgunits4bdrms_2000
-	renthsgunits5plusbdrms_2000 ownhsgunits0bdrms_2000 ownhsgunits1bdrm_2000 ownhsgunits2bdrms_2000 ownhsgunits3bdrms_2000 ownhsgunits4bdrms_2000 
+%let summaryvars00 = numhsgunits0bdrms_2000 renthsgunits_2000 renthsgunits0bdrms_2000 renthsgunits1bdrm_2000 renthsgunits2bdrms_2000 renthsgunits3bdrms_2000 renthsgunits4bdrms_2000
+	renthsgunits5plusbdrms_2000 ownhsgunits_2000 ownhsgunits0bdrms_2000 ownhsgunits1bdrm_2000 ownhsgunits2bdrms_2000 ownhsgunits3bdrms_2000 ownhsgunits4bdrms_2000 
 	ownhsgunits5plusbdrms_2000;
 
 %if &geo_name. = WARD2012 %then %do;
@@ -323,16 +330,93 @@ proc transpose data=m2000 out=table2000_&geo.;
 run; 
 
 
-%mend table1a;
-%table1a (ward2012);
-
-
 /* ACS data */
 data xACS_2006_10; 
 	set acs.acs_2006_10_dc_sum_tr&geo_suffix.;
-	keep &geo. numhsgunits0bd_2006_10 numhsgunits1bd_2006_10 numhsgunits2bd_2006_10 numhsgunits3bd_2006_10 numhsgunits3plusbd_2006_10
-	numhsgunits4bd_2006_10 numhsgunits5plusbd_2006_10;
+
+	numhsgunits_2006_10 = sum(of numhsgunits0bd_2006_10 numhsgunits1bd_2006_10 numhsgunits2bd_2006_10 numhsgunits3plusbd_2006_10);
+
+	keep &geo. 
+
+	numhsgunits_2006_10 numhsgunits0bd_2006_10 numhsgunits1bd_2006_10 numhsgunits2bd_2006_10 numhsgunits3bd_2006_10 numhsgunits3plusbd_2006_10
+	numhsgunits4bd_2006_10 numhsgunits5plusbd_2006_10 
+
+	numrenteroccupiedhu_2006_10 numrentocchu0bd_2006_10 numrentocchu1bd_2006_10 numrentocchu2bd_2006_10 numrentocchu3bd_2006_10
+	numrentocchu3plusbd_2006_10 numrentocchu4bd_2006_10 numrentocchu5plusbd_2006_10 
+
+	numowneroccupiedhu_2006_10 numownocchu0bd_2006_10 numownocchu1bd_2006_10
+	numownocchu2bd_2006_10 numownocchu3bd_2006_10 numownocchu3plusbd_2006_10 numownocchu4bd_2006_10 numownocchu5plusbd_2006_10
+
+	pct3brall_2006_10 pct3brrent_2006_10 pct3brown_2006_10
+
+	;
+
+	pct3brall_2006_10 = numhsgunits3plusbd_2006_10 / numhsgunits_2006_10;
+	pct3brrent_2006_10 = numrentocchu3plusbd_2006_10 / numrenteroccupiedhu_2006_10;
+	pct3brown_2006_10 = numownocchu3plusbd_2006_10 / numowneroccupiedhu_2006_10;
+
 run;
+
+proc transpose data=xACS_2006_10 out=table2006_10_&geo.;
+	var numhsgunits_2006_10 numhsgunits0bd_2006_10 numhsgunits1bd_2006_10 numhsgunits2bd_2006_10 numhsgunits3bd_2006_10
+		numhsgunits4bd_2006_10 numhsgunits5plusbd_2006_10 pct3brall_2006_10
+
+	numrenteroccupiedhu_2006_10 numrentocchu0bd_2006_10 numrentocchu1bd_2006_10 numrentocchu2bd_2006_10 numrentocchu3bd_2006_10
+	numrentocchu4bd_2006_10 numrentocchu5plusbd_2006_10 pct3brrent_2006_10
+
+	numowneroccupiedhu_2006_10 numownocchu0bd_2006_10 numownocchu1bd_2006_10 numownocchu2bd_2006_10 numownocchu3bd_2006_10
+	numownocchu4bd_2006_10 numownocchu5plusbd_2006_10 pct3brown_2006_10
+	 	;
+
+	id &geo.; 
+run; 
+
+
+data xACS_2012_16; 
+	set acs.acs_2012_16_dc_sum_tr&geo_suffix.;
+
+	numhsgunits_2012_16 = sum(of numhsgunits0bd_2012_16 numhsgunits1bd_2012_16 numhsgunits2bd_2012_16 numhsgunits3plusbd_2012_16);
+
+	keep &geo. 
+
+	numhsgunits_2012_16 numhsgunits0bd_2012_16 numhsgunits1bd_2012_16 numhsgunits2bd_2012_16 numhsgunits3bd_2012_16 numhsgunits3plusbd_2012_16
+	numhsgunits4bd_2012_16 numhsgunits5plusbd_2012_16 
+
+	numrenteroccupiedhu_2012_16 numrentocchu0bd_2012_16 numrentocchu1bd_2012_16 numrentocchu2bd_2012_16 numrentocchu3bd_2012_16
+	numrentocchu3plusbd_2012_16 numrentocchu4bd_2012_16 numrentocchu5plusbd_2012_16 
+
+	numowneroccupiedhu_2012_16 numownocchu0bd_2012_16 numownocchu1bd_2012_16
+	numownocchu2bd_2012_16 numownocchu3bd_2012_16 numownocchu3plusbd_2012_16 numownocchu4bd_2012_16 numownocchu5plusbd_2012_16
+
+	pct3brall_2012_16 pct3brrent_2012_16 pct3brown_2012_16
+
+	;
+
+	pct3brall_2012_16 = numhsgunits3plusbd_2012_16 / numhsgunits_2012_16;
+	pct3brrent_2012_16 = numrentocchu3plusbd_2012_16 / numrenteroccupiedhu_2012_16;
+	pct3brown_2012_16 = numownocchu3plusbd_2012_16 / numowneroccupiedhu_2012_16;
+
+run;
+
+proc transpose data=xACS_2012_16 out=table2012_16_&geo.;
+	var numhsgunits_2012_16 numhsgunits0bd_2012_16 numhsgunits1bd_2012_16 numhsgunits2bd_2012_16 numhsgunits3bd_2012_16
+		numhsgunits4bd_2012_16 numhsgunits5plusbd_2012_16 pct3brall_2012_16
+
+	numrenteroccupiedhu_2012_16 numrentocchu0bd_2012_16 numrentocchu1bd_2012_16 numrentocchu2bd_2012_16 numrentocchu3bd_2012_16
+	numrentocchu4bd_2012_16 numrentocchu5plusbd_2012_16 pct3brrent_2012_16
+
+	numowneroccupiedhu_2012_16 numownocchu0bd_2012_16 numownocchu1bd_2012_16 numownocchu2bd_2012_16 numownocchu3bd_2012_16
+	numownocchu4bd_2012_16 numownocchu5plusbd_2012_16 pct3brown_2012_16
+	 	;
+
+	id &geo.; 
+run; 
+
+
+%mend table1a;
+%table1a (city);
+
+
 
 data xACS_2012_16;
 	set ACS.Acs_2012_16_dc_sum_tr&geo_suffix.;
@@ -343,9 +427,7 @@ run;
 
 data RenterOcc2006_10;
 	set acs.acs_2006_10_dc_sum_tr&geo_suffix.;
-	Keep &geo. numrentocchu0bd_2006_10 numrentocchu1bd_2006_10 numrentocchu2bd_2006_10 numrentocchu3bd_2006_10
-	numrentocchu3plusbd_2006_10 numrentocchu4bd_2006_10 numrentocchu5plusbd_2006_10 numownocchu0bd_2006_10 numownocchu1bd_2006_10
-	numownocchu2bd_2006_10 numownocchu3bd_2006_10 numownocchu3plusbd_2006_10 numownocchu4bd_2006_10 numownocchu5plusbd_2006_10;
+	Keep &geo. 
 	run;
 
 data RenterOcc2012_16;
@@ -354,6 +436,12 @@ data RenterOcc2012_16;
 	numrentocchu3plusbd_2012_16 numrentocchu4bd_2012_16 numrentocchu5plusbd_2012_16 numownocchu0bd_2012_16 numownocchu1bd_2012_16
 	numownocchu2bd_2012_16 numownocchu3bd_2012_16 numownocchu3plusbd_2012_16 numownocchu4bd_2012_16 numownocchu5plusbd_2012_16;
 	run;
+
+
+
+
+
+
 data RentOcc3plusbd2006_10;
 	set acs.acs_2006_10_dc_sum_tr&geo_suffix.;
 	Keep &geo. numrtohu3bunder500_2006_10 numrtohu3b500to749_2006_10 numrtohu3b750to999_2006_10 numrtohu3b1000plus_2006_10;
