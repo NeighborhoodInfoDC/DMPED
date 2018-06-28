@@ -20,14 +20,14 @@
 %DCData_lib( ACS )
 
 
-/* 1980 data */
-
 %macro table1a (geo);
 
 %let geo_name = %upcase( &geo );
   %let geo_var = %sysfunc( putc( &geo_name, $geoval. ) );
   %let geo_suffix = %sysfunc( putc( &geo_name, $geosuf. ) );
   %let geo_label = %sysfunc( putc( &geo_name, $geodlbl. ) );
+
+  /* 1980 data */
 
 data x1980 ;
 	set ncdb.ncdb_sum&geo_suffix.;
@@ -480,19 +480,21 @@ run;
 data table_city_stack;
 	set table1980_city table1990_city table2000_city Table2006_10_city Table2012_16_city Table_ch_city 
 		Table2006_10_rent_city Table2012_16_rent_city;
+	SortNo + 1;
 run;
 
 data table_ward2012_stack;
 	set table1980_ward2012 table1990_ward2012 table2000_ward2012 Table2006_10_ward2012 Table2012_16_ward2012 Table_ch_ward2012 
 		Table2006_10_rent_ward2012 Table2012_16_rent_ward2012;
+	SortNo + 1;
 run;
 
-proc sort data = table_city_stack; by _name_; run;
-proc sort data = table_ward2012_stack; by _name_; run;
+proc sort data = table_city_stack; by SortNo; run;
+proc sort data = table_ward2012_stack; by SortNo; run;
 
 data table_all_final;
 	merge table_city_stack table_ward2012_stack;
-	by _name_;
+	by SortNo;
 run;
 
 
@@ -503,6 +505,7 @@ proc export data = table_all_final
    dbms=csv
    replace;
 run;
+
 
 
 /* End of program */
