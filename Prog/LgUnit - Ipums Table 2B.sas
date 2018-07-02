@@ -30,12 +30,12 @@ proc sort data = hhwts; by serial; run;
 
 %let cvars = allhh largeunit isschoolage isadult iskid
          issenior isdis raceW raceB raceH raceAPI raceO
-		 hudincome30 hudincome50 hudincome80 
+		 dcincome30 dcincome50 dcincome80 
 		 before1gen before2gen after1gen
 		 movedless1 moved2to10 moved10plus
 		 ;
 
-%let mvars = hher_age kid_age isadult iskid;
+%let mvars = hher_age hh_inc kid_age isadult iskid;
 
 data pretables;
 	set ipums.acs_2012_16_dc;
@@ -48,6 +48,9 @@ data pretables;
 
 	/*householder age */
 	if pernum = 1 then hher_age = age;
+
+	/*household income*/
+	if pernum = 1 then hh_inc = hhincome;
 
     /*large unit*/
 	if numprec >= 4 then largeunit = 1;
@@ -251,7 +254,7 @@ run;
 
 proc summary data = pretables_collapse;
 	class largeunit;
-	var allhh raceW raceB raceH raceAPI raceO hudincome30 hudincome50 hudincome80 multigen grouphouse issenior isdis;
+	var allhh raceW raceB raceH raceAPI raceO dcincome30 dcincome50 dcincome80 multigen grouphouse issenior isdis;
 	weight hhwt;
 	output out = table2b_pre sum=;
 run;
@@ -265,14 +268,18 @@ data table2b_pcts;
 	pct_raceAPI = raceAPI / allhh;
 	pct_raceO = raceO / allhh;
 
-	pct_hudincome30 = hudincome30 / allhh;
-	pct_hudincome50 = hudincome50 / allhh;
-	pct_hudincome80 = hudincome80 / allhh;
+	pct_dcincome30 = dcincome30 / allhh;
+	pct_dcincome50 = dcincome50 / allhh;
+	pct_dcincome80 = dcincome80 / allhh;
 
 	pct_issenior = issenior / allhh;
 	pct_isdis = isdis / allhh;
 	pct_multigen = multigen / allhh;
 	pct_grouphouse = grouphouse / allhh;
+
+	pct_movedless1 = movedless1 / allhh;
+	pct_moved2to10 = moved2to10 / allhh;
+	pct_moved10plus = moved10plus / allhh;
 
 run;
 
