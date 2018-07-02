@@ -19,6 +19,9 @@
 %DCData_lib( IPUMS )
 
 
+%let indata = ipums_2000_dc;
+
+
 data hhwts;
 	set ipums.acs_2012_16_dc;
 	if pernum = 1;
@@ -38,7 +41,7 @@ proc sort data = hhwts; by serial; run;
 %let mvars = hher_age hh_inc kid_age isadult iskid;
 
 data pretables;
-	set ipums.acs_2012_16_dc;
+	set ipums.&indata.;
 
 	 /*only households*/
 	if gq in (1,2);
@@ -254,7 +257,8 @@ run;
 
 proc summary data = pretables_collapse;
 	class largeunit;
-	var allhh raceW raceB raceH raceAPI raceO dcincome30 dcincome50 dcincome80 multigen grouphouse issenior isdis;
+	var allhh raceW raceB raceH raceAPI raceO dcincome30 dcincome50 dcincome80 multigen grouphouse issenior isdis
+		movedless1 moved2to10 moved10plus;
 	weight hhwt;
 	output out = table2b_pre sum=;
 run;
