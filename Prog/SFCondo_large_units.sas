@@ -177,7 +177,7 @@ run;
  *create variables needed for analysis;
 
  data Sales_who_owns_SF_Condo1;
-  set Sales_who_owns_SF_Condo (where=(cama in ("ResPt" "CondoP"))); *dropping observations that appear in COMM PT cama file (no bedroom info). 
+  set Sales_who_owns_SF_Condo (where=(cama in ("ResPt" "CondoP"))); *dropping observations that appear in COMM PT cama file (no bedroom info). ;
 
   BldgAgeGT2000=.;
   if AYB >= 2000 then BldgAgeGT2000=1;
