@@ -18,20 +18,28 @@ Homeownership Affordability in Urban America: Past and Future;
 
 
 ** Define libraries **;
-%DCData_lib( realprop );
+%DCData_lib( DMPED );
 %DCData_lib( equity );
 
 
 data create_flags;
-  set realpr_r.sales_res_clean (where=(ui_proptype in ('10' '11') and 2010 <= year(saledate) <= 2014))
+  set DMPED.Sales_who_owns_SF_Condo (where=(ui_proptype in ('10' '11') and 2000 <= year(saledate) <= 2017))
 /*add code for saledate [between 1/1/10 and 12/31/14]*/;
   
   /*pull in effective interest rates - for example: 
   http://www.fhfa.gov/DataTools/Downloads/Documents/Historical-Summary-Tables/Table15_2015_by_State_and_Year.xls*/
   
-	sale_yr = year(saledate);
-  
-	eff_int_rate_2010= 4.93;
+    eff_int_rate_2000= 7.90;
+	eff_int_rate_2001= 7.07;
+	eff_int_rate_2002= 6.62;
+	eff_int_rate_2003= 5.73;
+	eff_int_rate_2004= 5.53;
+	eff_int_rate_2005= 5.67;
+	eff_int_rate_2006= 6.53;
+	eff_int_rate_2007= 6.54;
+	eff_int_rate_2008= 6.14;
+	eff_int_rate_2009= 5.02;
+    eff_int_rate_2010= 4.93;
 	eff_int_rate_2011= 4.62;
 	eff_int_rate_2012= 3.72;
 	eff_int_rate_2013= 3.95;
@@ -47,104 +55,42 @@ data create_flags;
 
 	loan_multiplier_&year. =  month_int_rate_&year. *	( ( 1 + month_int_rate_&year. )**360	) / ( ( ( 1+ month_int_rate_&year. )**360 )-1 );
 
+
+	*calculate monthly Principal and Interest for First time Homebuyer (10% down);
 	if sale_yr=&year. then PI_First&year.=saleprice*.9*loan_multiplier_&year.;
 
 	%dollar_convert(PI_first&year.,PI_first&year.r,&year.,2017);
 
+   *calculate monthly PITI (Principal, Interest, Taxes and Insurance) for First Time Homebuyer (34% of PI = TI);
 	if sale_yr=&year. then PITI_First=PI_First&year.r*1.34;
+
+  *calculate monthly Principal and Interest for Repeat Homebuyer (20% down);
+    if sale_yr=&year. then PI_Repeat&year.=saleprice*.8*loan_multiplier_&year.;
 
 	%dollar_convert(PI_Repeat&year.,PI_Repeat&year.r,&year.,2017);
 
+*calculate monthly PITI (Principal, Interest, Taxes and Insurance) for Repeat Homebuyer (25% of PI = TI);
 	if sale_yr=&year. then PITI_Repeat=PI_Repeat&year.r*1.25;
-
 
 	%end;
 
 	%mend yearloop;
 	%yearloop
 
-		month_int_rate_2010 = (eff_int_rate_2010/12/100);
-		month_int_rate_2011 = (eff_int_rate_2011/12/100); 
-		month_int_rate_2012 = (eff_int_rate_2012/12/100); 
-		month_int_rate_2013 = (eff_int_rate_2013/12/100); 
-		month_int_rate_2014 = (eff_int_rate_2014/12/100); 
-		month_int_rate_2015 = (eff_int_rate_2015/12/100); 
-		month_int_rate_2016 = (eff_int_rate_2016/12/100); 
-		
-	loan_multiplier_2010 =  month_int_rate_2010 *	( ( 1 + month_int_rate_2010 )**360	) / ( ( ( 1+ month_int_rate_2010 )**360 )-1 );
-  	loan_multiplier_2011 =  month_int_rate_2011 *	( ( 1 + month_int_rate_2011 )**360	) / ( ( ( 1+ month_int_rate_2011 )**360 )-1 );
-  	loan_multiplier_2012 =  month_int_rate_2012 *	( ( 1 + month_int_rate_2012 )**360	) / ( ( ( 1+ month_int_rate_2012 )**360 )-1 );
-  	loan_multiplier_2013 =  month_int_rate_2013 *	( ( 1 + month_int_rate_2013 )**360	) / ( ( ( 1+ month_int_rate_2013 )**360 )-1 );
-  	loan_multiplier_2014 =  month_int_rate_2014 *	( ( 1 + month_int_rate_2014 )**360	) / ( ( ( 1+ month_int_rate_2014 )**360 )-1 );
-	loan_multiplier_2015 =  month_int_rate_2015 *	( ( 1 + month_int_rate_2015 )**360	) / ( ( ( 1+ month_int_rate_2015 )**360 )-1 );
-	loan_multiplier_2016 =  month_int_rate_2016 *	( ( 1 + month_int_rate_2016 )**360	) / ( ( ( 1+ month_int_rate_2016 )**360 )-1 );
-
-  *calculate monthly Principal and Interest for First time Homebuyer (10% down);
-    if sale_yr=2010 then PI_First2010=saleprice*.9*loan_multiplier_2010;
-	if sale_yr=2011 then PI_First2011=saleprice*.9*loan_multiplier_2011;
-	if sale_yr=2012 then PI_First2012=saleprice*.9*loan_multiplier_2012;
-	if sale_yr=2013 then PI_First2013=saleprice*.9*loan_multiplier_2013;
-	if sale_yr=2014 then PI_First2014=saleprice*.9*loan_multiplier_2014;
-	if sale_yr=2015 then PI_First2015=saleprice*.9*loan_multiplier_2015;
-	if sale_yr=2016 then PI_First2016=saleprice*.9*loan_multiplier_2016;
-
-	%dollar_convert(PI_first2010,PI_first2010r,2010,2017);
-	%dollar_convert(PI_first2011,PI_first2011r,2011,2017);
- 	%dollar_convert(PI_first2012,PI_first2012r,2012,2017);
-	%dollar_convert(PI_first2013,PI_first2013r,2013,2017);
-	%dollar_convert(PI_first2014,PI_first2014r,2014,2017);
-	%dollar_convert(PI_first2015,PI_first2015r,2015,2017);
-	%dollar_convert(PI_first2016,PI_first2016r,2016,2017);
-
-  *calculate monthly PITI (Principal, Interest, Taxes and Insurance) for First Time Homebuyer (34% of PI = TI);
-	if sale_yr=2010 then PITI_First=PI_First2010r*1.34;
-	if sale_yr=2011 then PITI_First=PI_First2011r*1.34;
-	if sale_yr=2012 then PITI_First=PI_First2012r*1.34;
-	if sale_yr=2013 then PITI_First=PI_First2013r*1.34;
-	if sale_yr=2014 then PITI_First=PI_First2014r*1.34;
-	if sale_yr=2015 then PITI_First=PI_First2015r*1.34;
-	if sale_yr=2016 then PITI_First=PI_First2016r*1.34;
-
-  *calculate monthly Principal and Interest for Repeat Homebuyer (20% down);
-    if sale_yr=2010 then PI_Repeat2010=saleprice*.8*loan_multiplier_2010;
-	if sale_yr=2011 then PI_Repeat2011=saleprice*.8*loan_multiplier_2011;
-	if sale_yr=2012 then PI_Repeat2012=saleprice*.8*loan_multiplier_2012;
-	if sale_yr=2013 then PI_Repeat2013=saleprice*.8*loan_multiplier_2013;
-	if sale_yr=2014 then PI_Repeat2014=saleprice*.8*loan_multiplier_2014;
-	if sale_yr=2015 then PI_Repeat2014=saleprice*.8*loan_multiplier_2015;
-	if sale_yr=2016 then PI_Repeat2014=saleprice*.8*loan_multiplier_2016;
-
-	%dollar_convert(PI_Repeat2010,PI_Repeat2010r,2010,2017);
-	%dollar_convert(PI_Repeat2011,PI_Repeat2011r,2011,2017);
- 	%dollar_convert(PI_Repeat2012,PI_Repeat2012r,2012,2017);
-	%dollar_convert(PI_Repeat2013,PI_Repeat2013r,2013,2017);
-	%dollar_convert(PI_Repeat2014,PI_Repeat2014r,2014,2017);
-	%dollar_convert(PI_Repeat2015,PI_Repeat2014r,2015,2017);
-	%dollar_convert(PI_Repeat2016,PI_Repeat2014r,2016,2017);
-
-	*calculate monthly PITI (Principal, Interest, Taxes and Insurance) for Repeat Homebuyer (25% of PI = TI);
-	if sale_yr=2010 then PITI_Repeat=PI_Repeat2010r*1.25;
-	if sale_yr=2011 then PITI_Repeat=PI_Repeat2011r*1.25;
-	if sale_yr=2012 then PITI_Repeat=PI_Repeat2012r*1.25;
-	if sale_yr=2013 then PITI_Repeat=PI_Repeat2013r*1.25;
-	if sale_yr=2014 then PITI_Repeat=PI_Repeat2014r*1.25;
-	if sale_yr=2015 then PITI_Repeat=PI_Repeat2015r*1.25;
-	if sale_yr=2016 then PITI_Repeat=PI_Repeat2016r*1.25;
-
 
 	/*Here are numbers for Average Household Income at the city level. 2012-16 ACS 
 Black	NH-White	Hispanic	AIOM	 
-59630	 157618		89997 	 	 76271		
+61923	 165970 	92543 	 	 80028		
 numhshldsb_2012_16 numhshldsw_2012_16 numhshldsh_2012_16 numhshldsaiom_2012_16*/ 
 
-	if PITI_First <= (157618 / 12*.28) then white_first_afford=1; else white_first_afford=0; 
-		if PITI_Repeat <= (157618/ 12 *.28) then white_repeat_afford=1; else white_repeat_afford=0; 
-	if PITI_First <= (59630 / 12 *.28) then black_first_afford=1; else black_first_afford=0; 
-		if PITI_Repeat <= (59630 / 12 *.28) then black_repeat_afford=1; else black_repeat_afford=0; 
-	if PITI_First <= (89997 / 12*.28) then hispanic_first_afford=1; else hispanic_first_afford=0; 
-		if PITI_Repeat <= (89997/ 12*.28 ) then hispanic_repeat_afford=1; else hispanic_repeat_afford=0; 
-	if PITI_First <= (76271 / 12*.28 ) then aiom_first_afford=1; else aiom_first_afford=0; 
-		if PITI_Repeat <= (76271 / 12*.28 ) then aiom_repeat_afford=1; else aiom_repeat_afford=0; 
+	if PITI_First <= (165970 / 12*.28) then white_first_afford=1; else white_first_afford=0; 
+		if PITI_Repeat <= (165970/ 12 *.28) then white_repeat_afford=1; else white_repeat_afford=0; 
+	if PITI_First <= (61923 / 12 *.28) then black_first_afford=1; else black_first_afford=0; 
+		if PITI_Repeat <= (61923 / 12 *.28) then black_repeat_afford=1; else black_repeat_afford=0; 
+	if PITI_First <= (92543 / 12*.28) then hispanic_first_afford=1; else hispanic_first_afford=0; 
+		if PITI_Repeat <= (92543/ 12*.28 ) then hispanic_repeat_afford=1; else hispanic_repeat_afford=0; 
+	if PITI_First <= (80028 / 12*.28 ) then aiom_first_afford=1; else aiom_first_afford=0; 
+		if PITI_Repeat <= (80028 / 12*.28 ) then aiom_repeat_afford=1; else aiom_repeat_afford=0; 
 
 
 	total_sales=1;
@@ -161,8 +107,10 @@ numhshldsb_2012_16 numhshldsw_2012_16 numhshldsh_2012_16 numhshldsaiom_2012_16*/
 			AIOM_repeat_afford = "Property Sale is Affordable for Repeat Owners of Asian, Pacific Islander, American Indian, Alaskan Native Descent, Other, Two or More Races"
 ;
 
-
 run;
+proc contents data=create_flags;
+run;
+
 proc print data= create_flags (obs=25);
 var saleprice PITI_FIRST PITI_repeat white_first_afford black_first_afford hispanic_first_afford AIOM_first_afford;
 run;
@@ -210,7 +158,6 @@ proc summary data=create_flags;
 		run;
 
 
-
 	data equity.sales_afford_all (label="DC Homes Sales Affordabilty for Average Household Income, 2010-14" drop=_type_ _freq_);
 
 	set city_level ward_level cluster_level tract_level; 
@@ -241,10 +188,10 @@ proc summary data=create_flags;
 		PctAffordRepeat_Black="Pct. of SF/Condo Sales 2010-14 Affordable to Repeat Buyer at Avg. Household Inc. Black Alone"
 		PctAffordRepeat_Hispanic="Pct. of SF/Condo Sales 2010-14 Affordable to Repeat Buyer at Avg. Household Inc. Hispanic"
 		PctAffordRepeat_AIOM="Pct. of SF/Condo Sales 2010-14 Affordable to First-time Buyer at Avg. Household Inc. Asian, Native American, Other, Multiple Race"
-	clusterlabel="Neighborhood Cluster Label" 
-clustername="Name of Neighborhood Cluster"
-total_sales="Total Number of Sales of Single Family Homes and Condiminium Units in Geography, 2010-14"
-tractlabel="Census Tract Label"
+	    clusterlabel="Neighborhood Cluster Label" 
+        clustername="Name of Neighborhood Cluster"
+        total_sales="Total Number of Sales of Single Family Homes and Condiminium Units in Geography, 2010-14"
+        tractlabel="Census Tract Label"
 		white_first_afford = "Number of SF/Condo Sales 2010-14 Affordable for FT White Owners"
 			black_first_afford = "Number of SF/Condo Sales 2010-14 Affordable for FT Black Owners"
 			hispanic_first_afford = "Number of SF/Condo Sales 2010-14 Affordable for FT Hispanic Owners"
