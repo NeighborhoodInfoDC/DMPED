@@ -142,7 +142,7 @@ run;
     ;
     
     keep 
-      ssl largeunit saledate saleyear next_saledate  ownerpt_extractdat_first ownerpt_extractdat_last city ward2012 zip geo2010 cluster2017 cluster_tr2000 x_coord y_coord usecode 
+      ssl largeunit saledate saleyear next_saledate usecode ui_proptype ownerpt_extractdat_first ownerpt_extractdat_last city ward2012 zip geo2010 cluster2017 cluster_tr2000 x_coord y_coord usecode 
       report_dt start_dt end_dt adj_start_dt adj_end_dt renter BldgAgeGT2000 AYB hstd_code Owner_occ_sale ownercat senior corporations cdcNFP otherind govtown
 	 ;
     
@@ -156,7 +156,7 @@ run;
   out=&out_ds.,
   outlib=DMPED,
   label=&label.,
-  sortby=ssl,
+  sortby=ssl report_dt,
   /** Metadata parameters **/
   restrictions=None,
   revisions=%str(&revisions),
