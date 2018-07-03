@@ -39,6 +39,30 @@ data create_flags;
 	eff_int_rate_2015= 3.95;
 	eff_int_rate_2016= 3.69;
 
+	%macro yearloop ();
+
+	%do year = 2010 %to 2016 ;
+
+	month_int_rate_&year. = (eff_int_rate_&year./12/100);
+
+	loan_multiplier_&year. =  month_int_rate_&year. *	( ( 1 + month_int_rate_&year. )**360	) / ( ( ( 1+ month_int_rate_&year. )**360 )-1 );
+
+	if sale_yr=&year. then PI_First&year.=saleprice*.9*loan_multiplier_&year.;
+
+	%dollar_convert(PI_first&year.,PI_first&year.r,&year.,2017);
+
+	if sale_yr=&year. then PITI_First=PI_First&year.r*1.34;
+
+	%dollar_convert(PI_Repeat&year.,PI_Repeat&year.r,&year.,2017);
+
+	if sale_yr=&year. then PITI_Repeat=PI_Repeat&year.r*1.25;
+
+
+	%end;
+
+	%mend yearloop;
+	%yearloop
+
 		month_int_rate_2010 = (eff_int_rate_2010/12/100);
 		month_int_rate_2011 = (eff_int_rate_2011/12/100); 
 		month_int_rate_2012 = (eff_int_rate_2012/12/100); 
@@ -110,8 +134,8 @@ data create_flags;
 
 	/*Here are numbers for Average Household Income at the city level. 2012-16 ACS 
 Black	NH-White	Hispanic	AIOM	 
-59630	 157618		89997 	 	 76271		*/
-
+59630	 157618		89997 	 	 76271		
+numhshldsb_2012_16 numhshldsw_2012_16 numhshldsh_2012_16 numhshldsaiom_2012_16*/ 
 
 	if PITI_First <= (157618 / 12*.28) then white_first_afford=1; else white_first_afford=0; 
 		if PITI_Repeat <= (157618/ 12 *.28) then white_repeat_afford=1; else white_repeat_afford=0; 
