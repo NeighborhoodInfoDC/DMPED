@@ -83,148 +83,168 @@ Black	NH-White	Hispanic	AIOM
 61923	 165970 	92543 	 	 80028		
 numhshldsb_2012_16 numhshldsw_2012_16 numhshldsh_2012_16 numhshldsaiom_2012_16*/ 
 
-	if PITI_First <= (165970 / 12*.28) then white_first_afford=1; else white_first_afford=0; 
-		if PITI_Repeat <= (165970/ 12 *.28) then white_repeat_afford=1; else white_repeat_afford=0; 
-	if PITI_First <= (61923 / 12 *.28) then black_first_afford=1; else black_first_afford=0; 
-		if PITI_Repeat <= (61923 / 12 *.28) then black_repeat_afford=1; else black_repeat_afford=0; 
-	if PITI_First <= (92543 / 12*.28) then hispanic_first_afford=1; else hispanic_first_afford=0; 
-		if PITI_Repeat <= (92543/ 12*.28 ) then hispanic_repeat_afford=1; else hispanic_repeat_afford=0; 
-	if PITI_First <= (80028 / 12*.28 ) then aiom_first_afford=1; else aiom_first_afford=0; 
-		if PITI_Repeat <= (80028 / 12*.28 ) then aiom_repeat_afford=1; else aiom_repeat_afford=0; 
+	/*80%AMI and 50% AMI as the new affordability category  
+2000  $82,800
+2001  $85,600
+2002  $91,500
+2003  $84,800
+2004  $85,400
+2005  $89,300
+2006  $90,300
+2007  $94,500
+2008  $99,000
+2009  $102,700
+2010  $103,500
+2011  $106,100
+2012  $107,500
+2013  $107,300
+2014  $107,000
+2015  $109,200
+2016  $108,600
+2017  $110,300
+	*/
 
 
 	total_sales=1;
 
-	label 	PITI_First = "Principal, Interest, Tax and Insurance for FT Homebuyer"
-			PITI_Repeat = "Principal, Interest, Tax and Insurance for Repeat Homebuyer"
-			white_first_afford = "Property Sale is Affordable for FT White Owners"
-			black_first_afford = "Property Sale is Affordable for FT Black Owners"
-			hispanic_first_afford = "Property Sale is Affordable for FT Hispanic Owners"
-			AIOM_first_afford = "Property Sale is Affordable for FT Owners of Asian, Pacific Islander, American Indian, Alaskan Native Descent, Other, Two or More Races"
-			white_repeat_afford = "Property Sale is Affordable for Repeat White Owners"
-			black_repeat_afford = "Property Sale is Affordable for Repeat Black Owners"
-			hispanic_repeat_afford = "Property Sale is Affordable for Repeat Hispanic Owners"
-			AIOM_repeat_afford = "Property Sale is Affordable for Repeat Owners of Asian, Pacific Islander, American Indian, Alaskan Native Descent, Other, Two or More Races"
-;
+/*add code for repeat buyer*/
+	if year(saledate)=2017 then do;
+           if PITI_First <= (110300*0.8 / 12*.28) then 80AMI_first_afford=1; else 80AMI_first_afford=0; 
+           if PITI_First <= (110300*0.5 / 12*.28) then 50AMI_first_afford=1; else 50AMI_first_afford=0; 
+	end;
+	if year(saledate)=2016 then do;
+           if PITI_First <= (108600*0.8 / 12*.28) then 80AMI_first_afford=1; else 80AMI_first_afford=0; 
+		   if PITI_First <= (108600*0.5 / 12*.28) then 50AMI_first_afford=1; else 50AMI_first_afford=0; 
+	end;
+	if year(saledate)=2015 then do;
+           if PITI_First <= (109200*0.8 / 12*.28) then 80AMI_first_afford=1; else 80AMI_first_afford=0; 
+		   if PITI_First <= (109200*0.5 / 12*.28) then 50AMI_first_afford=1; else 50AMI_first_afford=0; 
+	end;
+	if year(saledate)=2014 then do;
+           if PITI_First <= (107000*0.8 / 12*.28) then 80AMI_first_afford=1; else 80AMI_first_afford=0; 
+		   if PITI_First <= (107000*0.5 / 12*.28) then 50AMI_first_afford=1; else 50AMI_first_afford=0;
+	end;
+	if year(saledate)=2013 then do;
+           if PITI_First <= (107300*0.8 / 12*.28) then 80AMI_first_afford=1; else 80AMI_first_afford=0; 
+		   if PITI_First <= (107300*0.5 / 12*.28) then 50AMI_first_afford=1; else 50AMI_first_afford=0; 
+	end;
+	if year(saledate)=2012 then do;
+           if PITI_First <= (107500*0.8 / 12*.28) then 80AMI_first_afford=1; else 80AMI_first_afford=0; 
+		   if PITI_First <= (107500*0.5 / 12*.28) then 50AMI_first_afford=1; else 50AMI_first_afford=0; 
+	end;
+	if year(saledate)=2011 then do;
+           if PITI_First <= (106100*0.8 / 12*.28) then 80AMI_first_afford=1; else 80AMI_first_afford=0; 
+		   if PITI_First <= (106100*0.5 / 12*.28) then 50AMI_first_afford=1; else 50AMI_first_afford=0; 
+	end;
+	if year(saledate)=2010 then do;
+           if PITI_First <= (103500*0.8 / 12*.28) then 80AMI_first_afford=1; else 80AMI_first_afford=0; 
+		   if PITI_First <= (103500*0.5 / 12*.28) then 50AMI_first_afford=1; else 50AMI_first_afford=0;
+	end;
+	if year(saledate)=2009 then do;
+           if PITI_First <= (102700*0.8 / 12*.28) then 80AMI_first_afford=1; else 80AMI_first_afford=0; 
+		   if PITI_First <= (102700*0.5 / 12*.28) then 50AMI_first_afford=1; else 50AMI_first_afford=0;
+	end;
+	if year(saledate)=2008 then do;
+           if PITI_First <= (99000*0.8 / 12*.28) then 80AMI_first_afford=1; else 80AMI_first_afford=0; 
+		   if PITI_First <= (99000*0.5 / 12*.28) then 50AMI_first_afford=1; else 50AMI_first_afford=0; 
+	end;
+	if year(saledate)=2007 then do;
+           if PITI_First <= (94500*0.8 / 12*.28) then 80AMI_first_afford=1; else 80AMI_first_afford=0; 
+		   if PITI_First <= (94500*0.5 / 12*.28) then 50AMI_first_afford=1; else 50AMI_first_afford=0;
+	end;
+	if year(saledate)=2006 then do;
+           if PITI_First <= (90300*0.8 / 12*.28) then 80AMI_first_afford=1; else 80AMI_first_afford=0; 
+		   if PITI_First <= (90300*0.5 / 12*.28) then 50AMI_first_afford=1; else 50AMI_first_afford=0; 
+	end;
+	if year(saledate)=2005 then do;
+           if PITI_First <= (89300*0.8 / 12*.28) then 80AMI_first_afford=1; else 80AMI_first_afford=0; 
+		   if PITI_First <= (89300*0.5 / 12*.28) then 50AMI_first_afford=1; else 50AMI_first_afford=0; 
+	end;
+	if year(saledate)=2004 then do;
+           if PITI_First <= (85400*0.8 / 12*.28) then 80AMI_first_afford=1; else 80AMI_first_afford=0; 
+		   if PITI_First <= (85400*0.5 / 12*.28) then 50AMI_first_afford=1; else 50AMI_first_afford=0; 
+	end;
+	if year(saledate)=2003 then do;
+           if PITI_First <= (84800*0.8 / 12*.28) then 80AMI_first_afford=1; else 80AMI_first_afford=0; 
+		   if PITI_First <= (84800*0.5 / 12*.28) then 50AMI_first_afford=1; else 50AMI_first_afford=0; 
+	end;
+	if year(saledate)=2002 then do;
+           if PITI_First <= (91500*0.8 / 12*.28) then 80AMI_first_afford=1; else 80AMI_first_afford=0; 
+		   if PITI_First <= (91500*0.5 / 12*.28) then 50AMI_first_afford=1; else 50AMI_first_afford=0; 
+	end;
+	if year(saledate)=2001 then do;
+           if PITI_First <= (85600*0.8 / 12*.28) then 80AMI_first_afford=1; else 80AMI_first_afford=0;
+		   if PITI_First <= (85600*0.5 / 12*.28) then 50AMI_first_afford=1; else 50AMI_first_afford=0;
+	end;
+	if year(saledate)=2000 then do;
+           if PITI_First <= (82800*0.8 / 12*.28) then 80AMI_first_afford=1; else 80AMI_first_afford=0;
+		   if PITI_First <= (82800*0.5 / 12*.28) then 50AMI_first_afford=1; else 50AMI_first_afford=0;
+	end;
 
 run;
 proc contents data=create_flags;
 run;
 
 proc print data= create_flags (obs=25);
-var saleprice PITI_FIRST PITI_repeat white_first_afford black_first_afford hispanic_first_afford AIOM_first_afford;
+var saleprice PITI_FIRST PITI_repeat 80AMI_first_afford 50AMI_first_afford;
 run;
 proc freq data=create_flags; 
-tables white_first_afford black_first_afford hispanic_first_afford AIOM_first_afford; 
+tables 80AMI_first_afford 50AMI_first_afford; 
 run;
-*proc summary at city, ward, tract, and cluster levels - so you could get % of sales in Ward 7 affordable to 
+*proc summary at city, ward levels - so you could get % of sales in Ward 7 affordable to 
 median white family vs. median black family.;
 
-	
-/*Proc Summary: Affordability for Owners by Race*/
+/*Proc Summary: Affordability for Owners by 80AMI and 50AMI*/
 
 proc summary data=create_flags;
 	class city;
-	var total_sales white_first_afford white_repeat_afford black_first_afford black_repeat_afford
-		hispanic_first_afford hispanic_repeat_afford AIOM_first_afford AIOM_repeat_afford;
+	var total_sales 80AMI_first_afford 50AMI_first_afford;
 	output	out=City_level (where=(_type_^=0))	sum= ;
-	
 	format city $CITY16.;
 		run;
 
 proc summary data=create_flags;
 	class ward2012;
-	var total_sales white_first_afford white_repeat_afford black_first_afford black_repeat_afford
-		hispanic_first_afford hispanic_repeat_afford AIOM_first_afford AIOM_repeat_afford;
+	var total_sales 80AMI_first_afford 50AMI_first_afford;
 	output 	out=Ward_Level (where=(_type_^=0)) 
 	sum= ; 
 	format ward2012 $wd12.;
 ;
 		run;
 
-proc summary data=create_flags;
-	class geo2010;
-	var total_sales white_first_afford white_repeat_afford black_first_afford black_repeat_afford
-		hispanic_first_afford hispanic_repeat_afford AIOM_first_afford AIOM_repeat_afford;
-	output out=Tract_Level (where=(_type_^=0)) sum= ;
-		run;
+	data DMPED.sales_afford_SF_Condo (label="DC Single Family Home Sales Affordabilty for 80%, 50% Area Median Income, 2000-17" drop=_type_ _freq_);
 
-proc summary data=create_flags;
-	class cluster_tr2000;
-	var total_sales white_first_afford white_repeat_afford black_first_afford black_repeat_afford
-		hispanic_first_afford hispanic_repeat_afford AIOM_first_afford AIOM_repeat_afford;
-	output 		out=Cluster_Level (where=(_type_^=0)) 	sum= ;
-	
-		run;
+	set city_level ward_level; 
 
+	PctAffordFirst_80AMI=80AMI_first_afford/total_sales*100; 
+	PctAffordFirst_50AMI=50AMI_first_afford/total_sales*100; 
 
-	data equity.sales_afford_all (label="DC Homes Sales Affordabilty for Average Household Income, 2010-14" drop=_type_ _freq_);
-
-	set city_level ward_level cluster_level tract_level; 
-
-	tractlabel=geo2010; 
-	clustername=cluster_tr2000; 
-	clusterlabel=cluster_tr2000;
-
-	format tractlabel $GEO10A11. Clusterlabel $CLUS00A16. clustername $clus00s. geo2010 cluster_tr2000; 
-
-	PctAffordFirst_White=white_first_afford/total_sales*100; 
-	PctAffordFirst_Black=Black_first_afford/total_sales*100; 
-	PctAffordFirst_Hispanic=Hispanic_first_afford/total_sales*100;
-	PctAffordFirst_AIOM= AIOM_first_afford/total_sales*100;
-
-
-	PctAffordRepeat_White=white_Repeat_afford/total_sales*100; 
-	PctAffordRepeat_Black=Black_Repeat_afford/total_sales*100; 
-	PctAffordRepeat_Hispanic=Hispanic_Repeat_afford/total_sales*100;
-	PctAffordRepeat_AIOM= AIOM_repeat_afford/total_sales*100;
-
-	label PctAffordFirst_White="Pct. of SF/Condo Sales 2010-14 Affordable to First-time Buyer at Avg. Household Inc. NH White"
-		  PctAffordFirst_Black="Pct. of SF/Condo Sales 2010-14 Affordable to First-time Buyer at Avg. Household Inc. Black Alone"
-		  PctAffordFirst_Hispanic="Pct. of SF/Condo Sales 2010-14 Affordable to First-time Buyer at Avg. Household Inc. Hispanic"
-		 PctAffordFirst_AIOM="Pct. of SF/Condo Sales 2010-14 Affordable to First-time Buyer at Avg. Household Inc. Asian, Native American, Other, Multiple Race"
-	
-		PctAffordRepeat_White="Pct. of SF/Condo Sales 2010-14 Affordable to Repeat Buyer at Avg. Household Inc. NH White"
-		PctAffordRepeat_Black="Pct. of SF/Condo Sales 2010-14 Affordable to Repeat Buyer at Avg. Household Inc. Black Alone"
-		PctAffordRepeat_Hispanic="Pct. of SF/Condo Sales 2010-14 Affordable to Repeat Buyer at Avg. Household Inc. Hispanic"
-		PctAffordRepeat_AIOM="Pct. of SF/Condo Sales 2010-14 Affordable to First-time Buyer at Avg. Household Inc. Asian, Native American, Other, Multiple Race"
-	    clusterlabel="Neighborhood Cluster Label" 
-        clustername="Name of Neighborhood Cluster"
-        total_sales="Total Number of Sales of Single Family Homes and Condiminium Units in Geography, 2010-14"
-        tractlabel="Census Tract Label"
-		white_first_afford = "Number of SF/Condo Sales 2010-14 Affordable for FT White Owners"
-			black_first_afford = "Number of SF/Condo Sales 2010-14 Affordable for FT Black Owners"
-			hispanic_first_afford = "Number of SF/Condo Sales 2010-14 Affordable for FT Hispanic Owners"
-			AIOM_first_afford = "Number of SF/Condo Sales 2010-14 Affordable for FT Owners of Asian, Pacific Islander, American Indian, Alaskan Native Descent, Other, Two or More Races"
-			white_repeat_afford = "Number of SF/Condo Sales 2010-14  Affordable for Repeat White Owners"
-			black_repeat_afford = "Number of SF/Condo Sales 2010-14 Affordable for Repeat Black Owners"
-			hispanic_repeat_afford = "Number of SF/Condo Sales 2010-14 Affordable for Repeat Hispanic Owners"
-			AIOM_repeat_afford = "AffordableProperty Sale is Affordable Asian, Pacific Islander, American Indian, Alaskan Native Descent, Other, Two or More Races"
+	/*add code for repeat buyer affordability*
+	PctAffordRepeat_80AMI=80AMI_repeat_afford/total_sales*100; 
+*/
+	label PctAffordFirst_80AMI="Pct. of SF/Condo Sales 2000-17 Affordable to 80% AMI and 50% AMI"
 			;
-
-
-	
 	run;
 	
 	** Register metadata **;
 
 %Dc_update_meta_file(
-      ds_lib=Equity,
-      ds_name=sales_afford_all,
-      creator_process=Sales_Affordability.sas,
+      ds_lib=DMPED,
+      ds_name=sales_afford_SF_Condo,
+      creator_process=Affordability_sf_condo.sas,
       restrictions=None,
       revisions=New file.
       )
 
 data wardonly;
-	set equity.sales_afford_all (where=(ward2012~=" ") keep=ward2012 pct:); 
+	set DMPED.sales_afford_SF_Condo (where=(ward2012~=" ") keep=ward2012 pct:); 
 	run; 
 	proc transpose data=wardonly out=ward_long prefix=Ward_;
 	id ward2012;
 	run;
 
 data cityonly;
-	set equity.sales_afford_all (where=(city~=" ") keep=city pct:); 
+	set DMPED.sales_afford_SF_Condo (where=(city~=" ") keep=city pct:); 
 	city=0;
 	rename city=ward2012;
 	run; 
@@ -243,109 +263,6 @@ by _name_;
 	run;
 
 proc export data=output_table 
-	outfile="D:\DCDATA\Libraries\Equity\Prog\profile_tabs_aff.csv"
+	outfile="D:\DCDATA\Libraries\DMPED\Prog\sf_condo_tabs_aff.csv"
 	dbms=csv replace;
 	run;
-
-
-/***
-	create out put file for comms
-Geography	Race	Var1	Var2	Var3
-City		All		Value	Value	Value
-City		White	Value	Value	Value
-City		Black	Value	Value	Value
-City		Hispanic	Value	Value	Value
-Ward 1		All	Value	Value	Value
-Ward 1		White	Value	Value	Value
-Ward 1		Black	Value	Value	Value
-Ward 1		Hispanic	Value	Value	Value
-*/
-	
-
-	data white;
-		set equity.sales_afford_all (drop= PctAffordFirst_Black PctAffordFirst_Hispanic PctAffordFirst_AIOM
-											PctAffordRepeat_Black PctAffordRepeat_Hispanic PctAffordRepeat_AIOM
-											black_first_afford Hispanic_first_afford AIOM_first_afford 
-											black_Repeat_afford Hispanic_Repeat_afford AIOM_Repeat_afford );
-
-	length race $10. ID $11.;
-	race="White"; 
-
-	if city="1" then ID="0";
-	if Ward2012~=" " then ID=Ward2012;
-	if cluster_tr2000~=" " then ID=Cluster_Tr2000;
-	if geo2010~=" " then ID=geo2010; 
-
-	Rename PctAffordFirst_White=PctAffordFirst
-		   PctAffordRepeat_White=PctAffordRepeat
-		   white_first_afford=first_afford
-		   white_Repeat_afford=repeat_afford;
-	run;	
-
-		data black;
-		set equity.sales_afford_all (drop= PctAffordFirst_white PctAffordFirst_Hispanic PctAffordFirst_AIOM
-											PctAffordRepeat_white PctAffordRepeat_Hispanic PctAffordRepeat_AIOM
-											white_first_afford Hispanic_first_afford AIOM_first_afford 
-											white_Repeat_afford Hispanic_Repeat_afford AIOM_Repeat_afford );
-
-	length race $10. ID $11.;
-	race="Black"; 
-
-	if city="1" then ID="0";
-	if Ward2012~=" " then ID=Ward2012;
-	if cluster_tr2000~=" " then ID=Cluster_Tr2000;
-	if geo2010~=" " then ID=geo2010; 
-
-	Rename PctAffordFirst_black=PctAffordFirst
-		   PctAffordRepeat_black=PctAffordRepeat
-		   black_first_afford=first_afford
-		   black_Repeat_afford=repeat_afford;
-	run;	
-
-	
-		data hispanic;
-		set equity.sales_afford_all (drop= PctAffordFirst_white PctAffordFirst_black PctAffordFirst_AIOM
-											PctAffordRepeat_white PctAffordRepeat_black PctAffordRepeat_AIOM
-											white_first_afford black_first_afford AIOM_first_afford 
-											white_Repeat_afford black_Repeat_afford AIOM_Repeat_afford );
-
-	length race $10. ID $11.;
-	race="Hispanic"; 
-
-	if city="1" then ID="0";
-	if Ward2012~=" " then ID=Ward2012;
-	if cluster_tr2000~=" " then ID=Cluster_Tr2000;
-	if geo2010~=" " then ID=geo2010; 
-
-	Rename PctAffordFirst_Hispanic=PctAffordFirst
-		   PctAffordRepeat_Hispanic=PctAffordRepeat
-		   Hispanic_first_afford=first_afford
-		   Hispanic_Repeat_afford=repeat_afford;
-	run;	
-
-	data all_race (label="DC Sales Affordability for COMM" drop=PctAffordFirst PctAffordRepeat);
-	set white black hispanic;
-	
-	 PctAffordFirst_dec= PctAffordFirst/100; 
-	PctAffordRepeat_dec=PctAffordRepeat/100; 
-	label 
-	 PctAffordFirst_dec="Pct. of SF/Condo Sales 2010-14 Affordable to First-time Buyer at Avg. Household Inc."
-		 PctAffordRepeat_dec="Pct. of SF/Condo Sales 2010-14 Affordable to Repeat Buyer at Avg. Household Inc."
-		
-		first_afford = "Number of SF/Condo Sales 2010-14 Affordable for First Time Buyer"
-		repeat_afford = "Number of SF/Condo Sales 2010-14  Affordable for Repeat Owners"
-		race="Race of Householder";
-
-	
-	
-	run;
-
-	proc sort data=all_race;
-	by  geo2010 cluster_tr2000 ward2012 city  ;
-	run;
-proc export data=all_race 
-	outfile="D:\DCDATA\Libraries\Equity\Prog\Sales_affordability_allgeo.csv"
-	dbms=csv replace;
-	run;
-	proc contents data=all_race;
-	run; 
