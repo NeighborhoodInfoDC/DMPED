@@ -49,7 +49,7 @@ data create_flags;
 
 	%macro yearloop ();
 
-	%do year = 2010 %to 2016 ;
+	%do year = 2000 %to 2016 ;
 
 	month_int_rate_&year. = (eff_int_rate_&year./12/100);
 
@@ -57,20 +57,20 @@ data create_flags;
 
 
 	*calculate monthly Principal and Interest for First time Homebuyer (10% down);
-	if sale_yr=&year. then PI_First&year.=saleprice*.9*loan_multiplier_&year.;
+	if saleyear=&year. then PI_First&year.=saleprice*.9*loan_multiplier_&year.;
 
 	%dollar_convert(PI_first&year.,PI_first&year.r,&year.,2017);
 
    *calculate monthly PITI (Principal, Interest, Taxes and Insurance) for First Time Homebuyer (34% of PI = TI);
-	if sale_yr=&year. then PITI_First=PI_First&year.r*1.34;
+	if saleyear=&year. then PITI_First=PI_First&year.r*1.34;
 
   *calculate monthly Principal and Interest for Repeat Homebuyer (20% down);
-    if sale_yr=&year. then PI_Repeat&year.=saleprice*.8*loan_multiplier_&year.;
+    if saleyear=&year. then PI_Repeat&year.=saleprice*.8*loan_multiplier_&year.;
 
 	%dollar_convert(PI_Repeat&year.,PI_Repeat&year.r,&year.,2017);
 
 *calculate monthly PITI (Principal, Interest, Taxes and Insurance) for Repeat Homebuyer (25% of PI = TI);
-	if sale_yr=&year. then PITI_Repeat=PI_Repeat&year.r*1.25;
+	if saleyear=&year. then PITI_Repeat=PI_Repeat&year.r*1.25;
 
 	%end;
 
@@ -108,78 +108,88 @@ numhshldsb_2012_16 numhshldsw_2012_16 numhshldsh_2012_16 numhshldsaiom_2012_16*/
 	total_sales=1;
 
 /*add code for repeat buyer*/
+
+if PITI_First in (0,.) then do;
+	AMI80_first_afford = .;
+	AMI50_first_afford = .;
+end;
+
+else do;
+
 	if year(saledate)=2017 then do;
-           if PITI_First <= (110300*0.8 / 12*.28) then 80AMI_first_afford=1; else 80AMI_first_afford=0; 
-           if PITI_First <= (110300*0.5 / 12*.28) then 50AMI_first_afford=1; else 50AMI_first_afford=0; 
+           if PITI_First <= (110300*0.8 / 12*.28) then AMI80_first_afford=1; else AMI80_first_afford=0; 
+           if PITI_First <= (110300*0.5 / 12*.28) then AMI50_first_afford=1; else AMI50_first_afford=0; 
 	end;
 	if year(saledate)=2016 then do;
-           if PITI_First <= (108600*0.8 / 12*.28) then 80AMI_first_afford=1; else 80AMI_first_afford=0; 
-		   if PITI_First <= (108600*0.5 / 12*.28) then 50AMI_first_afford=1; else 50AMI_first_afford=0; 
+           if PITI_First <= (108600*0.8 / 12*.28) then AMI80_first_afford=1; else AMI80_first_afford=0; 
+		   if PITI_First <= (108600*0.5 / 12*.28) then AMI50_first_afford=1; else AMI50_first_afford=0; 
 	end;
 	if year(saledate)=2015 then do;
-           if PITI_First <= (109200*0.8 / 12*.28) then 80AMI_first_afford=1; else 80AMI_first_afford=0; 
-		   if PITI_First <= (109200*0.5 / 12*.28) then 50AMI_first_afford=1; else 50AMI_first_afford=0; 
+           if PITI_First <= (109200*0.8 / 12*.28) then AMI80_first_afford=1; else AMI80_first_afford=0; 
+		   if PITI_First <= (109200*0.5 / 12*.28) then AMI50_first_afford=1; else AMI50_first_afford=0; 
 	end;
 	if year(saledate)=2014 then do;
-           if PITI_First <= (107000*0.8 / 12*.28) then 80AMI_first_afford=1; else 80AMI_first_afford=0; 
-		   if PITI_First <= (107000*0.5 / 12*.28) then 50AMI_first_afford=1; else 50AMI_first_afford=0;
+           if PITI_First <= (107000*0.8 / 12*.28) then AMI80_first_afford=1; else AMI80_first_afford=0; 
+		   if PITI_First <= (107000*0.5 / 12*.28) then AMI50_first_afford=1; else AMI50_first_afford=0;
 	end;
 	if year(saledate)=2013 then do;
-           if PITI_First <= (107300*0.8 / 12*.28) then 80AMI_first_afford=1; else 80AMI_first_afford=0; 
-		   if PITI_First <= (107300*0.5 / 12*.28) then 50AMI_first_afford=1; else 50AMI_first_afford=0; 
+           if PITI_First <= (107300*0.8 / 12*.28) then AMI80_first_afford=1; else AMI80_first_afford=0; 
+		   if PITI_First <= (107300*0.5 / 12*.28) then AMI50_first_afford=1; else AMI50_first_afford=0; 
 	end;
 	if year(saledate)=2012 then do;
-           if PITI_First <= (107500*0.8 / 12*.28) then 80AMI_first_afford=1; else 80AMI_first_afford=0; 
-		   if PITI_First <= (107500*0.5 / 12*.28) then 50AMI_first_afford=1; else 50AMI_first_afford=0; 
+           if PITI_First <= (107500*0.8 / 12*.28) then AMI80_first_afford=1; else AMI80_first_afford=0; 
+		   if PITI_First <= (107500*0.5 / 12*.28) then AMI50_first_afford=1; else AMI50_first_afford=0; 
 	end;
 	if year(saledate)=2011 then do;
-           if PITI_First <= (106100*0.8 / 12*.28) then 80AMI_first_afford=1; else 80AMI_first_afford=0; 
-		   if PITI_First <= (106100*0.5 / 12*.28) then 50AMI_first_afford=1; else 50AMI_first_afford=0; 
+           if PITI_First <= (106100*0.8 / 12*.28) then AMI80_first_afford=1; else AMI80_first_afford=0; 
+		   if PITI_First <= (106100*0.5 / 12*.28) then AMI50_first_afford=1; else AMI50_first_afford=0; 
 	end;
 	if year(saledate)=2010 then do;
-           if PITI_First <= (103500*0.8 / 12*.28) then 80AMI_first_afford=1; else 80AMI_first_afford=0; 
-		   if PITI_First <= (103500*0.5 / 12*.28) then 50AMI_first_afford=1; else 50AMI_first_afford=0;
+           if PITI_First <= (103500*0.8 / 12*.28) then AMI80_first_afford=1; else AMI80_first_afford=0; 
+		   if PITI_First <= (103500*0.5 / 12*.28) then AMI50_first_afford=1; else AMI50_first_afford=0;
 	end;
 	if year(saledate)=2009 then do;
-           if PITI_First <= (102700*0.8 / 12*.28) then 80AMI_first_afford=1; else 80AMI_first_afford=0; 
-		   if PITI_First <= (102700*0.5 / 12*.28) then 50AMI_first_afford=1; else 50AMI_first_afford=0;
+           if PITI_First <= (102700*0.8 / 12*.28) then AMI80_first_afford=1; else AMI80_first_afford=0; 
+		   if PITI_First <= (102700*0.5 / 12*.28) then AMI50_first_afford=1; else AMI50_first_afford=0;
 	end;
 	if year(saledate)=2008 then do;
-           if PITI_First <= (99000*0.8 / 12*.28) then 80AMI_first_afford=1; else 80AMI_first_afford=0; 
-		   if PITI_First <= (99000*0.5 / 12*.28) then 50AMI_first_afford=1; else 50AMI_first_afford=0; 
+           if PITI_First <= (99000*0.8 / 12*.28) then AMI80_first_afford=1; else AMI80_first_afford=0; 
+		   if PITI_First <= (99000*0.5 / 12*.28) then AMI50_first_afford=1; else AMI50_first_afford=0; 
 	end;
 	if year(saledate)=2007 then do;
-           if PITI_First <= (94500*0.8 / 12*.28) then 80AMI_first_afford=1; else 80AMI_first_afford=0; 
-		   if PITI_First <= (94500*0.5 / 12*.28) then 50AMI_first_afford=1; else 50AMI_first_afford=0;
+           if PITI_First <= (94500*0.8 / 12*.28) then AMI80_first_afford=1; else AMI80_first_afford=0; 
+		   if PITI_First <= (94500*0.5 / 12*.28) then AMI50_first_afford=1; else AMI50_first_afford=0;
 	end;
 	if year(saledate)=2006 then do;
-           if PITI_First <= (90300*0.8 / 12*.28) then 80AMI_first_afford=1; else 80AMI_first_afford=0; 
-		   if PITI_First <= (90300*0.5 / 12*.28) then 50AMI_first_afford=1; else 50AMI_first_afford=0; 
+           if PITI_First <= (90300*0.8 / 12*.28) then AMI80_first_afford=1; else AMI80_first_afford=0; 
+		   if PITI_First <= (90300*0.5 / 12*.28) then AMI50_first_afford=1; else AMI50_first_afford=0; 
 	end;
 	if year(saledate)=2005 then do;
-           if PITI_First <= (89300*0.8 / 12*.28) then 80AMI_first_afford=1; else 80AMI_first_afford=0; 
-		   if PITI_First <= (89300*0.5 / 12*.28) then 50AMI_first_afford=1; else 50AMI_first_afford=0; 
+           if PITI_First <= (89300*0.8 / 12*.28) then AMI80_first_afford=1; else AMI80_first_afford=0; 
+		   if PITI_First <= (89300*0.5 / 12*.28) then AMI50_first_afford=1; else AMI50_first_afford=0; 
 	end;
 	if year(saledate)=2004 then do;
-           if PITI_First <= (85400*0.8 / 12*.28) then 80AMI_first_afford=1; else 80AMI_first_afford=0; 
-		   if PITI_First <= (85400*0.5 / 12*.28) then 50AMI_first_afford=1; else 50AMI_first_afford=0; 
+           if PITI_First <= (85400*0.8 / 12*.28) then AMI80_first_afford=1; else AMI80_first_afford=0; 
+		   if PITI_First <= (85400*0.5 / 12*.28) then AMI50_first_afford=1; else AMI50_first_afford=0; 
 	end;
 	if year(saledate)=2003 then do;
-           if PITI_First <= (84800*0.8 / 12*.28) then 80AMI_first_afford=1; else 80AMI_first_afford=0; 
-		   if PITI_First <= (84800*0.5 / 12*.28) then 50AMI_first_afford=1; else 50AMI_first_afford=0; 
+           if PITI_First <= (84800*0.8 / 12*.28) then AMI80_first_afford=1; else AMI80_first_afford=0; 
+		   if PITI_First <= (84800*0.5 / 12*.28) then AMI50_first_afford=1; else AMI50_first_afford=0; 
 	end;
 	if year(saledate)=2002 then do;
-           if PITI_First <= (91500*0.8 / 12*.28) then 80AMI_first_afford=1; else 80AMI_first_afford=0; 
-		   if PITI_First <= (91500*0.5 / 12*.28) then 50AMI_first_afford=1; else 50AMI_first_afford=0; 
+           if PITI_First <= (91500*0.8 / 12*.28) then AMI80_first_afford=1; else AMI80_first_afford=0; 
+		   if PITI_First <= (91500*0.5 / 12*.28) then AMI50_first_afford=1; else AMI50_first_afford=0; 
 	end;
 	if year(saledate)=2001 then do;
-           if PITI_First <= (85600*0.8 / 12*.28) then 80AMI_first_afford=1; else 80AMI_first_afford=0;
-		   if PITI_First <= (85600*0.5 / 12*.28) then 50AMI_first_afford=1; else 50AMI_first_afford=0;
+           if PITI_First <= (85600*0.8 / 12*.28) then AMI80_first_afford=1; else AMI80_first_afford=0;
+		   if PITI_First <= (85600*0.5 / 12*.28) then AMI50_first_afford=1; else AMI50_first_afford=0;
 	end;
 	if year(saledate)=2000 then do;
-           if PITI_First <= (82800*0.8 / 12*.28) then 80AMI_first_afford=1; else 80AMI_first_afford=0;
-		   if PITI_First <= (82800*0.5 / 12*.28) then 50AMI_first_afford=1; else 50AMI_first_afford=0;
+           if PITI_First <= (82800*0.8 / 12*.28) then AMI80_first_afford=1; else AMI80_first_afford=0;
+		   if PITI_First <= (82800*0.5 / 12*.28) then AMI50_first_afford=1; else AMI50_first_afford=0;
 	end;
+
+end;
 
 run;
 proc contents data=create_flags;
