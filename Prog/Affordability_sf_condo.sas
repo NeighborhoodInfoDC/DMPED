@@ -21,7 +21,6 @@ Homeownership Affordability in Urban America: Past and Future;
 %DCData_lib( DMPED );
 %DCData_lib( equity );
 
-
 data create_flags;
   set DMPED.Sales_who_owns_SF_Condo (where=(ui_proptype in ('10' '11') and 2000 <= year(saledate) <= 2017))
 /*add code for saledate [between 1/1/10 and 12/31/14]*/;
@@ -46,10 +45,10 @@ data create_flags;
 	eff_int_rate_2014= 4.22;
 	eff_int_rate_2015= 3.95;
 	eff_int_rate_2016= 3.69;
-
+    eff_int_rate_2017= 3.69;
 	%macro yearloop ();
 
-	%do year = 2000 %to 2016 ;
+	%do year = 2000 %to 2017 ;
 
 	month_int_rate_&year. = (eff_int_rate_&year./12/100);
 
@@ -243,14 +242,14 @@ median white family vs. median black family.;
 /*Proc Summary: Affordability for Owners by 80AMI and 50AMI*/
 
 proc summary data=create_flags;
-	class city;
+	class city saleyear;
 	var total_sales AMI80_first_afford AMI50_first_afford AMI80_repeat_afford AMI50_repeat_afford;
 	output	out=City_level (where=(_type_^=0))	sum= ;
 	format city $CITY16.;
 		run;
 
 proc summary data=create_flags;
-	class ward2012;
+	class ward2012 saleyear;
 	var total_sales AMI80_first_afford AMI50_first_afford AMI80_repeat_afford AMI50_repeat_afford;
 	output 	out=Ward_Level (where=(_type_^=0)) 
 	sum= ; 
