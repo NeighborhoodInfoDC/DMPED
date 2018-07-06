@@ -59,7 +59,6 @@ data create_flags;
 
 	loan_multiplier_&year. =  month_int_rate_&year. *	( ( 1 + month_int_rate_&year. )**360	) / ( ( ( 1+ month_int_rate_&year. )**360 )-1 );
 
-
 	*calculate monthly Principal and Interest for First time Homebuyer (10% down);
 	if saleyear=&year. then PI_First&year.=saleprice*.9*loan_multiplier_&year.;
 
@@ -70,8 +69,6 @@ data create_flags;
 
   *calculate monthly Principal and Interest for Repeat Homebuyer (20% down);
     if saleyear=&year. then PI_Repeat&year.=saleprice*.8*loan_multiplier_&year.;
-
-	%dollar_convert(PI_Repeat&year.,PI_Repeat&year.r,&year.,2017);
 
 *calculate monthly PITI (Principal, Interest, Taxes and Insurance) for Repeat Homebuyer (25% of PI = TI);
 	if saleyear=&year. then PITI_Repeat=PI_Repeat&year.r*1.25;
@@ -111,7 +108,6 @@ numhshldsb_2012_16 numhshldsw_2012_16 numhshldsh_2012_16 numhshldsaiom_2012_16*/
 
 	total_sales=1;
 
-/*add code for repeat buyer*/
 
 if PITI_First in (0,.) then do;
 	AMI80_first_afford = .;
@@ -241,17 +237,15 @@ run;
 proc freq data=create_flags; 
 tables AMI80_first_afford AMI50_first_afford AMI80_repeat_afford AMI50_repeat_afford; 
 run;
-*proc summary at city, ward levels - so you could get % of sales in Ward 7 affordable to 
-median white family vs. median black family.;
 
 /*Proc Summary: Affordability for Owners by 80AMI and 50AMI*/
 
 proc summary data=create_flags;
-	class city saleyear;
+	class saleyear;
 	var total_sales AMI80_first_afford AMI50_first_afford AMI80_repeat_afford AMI50_repeat_afford;
 	output	out=City_level	sum= ;
 	format city $CITY16.;
-		run;
+run;
 
 proc summary data=create_flags;
 	class ward2012 saleyear;
@@ -259,8 +253,7 @@ proc summary data=create_flags;
 	output 	out=Ward_Level 
 	sum= ; 
 	format ward2012 $wd12.;
-;
-		run;
+run;
 
 	data sales_afford_SF_Condo (label="DC Single Family Home Sales Affordabilty for 80%, 50% Area Median Income, 2000-17" drop=_type_ _freq_);
 
