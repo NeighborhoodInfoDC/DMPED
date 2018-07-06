@@ -28,7 +28,7 @@ Homeownership Affordability in Urban America: Past and Future;
 proc contents data= Sales_who_owns_SF_Condo_clean; run;
 
 data create_flags;
-  set Sales_who_owns_SF_Condo_clean (where=(clean_sale=1 and (2000 <= saleyear <= 2017)));
+  set Sales_who_owns_SF_Condo_clean (where=(LargeUnit=1 and clean_sale=1 and (2000 <= saleyear <= 2017)));
   
   /*pull in effective interest rates - for example: 
   http://www.fhfa.gov/DataTools/Downloads/Documents/Historical-Summary-Tables/Table15_2015_by_State_and_Year.xls*/
