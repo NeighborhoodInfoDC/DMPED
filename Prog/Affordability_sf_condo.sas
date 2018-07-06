@@ -109,7 +109,31 @@ numhshldsb_2012_16 numhshldsw_2012_16 numhshldsh_2012_16 numhshldsaiom_2012_16*/
 	total_sales=1;
 
 
-if PITI_First in (0,.) then do;
+	%let areamedian=82800 85600 91500 84800 $85400 89300 90300 94500 99000 102700 103500 106100 107500 107300 107000 109200 108600 110300;
+	%let yearlist=2000 2001 2002 2003 2004 2005 2006 2007 2008 2009 2010 2011 2012 2013 2014 2015 2016 2017;
+
+	%macro calc_affordbyAMI;
+
+	%do i=1 %to 18;
+
+	%let ami=%scan(&areamedian,&i.," "); 
+	%let yr=%scan(&yearlist,&i.," "); 
+
+
+	%if saleyear =&yr. %then %do;
+	       if PITI_First <= (&ami.*0.8 / 12*.28) then AMI80_first_afford=1; else AMI80_first_afford=0; 
+	       if PITI_First <= (&ami.*0.5 / 12*.28) then AMI50_first_afford=1; else AMI50_first_afford=0;
+		   if PITI_Repeat <= (&ami.*0.8 / 12*.28) then AMI80_repeat_afford=1; else AMI80_repeat_afford=0; 
+	       if PITI_Repeat <= (&ami.*0.5 / 12*.28) then AMI50_repeat_afford=1; else AMI50_repeat_afford=0; 
+	%end;
+	%end;
+
+	%mend calc_affordbyAMI;
+
+	%calc_affordbyAMI;
+
+
+/*if PITI_First in (0,.) then do;
 	AMI80_first_afford = .;
 	AMI50_first_afford = .;
 	total_sales=0;
@@ -225,7 +249,7 @@ else do;
 		   if PITI_Repeat <= (82800*0.5 / 12*.28) then AMI50_repeat_afford=1; else AMI50_repeat_afford=0;
 	end;
 
-end;
+end; */
 
 run;
 proc contents data=create_flags;
