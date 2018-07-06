@@ -25,6 +25,8 @@ Homeownership Affordability in Urban America: Past and Future;
 %Sales_pars();
 %Clean_sales( inds=DMPED.Sales_who_owns_SF_Condo, outds=Sales_who_owns_SF_Condo_clean) ;
 
+proc contents data= Sales_who_owns_SF_Condo_clean; run;
+
 data create_flags;
   set Sales_who_owns_SF_Condo_clean (where=(clean_sale=1 and (2000 <= saleyear <= 2017)));
   
@@ -247,14 +249,14 @@ median white family vs. median black family.;
 proc summary data=create_flags;
 	class city saleyear;
 	var total_sales AMI80_first_afford AMI50_first_afford AMI80_repeat_afford AMI50_repeat_afford;
-	output	out=City_level (where=(_type_^=0))	sum= ;
+	output	out=City_level	sum= ;
 	format city $CITY16.;
 		run;
 
 proc summary data=create_flags;
 	class ward2012 saleyear;
 	var total_sales AMI80_first_afford AMI50_first_afford AMI80_repeat_afford AMI50_repeat_afford;
-	output 	out=Ward_Level (where=(_type_^=0)) 
+	output 	out=Ward_Level 
 	sum= ; 
 	format ward2012 $wd12.;
 ;
