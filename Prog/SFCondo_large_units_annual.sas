@@ -118,7 +118,7 @@ run;
 		if ownercat in ("040" "050" "070") then govtown = 1;
        else if ownercat in ("010" "020" "030" "060"  "090" "115" "120" "130" "100" "080" "111") then govtown= 0;
 
-     
+         total=1; 
  	  output;
 	  report_dt = intnx( "&unit", report_dt, 1, 'beginning' );
 
@@ -139,6 +139,7 @@ run;
 	  govtown="Owner is DC or US government or quasi-public entity, beginning of the period"
 	  adj_start_dt="Beginning of the period"
 	  adj_end_dt = "End of the period"
+	  total="All units"
     ;
     
     keep 
