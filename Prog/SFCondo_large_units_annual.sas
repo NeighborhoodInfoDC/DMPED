@@ -107,11 +107,11 @@ run;
       else if ownercat in ("010" "020" "030" "040" "050" "060" "070" "080" "090" "100" "111") then corporations= 0;
 
 	  *churches, CDCs, nonprofits; 
-	  if ownercat in ("100" "080" "111") and then cdcNFP = 1;
+	  if ownercat in ("100" "080" "111") then cdcNFP = 1;
 	  else if ownercat in ("010" "020" "030" "040" "050" "060" "070" "090" "115" "120" "130")  then cdcNFP= 0;
 
 	  *other individuals; 
-	  if ownercat in ("030") and then otherind = 1;
+	  if ownercat in ("030") then otherind = 1;
       else if ownercat in ("010" "020"  "040" "050" "060" "070" "090" "115" "120" "130" "100" "080" "111")  then otherind= 0;
 
 	  *local or federal govt or quasi public;
