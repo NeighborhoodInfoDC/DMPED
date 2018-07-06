@@ -279,7 +279,7 @@ run;
 
 	
 proc export data=sales_afford_SF_Condo
-	outfile="D:\DCDATA\Libraries\DMPED\Prog\sf_condo_tabs_aff.csv"
+	outfile="&_dcdata_default_path\DMPED\Prog\sf_condo_tabs_aff.csv"
 	dbms=csv replace;
 	run;
 
