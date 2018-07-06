@@ -28,7 +28,7 @@ data ACS_2012_16_map;
 
 	keep &geo. all3brplusrentunits numrnt3br_under1000 numrnt3br_under1500 pctrnt3br_under1000 pctrnt3br_under1500 pct3brrent;
 
-	all3brplusrentunits = sum(of numrtohu3bunder500_2012_16 numrtohu3b500to749_2012_16 numrtohu3b750to999_2012_16 numrtohu3b1000plus_2012_16
+	all3brplusrentunits = sum(of numrtohu3bunder500_2012_16 numrtohu3b500to749_2012_16 numrtohu3b750to999_2012_16
 							numrtohu3b1000to1499_2012_16 numrtohu3b1500plus_2012_16);
 
 	numrnt3br_under1000 = sum(of numrtohu3bunder500_2012_16 numrtohu3b500to749_2012_16 numrtohu3b750to999_2012_16);
