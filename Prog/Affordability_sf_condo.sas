@@ -277,38 +277,3 @@ proc export data=sales_afford_SF_Condo
 	dbms=csv replace;
 	run;
 
-	
-	** Register metadata **;
-%Dc_update_meta_file(
-      ds_lib=DMPED,
-      ds_name=sales_afford_SF_Condo,
-      creator_process=Affordability_sf_condo.sas,
-      restrictions=None,
-      revisions=New file.
-      )
-
-data wardonly;
-	set DMPED.sales_afford_SF_Condo (where=(ward2012~=" ") keep=ward2012 pct:); 
-	run; 
-	proc transpose data=wardonly out=ward_long prefix=Ward_;
-	id ward2012;
-	run;
-
-data cityonly;
-	set DMPED.sales_afford_SF_Condo (where=(city~=" ") keep=city pct:); 
-	city=0;
-	rename city=ward2012;
-	run; 
-
-	proc transpose data=cityonly out=city_long prefix=Ward_;
-	id ward2012;
-	run;
-proc sort data=city_long;
-by _name_;
-proc sort data=ward_long;
-by _name_; 
-
-	data output_table;
-	merge city_long ward_long;
-	by _name_;
-	run;
