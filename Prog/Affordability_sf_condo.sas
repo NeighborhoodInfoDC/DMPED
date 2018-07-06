@@ -26,8 +26,7 @@ Homeownership Affordability in Urban America: Past and Future;
 %Clean_sales( inds=DMPED.Sales_who_owns_SF_Condo, outds=Sales_who_owns_SF_Condo_clean) ;
 
 data create_flags;
-  set Sales_who_owns_SF_Condo_clean (where=(ui_proptype in ('10' '11') and 2000 <= year(saledate) <= 2017))
-/*add code for saledate [between 1/1/10 and 12/31/14]*/;
+  set Sales_who_owns_SF_Condo_clean (where=(clean_sale=1 and (2000 <= saleyear <= 2017)));
   
   /*pull in effective interest rates - for example: 
   http://www.fhfa.gov/DataTools/Downloads/Documents/Historical-Summary-Tables/Table15_2015_by_State_and_Year.xls*/
@@ -49,7 +48,7 @@ data create_flags;
 	eff_int_rate_2014= 4.22;
 	eff_int_rate_2015= 3.95;
 	eff_int_rate_2016= 3.69;
-    eff_int_rate_2017= 3.69;
+    eff_int_rate_2017= 3.69; *2017 not available, using 2016;
 	%macro yearloop ();
 
 	%do year = 2000 %to 2017 ;
