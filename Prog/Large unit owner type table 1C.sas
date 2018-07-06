@@ -21,33 +21,36 @@
 %DCData_lib( DMPED)
 %DCData_lib( MAR)
 
-proc sort data= DMPED.SFCondo_year_2017;
+proc sort data= DMPED.SFCondo_year_2017 out = SFCondo_year_2017;
 by ssl;
 run;
 
-proc sort data= MAR.address_ssl_xref;
+proc sort data= MAR.address_ssl_xref out = address_ssl_xref;
 by ssl;
 run;
-data DMPED.SFCondo_year_2017;
-  set DMPED.SFCondo_year_2017;
+
+data SFCondo_year_2017;
+  set SFCondo_year_2017;
   refyear=year(report_dt);
 run;
 
 data merge_SFCondo;
-	merge DMPED.SFCondo_year_2017 MAR.address_ssl_xref; 
+	merge SFCondo_year_2017 (in=a) address_ssl_xref; 
 	by ssl;
+	if a;
 run;
 proc sort data=merge_SFCondo;
 by Address_Id;
 run;
-proc sort data=mar.address_points_2018_16;
+proc sort data=mar.address_points_2018_06 out = address_points_2018_06;
 by Address_Id;
 run;
 
 data merge_SFCondo_Wards;
-	merge merge_SFCondo mar.address_points_2018_16;
+	merge merge_SFCondo (in=a drop = ward2012) address_points_2018_06;
     by Address_Id;
-	total_sale=1
+	if a;
+	total_sales=1;
 run;
 
 proc summary data=merge_SFCondo_Wards;
@@ -58,9 +61,9 @@ proc summary data=merge_SFCondo_Wards;
 run;
 
 proc summary data=merge_SFCondo_Wards;
-	class wd12 refyear;
+	class ward2012 refyear;
 	var total_sales govtown corporations cdcNFP otherind;
-	output	out=City_level	sum= ;
+	output	out=ward_level	sum= ;
 	format city $CITY16.;
 run;
 
