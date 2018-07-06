@@ -239,16 +239,22 @@ tables AMI80_first_afford AMI50_first_afford AMI80_repeat_afford AMI50_repeat_af
 run;
 
 /*Proc Summary: Affordability for Owners by 80AMI and 50AMI*/
+proc sort data=create_flags;
+by saleyear;
+run;
 
 proc summary data=create_flags;
-	class saleyear;
+	by saleyear;
 	var total_sales AMI80_first_afford AMI50_first_afford AMI80_repeat_afford AMI50_repeat_afford;
 	output	out=City_level	sum= ;
 	format city $CITY16.;
 run;
+proc sort data=create_flags;
+by ward2012 saleyear;
+run;
 
 proc summary data=create_flags;
-	class ward2012 saleyear;
+	by ward2012 saleyear;
 	var total_sales AMI80_first_afford AMI50_first_afford AMI80_repeat_afford AMI50_repeat_afford;
 	output 	out=Ward_Level 
 	sum= ; 
