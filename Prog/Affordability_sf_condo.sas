@@ -40,8 +40,23 @@ data merge_who_owns_SF_Condo_clean;
 	if a;
 run;
 
+proc sort data=merge_who_owns_SF_Condo_clean;
+by Address_Id;
+run;
+proc sort data=mar.address_points_2018_06 out = address_points_2018_06;
+by Address_Id;
+run;
+
+data merge_who_owns_SF_Condo_wards;
+	merge merge_who_owns_SF_Condo_clean (in=a drop = ward2012) address_points_2018_06;
+    by Address_Id;
+	if a;
+run;
+
+proc contents data=merge_who_owns_SF_Condo_wards; run;
+
 data create_flags;
-  set merge_who_owns_SF_Condo_clean (where=(clean_sale=1 and (2000 <= saleyear <= 2017)));
+  set merge_who_owns_SF_Condo_wards (where=(clean_sale=1 and (2000 <= saleyear <= 2017)));
   
   /*pull in effective interest rates - for example: 
   http://www.fhfa.gov/DataTools/Downloads/Documents/Historical-Summary-Tables/Table15_2015_by_State_and_Year.xls*/
@@ -206,13 +221,12 @@ run;
 
 data city (drop=_type_ _freq_);
 merge city_large city_level (rename=(total_sales=total_sales_lg));
-by saleyear;
+by WARD2012 saleyear;
 
 run;
 data ward (drop=_type_ _freq_);
 merge ward_large ward_level (rename=(total_sales=total_sales_lg));
 by WARD2012 saleyear;
-
 run;
 
 data sales_afford_SF_Condo (label="DC Single Family Home Sales Affordabilty for 80%, 50% Area Median Income, 2000-17");
@@ -228,19 +242,20 @@ data sales_afford_SF_Condo (label="DC Single Family Home Sales Affordabilty for 
 
 
 	label PctAffordFirst_80AMI="Pct. of SF/Condo Sales Affordable at 80% AMI for First-time Buyer"
-			;
-	run;
+	;
+run;
 
-proc sort data = sales_afford_SF_Condo; by Ward2012 saleyear ; run;
+proc sort data = sales_afford_SF_Condo; by saleyear Ward2012; run;
 
 proc transpose data=sales_afford_SF_Condo out=sales_afford_SF_Condo_transpose(label="DC Single Family Home Sales Affordabilty for 80%, 50% Area Median Income, 2000-17");
-	var  PctAffordFirst_80AMI	 PctAffordFirst_50AMI	PctAffordRepeat_80AMI PctAffordRepeat_50AMI
+	var  PctAffordFirst_80AMI PctAffordFirst_50AMI PctAffordRepeat_80AMI PctAffordRepeat_50AMI
 		;
-	by Ward2012 saleyear ; 
+	by saleyear; 
+	id Ward2012;
 run; 
 
 
-proc export data=sales_afford_SF_Condo
+proc export data=sales_afford_SF_Condo_transpose
 	outfile="&_dcdata_default_path\DMPED\Prog\sf_condo_tabs_aff.csv"
 	dbms=csv replace;
 	run;
