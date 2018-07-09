@@ -214,7 +214,8 @@ merge ward_large ward_level (rename=(total_sales=total_sales_lg));
 by WARD2012 saleyear;
 
 run;
-	data sales_afford_SF_Condo (label="DC Single Family Home Sales Affordabilty for 80%, 50% Area Median Income, 2000-17");
+
+data sales_afford_SF_Condo (label="DC Single Family Home Sales Affordabilty for 80%, 50% Area Median Income, 2000-17");
 
 	set city ward ; 
 
@@ -230,10 +231,12 @@ run;
 			;
 	run;
 
-proc transpose data=sales_afford_SF_Condo out=sales_afford_SF_Condo(label="DC Single Family Home Sales Affordabilty for 80%, 50% Area Median Income, 2000-17");
+proc sort data = sales_afford_SF_Condo; by Ward2012 saleyear ; run;
+
+proc transpose data=sales_afford_SF_Condo out=sales_afford_SF_Condo_transpose(label="DC Single Family Home Sales Affordabilty for 80%, 50% Area Median Income, 2000-17");
 	var  PctAffordFirst_80AMI	 PctAffordFirst_50AMI	PctAffordRepeat_80AMI PctAffordRepeat_50AMI
 		;
-id year Ward2012; 
+	by Ward2012 saleyear ; 
 run; 
 
 
