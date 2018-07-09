@@ -28,7 +28,7 @@ Homeownership Affordability in Urban America: Past and Future;
 proc contents data= Sales_who_owns_SF_Condo_clean; run;
 
 data create_flags;
-  set Sales_who_owns_SF_Condo_clean (where=(LargeUnit=1 and clean_sale=1 and (2000 <= saleyear <= 2017)));
+  set Sales_who_owns_SF_Condo_clean (where=(clean_sale=1 and (2000 <= saleyear <= 2017)));
   
   /*pull in effective interest rates - for example: 
   http://www.fhfa.gov/DataTools/Downloads/Documents/Historical-Summary-Tables/Table15_2015_by_State_and_Year.xls*/
@@ -62,10 +62,8 @@ data create_flags;
 	*calculate monthly Principal and Interest for First time Homebuyer (10% down);
 	if saleyear=&year. then PI_First&year.=saleprice*.9*loan_multiplier_&year.;
 
-	%dollar_convert(PI_first&year.,PI_first&year.r,&year.,2017);
-
    *calculate monthly PITI (Principal, Interest, Taxes and Insurance) for First Time Homebuyer (34% of PI = TI);
-	if saleyear=&year. then PITI_First=PI_First&year.r*1.34;
+	if saleyear=&year. then PITI_First=PI_First&year.*1.34;
 
   *calculate monthly Principal and Interest for Repeat Homebuyer (20% down);
     if saleyear=&year. then PI_Repeat&year.=saleprice*.8*loan_multiplier_&year.;
@@ -108,44 +106,41 @@ numhshldsb_2012_16 numhshldsw_2012_16 numhshldsh_2012_16 numhshldsaiom_2012_16*/
 
 	total_sales=1;
 
-
-
-
-	%macro calc_affordbyAMI;
-
-	%let areamedian=82800 85600 91500 84800 $85400 89300 90300 94500 99000 102700 103500 106100 107500 107300 107000 109200 108600 110300;
-	%let yearlist=2000 2001 2002 2003 2004 2005 2006 2007 2008 2009 2010 2011 2012 2013 2014 2015 2016 2017;
-
-	%do i=1 %to 18;
-
-	%let ami=%scan(&areamedian.,&i.," "); 
-	%let yr=%scan(&yearlist.,&i.," "); 
-
-
-	%if saleyear =&yr. %then %do;
-
 	if PITI_First in (0,.) then do;
-		AMI80_first_afford = .;
-		AMI50_first_afford = .;
-		total_sales=0;
+			AMI80_first_afford = .;
+			AMI50_first_afford = .;
+			total_sales=0;
 	end;
 
 	else do;
+		%macro calc_affordbyAMI;
 
-       if PITI_First <= (&ami.*0.8 / 12*.28) then AMI80_first_afford=1; else AMI80_first_afford=0; 
-       if PITI_First <= (&ami.*0.5 / 12*.28) then AMI50_first_afford=1; else AMI50_first_afford=0;
-	   if PITI_Repeat <= (&ami.*0.8 / 12*.28) then AMI80_repeat_afford=1; else AMI80_repeat_afford=0; 
-       if PITI_Repeat <= (&ami.*0.5 / 12*.28) then AMI50_repeat_afford=1; else AMI50_repeat_afford=0; .
-	end; 
-	%end;
-	%end;
+		%let areamedian=82800 85600 91500 84800 85400 89300 90300 94500 99000 102700 103500 106100 107500 107300 107000 109200 108600 110300;
+		%let yearlist=2000 2001 2002 2003 2004 2005 2006 2007 2008 2009 2010 2011 2012 2013 2014 2015 2016 2017;
 
-	%mend calc_affordbyAMI;
+			%do i=1 %to 18;
 
-	%calc_affordbyAMI;
+			%let ami=%scan(&areamedian.,&i.," "); 
+			%let yr=%scan(&yearlist.,&i.," "); 
 
 
+			if saleyear =&yr. then do;
 
+			       if PITI_First <= (&ami.*0.8 / 12*.28) then AMI80_first_afford=1; else AMI80_first_afford=0; 
+			       if PITI_First <= (&ami.*0.5 / 12*.28) then AMI50_first_afford=1; else AMI50_first_afford=0;
+				   if PITI_Repeat <= (&ami.*0.8 / 12*.28) then AMI80_repeat_afford=1; else AMI80_repeat_afford=0; 
+			       if PITI_Repeat <= (&ami.*0.5 / 12*.28) then AMI50_repeat_afford=1; else AMI50_repeat_afford=0; 
+				end; 
+
+
+			%end;
+
+		%mend calc_affordbyAMI;
+
+		%calc_affordbyAMI;
+
+	end;
+	
 run;
 proc contents data=create_flags;
 run;
