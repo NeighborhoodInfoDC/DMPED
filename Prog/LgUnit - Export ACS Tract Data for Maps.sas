@@ -26,7 +26,7 @@ data ACS_2012_16_map;
 
 	numhsgunits_2012_16 = sum(of numhsgunits0bd_2012_16 numhsgunits1bd_2012_16 numhsgunits2bd_2012_16 numhsgunits3plusbd_2012_16);
 
-	keep &geo. all3brplusrentunits numrnt3br_under1000 numrnt3br_under1500 pctrnt3br_under1000 pctrnt3br_under1500 pct3brrent;
+	keep &geo. numhsgunits_2012_16 numrenteroccupiedhu_2012_16 all3brplusrentunits numrnt3br_under1000 numrnt3br_under1500 pctrnt3br_under1000 pctrnt3br_under1500 pct3brrent;
 
 	all3brplusrentunits = sum(of numrtohu3bunder500_2012_16 numrtohu3b500to749_2012_16 numrtohu3b750to999_2012_16
 							numrtohu3b1000to1499_2012_16 numrtohu3b1500plus_2012_16);
@@ -55,5 +55,9 @@ proc export data = ACS_2012_16_map
 	dbms = csv replace;
 run;
 
+proc univariate data=acs_2012_16_map;
+id geo2010;
+var numrenteroccupiedhu_2012_16 all3brplusrentunits pct3brrent;
+run; 
 
 /* End of program */
