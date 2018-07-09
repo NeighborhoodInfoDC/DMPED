@@ -231,9 +231,9 @@ run;
 	run;
 
 proc transpose data=sales_afford_SF_Condo out=sales_afford_SF_Condo(label="DC Single Family Home Sales Affordabilty for 80%, 50% Area Median Income, 2000-17");
-	var year Ward2012		
+	var  PctAffordFirst_80AMI	 PctAffordFirst_50AMI	PctAffordRepeat_80AMI PctAffordRepeat_50AMI
 		;
-id ; 
+id year Ward2012; 
 run; 
 
 
