@@ -57,7 +57,7 @@ run;
 
 proc univariate data=acs_2012_16_map;
 id geo2010;
-var numrenteroccupiedhu_2012_16 all3brplusrentunits pct3brrent;
+var numrenteroccupiedhu_2012_16 all3brplusrentunits pct3brrent pctrnt3br_under1500 pctrnt3br_under1000;
 run; 
 
 /* End of program */
