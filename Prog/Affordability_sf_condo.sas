@@ -151,6 +151,21 @@ run;
 proc freq data=create_flags; 
 tables AMI80_first_afford AMI50_first_afford AMI80_repeat_afford AMI50_repeat_afford; 
 run;
+/*% of sales that were large units* - new table*/
+	proc sort data=create_flags;
+	by saleyear ;
+	proc summary data=create_flags;
+	 by saleyear;
+	 var largeunit total_sales;
+	 output out=city_large sum=;
+	 run;
+	proc sort data=create_flags;
+	by ward2012 saleyear ;
+	proc summary data=create_flags;
+	 by ward2012 saleyear;
+	 var largeunit total_sales;
+	 output out=ward_large sum=;
+	 run;
 
 /*Proc Summary: Affordability for Owners by 80AMI and 50AMI*/
 proc sort data=create_flags;
@@ -158,16 +173,17 @@ by saleyear;
 run;
 
 proc summary data=create_flags;
+	where largeunit=1;
 	by saleyear;
 	var total_sales AMI80_first_afford AMI50_first_afford AMI80_repeat_afford AMI50_repeat_afford;
 	output	out=City_level	sum= ;
-	format city $CITY16.;
 run;
 proc sort data=create_flags;
 by ward2012 saleyear;
 run;
 
 proc summary data=create_flags;
+	where largeunit=1;
 	by ward2012 saleyear;
 	var total_sales AMI80_first_afford AMI50_first_afford AMI80_repeat_afford AMI50_repeat_afford;
 	output 	out=Ward_Level 
@@ -175,19 +191,29 @@ proc summary data=create_flags;
 	format ward2012 $wd12.;
 run;
 
-	data sales_afford_SF_Condo (label="DC Single Family Home Sales Affordabilty for 80%, 50% Area Median Income, 2000-17" drop=_type_ _freq_);
+data city (drop=_type_ _freq_);
+merge city_large city_level (rename=(total_sales=total_sales_lg));
+by saleyear;
 
-	set city_level ward_level; 
+run;
+data ward (drop=_type_ _freq_);
+merge ward_large ward_level (rename=(total_sales=total_sales_lg));
+by WARD2012 saleyear;
 
-	PctAffordFirst_80AMI=AMI80_first_afford/total_sales*100; 
-	PctAffordFirst_50AMI=AMI50_first_afford/total_sales*100; 
-    PctAffordRepeat_80AMI=AMI80_repeat_afford/total_sales*100; 
-	PctAffordRepeat_50AMI=AMI50_repeat_afford/total_sales*100; 
+run;
+	data sales_afford_SF_Condo (label="DC Single Family Home Sales Affordabilty for 80%, 50% Area Median Income, 2000-17");
 
-	/*add code for repeat buyer affordability*
-	PctAffordRepeat_80AMI=80AMI_repeat_afford/total_sales*100; 
-*/
-	label PctAffordFirst_80AMI="Pct. of SF/Condo Sales 2000-17 Affordable to 80% AMI and 50% AMI"
+	set city ward ; 
+
+	PctSales_Large=largeunit/total_sales; 
+
+	PctAffordFirst_80AMI=AMI80_first_afford/total_sales_lg*100; 
+	PctAffordFirst_50AMI=AMI50_first_afford/total_sales_lg*100; 
+    PctAffordRepeat_80AMI=AMI80_repeat_afford/total_sales_lg*100; 
+	PctAffordRepeat_50AMI=AMI50_repeat_afford/total_sales_lg*100; 
+
+
+	label PctAffordFirst_80AMI="Pct. of SF/Condo Sales Affordable at 80% AMI for First-time Buyer"
 			;
 	run;
 
