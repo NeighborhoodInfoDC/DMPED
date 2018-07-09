@@ -55,14 +55,14 @@ run;
 
 proc summary data=merge_SFCondo_Wards;
 	class city refyear;
-	var total_sales govtown corporations cdcNFP otherind;
+	var total_sales govtown corporations cdcNFP otherind renter Owner_occ_sale senior;
 	output	out=City_level	sum= ;
 	format city $CITY16.;
 run;
 
 proc summary data=merge_SFCondo_Wards;
 	class ward2012 refyear;
-	var total_sales govtown corporations cdcNFP otherind;
+	var total_sales govtown corporations cdcNFP otherind renter Owner_occ_sale senior;
 	output	out=ward_level	sum= ;
 	format city $CITY16.;
 run;
@@ -88,4 +88,31 @@ run;
 proc export data=owner_category
 	outfile="D:\DCDATA\Libraries\DMPED\Prog\sf_condo_owner_category.csv"
 	dbms=csv replace;
+run;
+
+
+/* percent SF and condo with 3+ bedrooms by age of building 2017*/
+
+data age;
+set merge_SFCondo_Wards;
+if AYB<2000 then before2000 = 1; else before2000=0;
+run;
+
+proc summary data=age;
+	class before2000 ward2012 city;
+	var total_sales LargeUnit;
+	output	out=BuildingAge	sum= ;
+	format city $CITY16.;
+run;
+
+/* percent of units with 3+ bedrooms by property type*/
+
+data property_type;
+set merge_SFCondo_Wards (where=(LargeUnit=1));
+run;
+
+proc summary data=property_type;
+class refyear ward2012;
+var ui_proptype;
+output  out= PropertyType sum;
 run;
