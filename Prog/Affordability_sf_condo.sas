@@ -21,14 +21,27 @@ Homeownership Affordability in Urban America: Past and Future;
 %DCData_lib( DMPED );
 %DCData_lib( equity );
 %DCData_lib( realprop );
+%DCData_lib( MAR );
 
 %Sales_pars();
 %Clean_sales( inds=DMPED.Sales_who_owns_SF_Condo, outds=Sales_who_owns_SF_Condo_clean) ;
 
 proc contents data= Sales_who_owns_SF_Condo_clean; run;
 
+proc sort data=Sales_who_owns_SF_Condo_clean;
+by ssl;
+run;
+proc sort data= MAR.address_ssl_xref out = address_ssl_xref;
+by ssl;
+run;
+data merge_who_owns_SF_Condo_clean;
+	merge Sales_who_owns_SF_Condo_clean (in=a) address_ssl_xref; 
+	by ssl;
+	if a;
+run;
+
 data create_flags;
-  set Sales_who_owns_SF_Condo_clean (where=(clean_sale=1 and (2000 <= saleyear <= 2017)));
+  set merge_who_owns_SF_Condo_clean (where=(clean_sale=1 and (2000 <= saleyear <= 2017)));
   
   /*pull in effective interest rates - for example: 
   http://www.fhfa.gov/DataTools/Downloads/Documents/Historical-Summary-Tables/Table15_2015_by_State_and_Year.xls*/
@@ -217,9 +230,16 @@ run;
 			;
 	run;
 
-	
+proc transpose data=sales_afford_SF_Condo out=sales_afford_SF_Condo(label="DC Single Family Home Sales Affordabilty for 80%, 50% Area Median Income, 2000-17");
+	var year Ward2012		
+		;
+id ; 
+run; 
+
+
 proc export data=sales_afford_SF_Condo
 	outfile="&_dcdata_default_path\DMPED\Prog\sf_condo_tabs_aff.csv"
 	dbms=csv replace;
 	run;
+
 
