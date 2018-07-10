@@ -18,8 +18,8 @@
 %include "L:\SAS\Inc\StdLocal.sas";
 
 ** Define libraries **;
-%DCData_lib( DMPED)
-%DCData_lib( MAR)
+%DCData_lib( DMPED);
+%DCData_lib( MAR);
 
 proc sort data= DMPED.SFCondo_year_2017 out = SFCondo_year_2017;
 by ssl;
@@ -96,7 +96,6 @@ run;
 
 /* percent SF and condo with 3+ bedrooms by age of building 2017*/
 
-
 data age;
 set merge_SFCondo_Wards;
 if AYB<2000 then before2000 = 1; else before2000=0;
@@ -106,9 +105,12 @@ proc summary data=age(where=(LargeUnit=1));
 	class before2000 ward2012 city;
 	var total_sales LargeUnit;
 	output	out=BuildingAge	sum= ;
-	format city $CITY16.;
 run;
 
+proc export data=BuildingAge
+	outfile="D:\DCDATA\Libraries\DMPED\Prog\sf_condo_BuildingAge.csv"
+	dbms=csv replace;
+run;
 /* percent of units with 3+ bedrooms by property type*/
 
 data property_type;
@@ -121,3 +123,7 @@ var ui_proptype;
 output  out= PropertyType sum;
 run;
 
+proc export data=PropertyType
+	outfile="D:\DCDATA\Libraries\DMPED\Prog\sf_condo_PropertyType.csv"
+	dbms=csv replace;
+run;
