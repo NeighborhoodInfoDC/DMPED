@@ -15,6 +15,7 @@
                
 **************************************************************************/
 
+
 %include "L:\SAS\Inc\StdLocal.sas";
 
 ** Define libraries **;
@@ -99,13 +100,19 @@ data owner_category (label="percent of large units by owner category" drop=_type
           Pctotherind="Pct. of Other individual (not owner occupied)"
 			;
 run;
-
-	
-proc export data=owner_category
-	outfile="D:\DCDATA\Libraries\DMPED\Prog\sf_condo_owner_category.csv"
-	dbms=csv replace;
+proc sort data=owner_category;
+by refyear;
 run;
 
+proc transpose data=owner_category out=owner_category;
+var Pctgov Pctcorporations PctcdcNFP Pctotherind pctownerocc pctrenterocc pctsenior;
+by refyear;
+id ward2012;run;
+	
+proc export data=owner_category
+	outfile="&_dcdata_default_path\DMPED\Prog\sf_condo_owner_category.csv"
+	dbms=csv replace;
+run;
 
 /* percent SF and condo with 3+ bedrooms by age of building 2017*/
 
@@ -115,28 +122,48 @@ if AYB<2000 then before2000 = 1; else before2000=0;
 run;
 
 proc summary data=age(where=(LargeUnit=1));
-	class before2000 ward2012 city;
-	var total_sales LargeUnit;
+	class before2000 ward2012;
+	var total_sales LargeUnit refyear;
 	output	out=BuildingAge	sum= ;
+run;
+proc sort data=age;
+by refyear;
+run;
+
+proc transpose data=age out=BuildingAge;
+var total_sales LargeUnit;
+by refyear;
+id ward2012;
 run;
 
 proc export data=BuildingAge
-	outfile="D:\DCDATA\Libraries\DMPED\Prog\sf_condo_BuildingAge.csv"
+	outfile="&_dcdata_default_path\DMPED\Prog\sf_condo_BuildingAge.csv"
 	dbms=csv replace;
 run;
 /* percent of units with 3+ bedrooms by property type*/
 
 data property_type;
 set merge_SFCondo_Wards (where=(LargeUnit=1));
+if ui_proptype=001 or ui_proptype=011 or ui_proptype=012 or ui_proptype=013 then singlefamily=1; else singlefamily=0;
+if ui_proptype= 016 or ui_proptype= 017 then condo=1; else condo=0;
+if condo=1 or singlefamily=1 then combined=1; else combined=0;
 run;
 
 proc summary data=property_type(where=(LargeUnit=1));
 class refyear ward2012;
-var ui_proptype;
+var singlefamily condo combined;
 output  out= PropertyType sum;
+run;
+proc sort data=property_type;
+by refyear;
+run;
+proc transpose data=property_type out=property_type;
+var total_sales LargeUnit;
+by refyear;
+id ward2012;
 run;
 
 proc export data=PropertyType
-	outfile="D:\DCDATA\Libraries\DMPED\Prog\sf_condo_PropertyType.csv"
+	outfile="&_dcdata_default_path\DMPED\Prog\sf_condo_PropertyType.csv"
 	dbms=csv replace;
 run;
