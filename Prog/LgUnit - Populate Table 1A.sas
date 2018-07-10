@@ -511,15 +511,17 @@ data allyear_&geo.;
 	merge m2000 xACS_2006_10 xACS_2012_16;
 	by &geo.;
 
+	/* All units */
 	ch_3brall_2000_to_2012_16 = numhsgunits3bd_2012_16 - numhsgunits3bdrms_2000;
-	ch_4brall_2000_to_2012_16 = NumHsgUnits4bd_2012_16 - NumHsgUnits4Bdrms_2000;
-	ch_5brall_2000_to_2012_16 = NumRentOccHU5plusbd_2012_16 - NumHsgUnits5plusBdrms_2000;
+	ch_4brall_2000_to_2012_16 = numhsgunits4bd_2012_16 - NumHsgUnits4Bdrms_2000;
+	ch_5brall_2000_to_2012_16 = numhsgunits5plusbd_2012_16 - NumHsgUnits5plusBdrms_2000;
 
 	pct_ch_tot_2000_to_2006_10 = (numhsgunits_2006_10 - numhsgunits_2000) / numhsgunits_2006_10;
 	pct_ch_3p_2000_to_2006_10 = (numhsgunits3plusbd_2006_10 - numhsgunits3plusbd_2000) / numhsgunits3plusbd_2006_10;
 
 	pct_ch_tot_2006_10_to_2012_16 = (numhsgunits_2012_16 - numhsgunits_2006_10) / numhsgunits_2012_16;
 	pct_ch_3p_2006_10_to_2012_16 = (numhsgunits3plusbd_2012_16 - numhsgunits3plusbd_2006_10) / numhsgunits3plusbd_2012_16;
+
 
 	label ch_3brall_2000_to_2012_16 = "Change in Units with 3 bedrooms 2000 to 2012-16"
 		  ch_4brall_2000_to_2012_16 = "Change in Units with 4 bedrooms 2000 to 2012-16"
