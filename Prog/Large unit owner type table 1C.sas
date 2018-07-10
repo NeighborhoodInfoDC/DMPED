@@ -53,14 +53,14 @@ data merge_SFCondo_Wards;
 	total_sales=1;
 run;
 
-proc summary data=merge_SFCondo_Wards;
+proc summary data=merge_SFCondo_Wards (where=(LargeUnit=1));
 	class city refyear;
 	var total_sales govtown corporations cdcNFP otherind renter Owner_occ_sale renter senior;
 	output	out=City_level	sum= ;
 	format city $CITY16.;
 run;
 
-proc summary data=merge_SFCondo_Wards;
+proc summary data=merge_SFCondo_Wards(where=(LargeUnit=1));
 	class ward2012 refyear;
 	var total_sales govtown corporations cdcNFP otherind renter Owner_occ_sale renter senior;
 	output	out=ward_level	sum= ;
@@ -102,7 +102,7 @@ set merge_SFCondo_Wards;
 if AYB<2000 then before2000 = 1; else before2000=0;
 run;
 
-proc summary data=age;
+proc summary data=age(where=(LargeUnit=1));
 	class before2000 ward2012 city;
 	var total_sales LargeUnit;
 	output	out=BuildingAge	sum= ;
@@ -115,7 +115,7 @@ data property_type;
 set merge_SFCondo_Wards (where=(LargeUnit=1));
 run;
 
-proc summary data=property_type;
+proc summary data=property_type(where=(LargeUnit=1));
 class refyear ward2012;
 var ui_proptype;
 output  out= PropertyType sum;
