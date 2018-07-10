@@ -137,6 +137,10 @@ numhshldsb_2012_16 numhshldsw_2012_16 numhshldsh_2012_16 numhshldsaiom_2012_16*/
 	if PITI_First in (0,.) then do;
 			AMI80_first_afford = .;
 			AMI50_first_afford = .;
+			AMI30_first_afford= .;
+			AMI80_repeat_afford = .;
+			AMI50_repeat_afford = .;
+			AMI30_repeat_afford= .;
 			total_sales=0;
 	end;
 
@@ -156,8 +160,10 @@ numhshldsb_2012_16 numhshldsw_2012_16 numhshldsh_2012_16 numhshldsaiom_2012_16*/
 
 			       if PITI_First <= (&ami.*0.8 / 12*.28) then AMI80_first_afford=1; else AMI80_first_afford=0; 
 			       if PITI_First <= (&ami.*0.5 / 12*.28) then AMI50_first_afford=1; else AMI50_first_afford=0;
+				   if PITI_First <= (&ami.*0.3 / 12*.28) then AMI30_first_afford=1; else AMI30_first_afford=0; 
 				   if PITI_Repeat <= (&ami.*0.8 / 12*.28) then AMI80_repeat_afford=1; else AMI80_repeat_afford=0; 
 			       if PITI_Repeat <= (&ami.*0.5 / 12*.28) then AMI50_repeat_afford=1; else AMI50_repeat_afford=0; 
+				   if PITI_Repeat <= (&ami.*0.3 / 12*.28) then AMI30_repeat_afford=1; else AMI30_repeat_afford=0;
 				end; 
 
 
@@ -177,7 +183,7 @@ proc print data= create_flags (obs=25);
 var saleprice saleyear PITI_FIRST PITI_repeat AMI80_first_afford AMI50_first_afford AMI80_repeat_afford AMI50_repeat_afford;
 run;
 proc freq data=create_flags; 
-tables AMI80_first_afford AMI50_first_afford AMI80_repeat_afford AMI50_repeat_afford; 
+tables AMI80_first_afford AMI50_first_afford AMI80_repeat_afford AMI50_repeat_afford AMI30_first_afford AMI30_repeat_afford; 
 run;
 /*% of sales that were large units* - new table*/
 	proc sort data=create_flags;
@@ -203,7 +209,7 @@ run;
 proc summary data=create_flags;
 	where largeunit=1;
 	by saleyear;
-	var total_sales AMI80_first_afford AMI50_first_afford AMI80_repeat_afford AMI50_repeat_afford;
+	var total_sales AMI80_first_afford AMI50_first_afford AMI80_repeat_afford AMI50_repeat_afford AMI30_first_afford AMI30_repeat_afford;
 	output	out=City_level	sum= ;
 run;
 proc sort data=create_flags;
@@ -213,7 +219,7 @@ run;
 proc summary data=create_flags;
 	where largeunit=1;
 	by ward2012 saleyear;
-	var total_sales AMI80_first_afford AMI50_first_afford AMI80_repeat_afford AMI50_repeat_afford;
+	var total_sales AMI80_first_afford AMI50_first_afford AMI80_repeat_afford AMI50_repeat_afford AMI30_first_afford AMI30_repeat_afford;
 	output 	out=Ward_Level 
 	sum= ; 
 	format ward2012 $wd12.;
@@ -222,7 +228,6 @@ run;
 data city (drop=_type_ _freq_);
 merge city_large city_level (rename=(total_sales=total_sales_lg));
 by WARD2012 saleyear;
-
 run;
 data ward (drop=_type_ _freq_);
 merge ward_large ward_level (rename=(total_sales=total_sales_lg));
@@ -239,7 +244,8 @@ data sales_afford_SF_Condo (label="DC Single Family Home Sales Affordabilty for 
 	PctAffordFirst_50AMI=AMI50_first_afford/total_sales_lg*100; 
     PctAffordRepeat_80AMI=AMI80_repeat_afford/total_sales_lg*100; 
 	PctAffordRepeat_50AMI=AMI50_repeat_afford/total_sales_lg*100; 
-
+    PctAffordFirst_30AMI=AMI30_first_afford/total_sales_lg*100; 
+    PctAffordRepeat_30AMI=AMI30_repeat_afford/total_sales_lg*100; 
 
 	label PctAffordFirst_80AMI="Pct. of SF/Condo Sales Affordable at 80% AMI for First-time Buyer"
 	;
@@ -248,7 +254,7 @@ run;
 proc sort data = sales_afford_SF_Condo; by saleyear Ward2012; run;
 
 proc transpose data=sales_afford_SF_Condo out=sales_afford_SF_Condo_transpose(label="DC Single Family Home Sales Affordabilty for 80%, 50% Area Median Income, 2000-17");
-	var  PctAffordFirst_80AMI PctAffordFirst_50AMI PctAffordRepeat_80AMI PctAffordRepeat_50AMI
+	var  PctAffordFirst_80AMI PctAffordFirst_50AMI PctAffordRepeat_80AMI PctAffordRepeat_50AMI AMI30_first_afford AMI30_repeat_afford
 		;
 	by saleyear; 
 	id Ward2012;
