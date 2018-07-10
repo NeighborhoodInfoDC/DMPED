@@ -86,6 +86,8 @@ data owner_category (label="percent of large units by owner category" drop=_type
 	pctrenterocc= renter/total_sales*100; 
 	pctsenior= senior/Owner_occ_sale*100; 
 
+	if city = "1" then Ward2012 = "0";
+
 	label Pctgov="Pct. of large units owned by government"
 	      Pctcorporations="Pct. of large units owned by taxable corporations"
           PctcdcNFP="Pct. of large units owned by Church, community, development corporation or other non profit"
