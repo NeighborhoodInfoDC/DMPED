@@ -55,14 +55,14 @@ run;
 
 proc summary data=merge_SFCondo_Wards;
 	class city refyear;
-	var total_sales govtown corporations cdcNFP otherind renter Owner_occ_sale senior;
+	var total_sales govtown corporations cdcNFP otherind renter Owner_occ_sale renter senior;
 	output	out=City_level	sum= ;
 	format city $CITY16.;
 run;
 
 proc summary data=merge_SFCondo_Wards;
 	class ward2012 refyear;
-	var total_sales govtown corporations cdcNFP otherind renter Owner_occ_sale senior;
+	var total_sales govtown corporations cdcNFP otherind renter Owner_occ_sale renter senior;
 	output	out=ward_level	sum= ;
 	format city $CITY16.;
 run;
@@ -76,6 +76,9 @@ data owner_category (label="percent of large units by owner category" drop=_type
 	Pctcorporations=corporations/total_sales*100; 
     PctcdcNFP=cdcNFP/total_sales*100; 
 	Pctotherind=otherind/total_sales*100; 
+	pctownerocc= Owner_occ_sale/total_sales*100; 
+	pctrenterocc= renter/total_sales*100; 
+	pctsenior= senior/Owner_occ_sale*100; 
 
 	label Pctgov="Pct. of large units owned by government"
 	      Pctcorporations="Pct. of large units owned by taxable corporations"
@@ -92,6 +95,7 @@ run;
 
 
 /* percent SF and condo with 3+ bedrooms by age of building 2017*/
+
 
 data age;
 set merge_SFCondo_Wards;
@@ -116,3 +120,4 @@ class refyear ward2012;
 var ui_proptype;
 output  out= PropertyType sum;
 run;
+
