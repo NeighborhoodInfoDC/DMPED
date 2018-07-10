@@ -46,8 +46,14 @@ proc sort data=mar.address_points_2018_06 out = address_points_2018_06;
 by Address_Id;
 run;
 
+data fix_address_points_2018_06;
+	set address_points_2018_06;
+	city = "1";
+run;
+
+
 data merge_SFCondo_Wards;
-	merge merge_SFCondo (in=a drop = ward2012) address_points_2018_06;
+	merge merge_SFCondo (in=a drop = ward2012) fix_address_points_2018_06;
     by Address_Id;
 	if a;
 	total_sales=1;
