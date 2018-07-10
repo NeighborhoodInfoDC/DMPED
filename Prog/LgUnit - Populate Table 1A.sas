@@ -425,7 +425,7 @@ proc transpose data=xACS_2006_10 out=table2006_10_&geo.;
 run; 
 
 proc transpose data=xACS_2006_10 out=table2006_10_rent_&geo.;
-	var pct3brrent_2006_10 pctrtohu3bunder500_2006_10 pctrtohu3b500to749_2006_10 pctrtohu3b750to999_2006_10 pctrtohu3b1000plus_2006_10
+	var pctrtohu3bunder500_2006_10 pctrtohu3b500to749_2006_10 pctrtohu3b750to999_2006_10 pctrtohu3b1000plus_2006_10
 	 	;
 	id &geo.; 
 run; 
@@ -499,7 +499,7 @@ proc transpose data=xACS_2012_16 out=table2012_16_&geo.;
 run; 
 
 proc transpose data=xACS_2012_16 out=table2012_16_rent_&geo.;
-	var pct3brrent_2012_16 pctrtohu3bunder500_2012_16 pctrtohu3b500to749_2012_16 pctrtohu3b750to999_2012_16 pctrtohu3b1000plus_2012_16
+	var pctrtohu3bunder500_2012_16 pctrtohu3b500to749_2012_16 pctrtohu3b750to999_2012_16 pctrtohu3b1000plus_2012_16
 		pctrtohu3b1000to1499_2012_16 pctrtohu3b1500plus_2012_16
 	 	;
 	id &geo.; 
