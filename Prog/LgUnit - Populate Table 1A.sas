@@ -453,7 +453,7 @@ data xACS_2012_16;
 
 	pct3brall_2012_16 pct3brrent_2012_16 pct3brown_2012_16
 
-	pctrtohu3bunder500_2012_16 pctrtohu3bunder500_2012_16 pctrtohu3b750to999_2012_16
+	pctrtohu3bunder500_2012_16 pctrtohu3b500to749_2012_16 pctrtohu3b750to999_2012_16
 	pctrtohu3b1000plus_2012_16 pctrtohu3b1000to1499_2012_16 pctrtohu3b1500plus_2012_16
 
 	;
