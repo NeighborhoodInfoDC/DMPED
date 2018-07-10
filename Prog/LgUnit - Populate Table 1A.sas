@@ -386,15 +386,26 @@ data xACS_2006_10;
 
 	pct3brall_2006_10 pct3brrent_2006_10 pct3brown_2006_10
 
+	pctrtohu3bunder500_2006_10 pctrtohu3b500to749_2006_10 pctrtohu3b750to999_2006_10 pctrtohu3b1000plus_2006_10
+
 	;
 
 	pct3brall_2006_10 = numhsgunits3plusbd_2006_10 / numhsgunits_2006_10;
 	pct3brrent_2006_10 = numrentocchu3plusbd_2006_10 / numrenteroccupiedhu_2006_10;
 	pct3brown_2006_10 = numownocchu3plusbd_2006_10 / numowneroccupiedhu_2006_10;
 
+	pctrtohu3bunder500_2006_10 = numrtohu3bunder500_2006_10 / numrentocchu3plusbd_2006_10;
+	pctrtohu3b500to749_2006_10 = numrtohu3b500to749_2006_10 / numrentocchu3plusbd_2006_10;
+	pctrtohu3b750to999_2006_10 = numrtohu3b750to999_2006_10 / numrentocchu3plusbd_2006_10;
+	pctrtohu3b1000plus_2006_10 = numrtohu3b1000plus_2006_10 / numrentocchu3plusbd_2006_10;
+
 	label pct3brall_2006_10 = "Pct. of All Units with 3+ bedrooms"
 		  pct3brrent_2006_10 = "Pct. of Rental Units with 3+ bedrooms" 
 		  pct3brown_2006_10 = "Pct. of Owner Units with 3+ bedrooms" 
+		  pctrtohu3bunder500_2006_10 = "Pct of renter units Under $500"
+		  pctrtohu3b500to749_2006_10 = "Pct of renter units $500 - $749"
+		  pctrtohu3b750to999_2006_10 = "Pct of renter units $750 - $999"
+		  pctrtohu3b1000plus_2006_10 = "Pct of renter units $1,000+"
 	;
 
 run;
@@ -414,7 +425,7 @@ proc transpose data=xACS_2006_10 out=table2006_10_&geo.;
 run; 
 
 proc transpose data=xACS_2006_10 out=table2006_10_rent_&geo.;
-	var pct3brrent_2006_10 numrtohu3bunder500_2006_10 numrtohu3b500to749_2006_10 numrtohu3b750to999_2006_10 numrtohu3b1000plus_2006_10
+	var pct3brrent_2006_10 pctrtohu3bunder500_2006_10 pctrtohu3b500to749_2006_10 pctrtohu3b750to999_2006_10 pctrtohu3b1000plus_2006_10
 	 	;
 	id &geo.; 
 run; 
@@ -441,6 +452,9 @@ data xACS_2012_16;
 	numrtohu3b1000to1499_2012_16 numrtohu3b1500plus_2012_16
 
 	pct3brall_2012_16 pct3brrent_2012_16 pct3brown_2012_16
+
+	pctrtohu3bunder500_2012_16 pctrtohu3bunder500_2012_16 pctrtohu3b750to999_2012_16
+	pctrtohu3b1000plus_2012_16 pctrtohu3b1000to1499_2012_16 pctrtohu3b1500plus_2012_16
 
 	;
 
