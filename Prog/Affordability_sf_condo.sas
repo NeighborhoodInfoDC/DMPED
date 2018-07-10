@@ -227,8 +227,13 @@ run;
 
 data city (drop=_type_ _freq_);
 merge city_large city_level (rename=(total_sales=total_sales_lg));
-by WARD2012 saleyear;
+by saleyear;
 run;
+data city;
+set city;
+city="1";
+run;
+
 data ward (drop=_type_ _freq_);
 merge ward_large ward_level (rename=(total_sales=total_sales_lg));
 by WARD2012 saleyear;
@@ -246,12 +251,12 @@ data sales_afford_SF_Condo (label="DC Single Family Home Sales Affordabilty for 
 	PctAffordRepeat_50AMI=AMI50_repeat_afford/total_sales_lg*100; 
     PctAffordFirst_30AMI=AMI30_first_afford/total_sales_lg*100; 
     PctAffordRepeat_30AMI=AMI30_repeat_afford/total_sales_lg*100; 
-
+    if city = "1" then Ward2012 = "City";
 	label PctAffordFirst_80AMI="Pct. of SF/Condo Sales Affordable at 80% AMI for First-time Buyer"
 	;
 run;
 
-proc sort data = sales_afford_SF_Condo; by saleyear Ward2012; run;
+proc sort data = sales_afford_SF_Condo; by saleyear; run;
 
 proc transpose data=sales_afford_SF_Condo out=sales_afford_SF_Condo_transpose(label="DC Single Family Home Sales Affordabilty for 80%, 50% Area Median Income, 2000-17");
 	var  PctAffordFirst_80AMI PctAffordFirst_50AMI PctAffordRepeat_80AMI PctAffordRepeat_50AMI AMI30_first_afford AMI30_repeat_afford
@@ -259,7 +264,6 @@ proc transpose data=sales_afford_SF_Condo out=sales_afford_SF_Condo_transpose(la
 	by saleyear; 
 	id Ward2012;
 run; 
-
 
 proc export data=sales_afford_SF_Condo_transpose
 	outfile="&_dcdata_default_path\DMPED\Prog\sf_condo_tabs_aff.csv"
