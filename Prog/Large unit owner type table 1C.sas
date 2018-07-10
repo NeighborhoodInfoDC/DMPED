@@ -35,7 +35,7 @@ data SFCondo_year_2017;
 run;
 
 data merge_SFCondo;
-	merge SFCondo_year_2017 (in=a) address_ssl_xref; 
+	merge SFCondo_year_2017 (in=a) address_ssl_xref ; 
 	by ssl;
 	if a;
 run;
@@ -53,10 +53,15 @@ run;
 
 
 data merge_SFCondo_Wards;
-	merge merge_SFCondo (in=a drop = ward2012) fix_address_points_2018_06;
+	merge merge_SFCondo (in=a rename=(ward2012=ward_a)) 
+		  fix_address_points_2018_06 (rename=(ward2012=ward_b));
     by Address_Id;
 	if a;
 	total_sales=1;
+
+	if ward_a ^= " " then ward2012 = ward_a;
+		else if ward_b ^= " " then ward2012 = ward_b;
+
 run;
 
 proc summary data=merge_SFCondo_Wards (where=(LargeUnit=1));
