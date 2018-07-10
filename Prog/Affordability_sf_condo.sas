@@ -258,13 +258,15 @@ run;
 
 proc sort data = sales_afford_SF_Condo; by saleyear; run;
 
-proc transpose data=sales_afford_SF_Condo out=sales_afford_SF_Condo_transpose(label="DC Single Family Home Sales Affordabilty for 80%, 50% Area Median Income, 2000-17");
-	var  PctAffordFirst_80AMI PctAffordFirst_50AMI PctAffordRepeat_80AMI PctAffordRepeat_50AMI AMI30_first_afford AMI30_repeat_afford
+proc transpose data=sales_afford_SF_Condo out=sales_afford_SF_Condo_transpose(label="DC Single Family Home Sales Affordabilty by Area Median Income, 2000-17");
+	var PctSales_Large PctAffordFirst_80AMI PctAffordFirst_50AMI PctAffordRepeat_80AMI PctAffordRepeat_50AMI PctAffordFirst_30AMI PctAffordRepeat_30AMI
 		;
 	by saleyear; 
 	id Ward2012;
 run; 
-
+proc sort data=sales_afford_SF_Condo_transpose;
+by _name_ saleyear;
+run; 
 proc export data=sales_afford_SF_Condo_transpose
 	outfile="&_dcdata_default_path\DMPED\Prog\sf_condo_tabs_aff.csv"
 	dbms=csv replace;
