@@ -19,9 +19,6 @@
 %DCData_lib( IPUMS )
 
 
-%let indata = Acs_2012_16_dc;
-%let vacdata = acs_2012_16_vacant_dc;
-
 %let cvars = allhh largeunit isschoolage isadult iskid
          issenior isdis raceW raceB raceH raceAPI raceO
 		 dcincome30 dcincome50 dcincome80 
@@ -34,26 +31,40 @@
 
 %let mvars = hher_age hh_inc kid_age isadult iskid;
 
+%macro recode_dvars (var1,var2);
+	if &var1. < 100 then &var2. = 0;
+	else if 100 <= &var1. < 200 then &var2. = 1;
+	else if 200 <= &var1. < 300 then &var2. = 2;
+	else if 300 <= &var1. < 400 then &var2. = 3;
+	else if 400 <= &var1. < 500 then &var2. = 4;
+	else if 500 <= &var1. < 600 then &var2. = 5;
+	else if 600 <= &var1. < 700 then &var2. = 6;
+	else if 700 <= &var1. < 800 then &var2. = 7;
+	else if 800 <= &var1. < 900 then &var2. = 8;
+	else if 900 <= &var1. < 1000 then &var2. = 9;
+	else if 1000 <= &var1. < 1100 then &var2. = 10;
+	else if 1100 <= &var1. < 1200 then &var2. = 11;
+	else if 1200 <= &var1. < 1300 then &var2. = 12;
+	else if 1300 <= &var1. < 1400 then &var2. = 13;
+	else if 1400 <= &var1. < 1500 then &var2. = 14;
+	else if 1500 <= &var1. < 1600 then &var2. = 15;
+%mend recode_dvars;
 
-%macro ipums_lgunit (tenure);
 
-%let ten = upcase(&tenure.);
+%macro ipums_lgunit (tenure,yrs);
 
-data hhwts;
-	set ipums.&indata. (where=(pernum=1 and gq in (1,2)))  
-		ipums.&vacdata. ;
-	keep serial puma hhwt;
+%let ten = %upcase( &tenure. );
+%let yrs = %upcase( &yrs. );
 
-	%if &ten. = OWN %then %do;
-		if ownershp = 1;
-	%end;
+%if &yrs. = ACS %then %do;
+	%let indata = Acs_2012_16_dc;
+	%let vacdata = acs_2012_16_vacant_dc;
+%end;
 
-	%else %if &ten. = RENT %then %do;
-		if ownershp = 2;
-	%end;
-run;
-
-proc sort data = hhwts; by serial; run;
+%if &yrs. = 2000 %then %do;
+	%let indata = Ipums_2000_dc;
+	%let vacdata = Ipums_2000_vacant_dc;
+%end;
 
 data vacdata;
 	set ipums.&vacdata. ;
@@ -67,8 +78,40 @@ data vacdata;
 	%end;
 run;
 
+data hhwts;
+	set ipums.&indata. (where=(pernum=1 and gq in (1,2)))  
+		vacdata ;
+	keep serial puma hhwt;
+
+	%if &ten. = OWN %then %do;
+		if ownershp = 1;
+	%end;
+
+	%else %if &ten. = RENT %then %do;
+		if ownershp = 2;
+	%end;
+run;
+
+proc sort data = hhwts; by serial; run;
+
+
+
 data pretables;
 	set Ipums.&indata.;
+
+	%if &yrs. = 2000 %then %do;
+		
+	%recode_dvars (raced,race);
+	%recode_dvars (hispand,hispan);
+	%recode_dvars (related,relate);
+
+	if builtyr in (1,2,3,4) then builtyr2 = 6;
+		else if builtyr in (5,6) then builtyr2 = 4;
+		else if builtyr in (7,8) then builtyr2 = 2;
+		else if builtyr in (9) then builtyr2 = 1;
+
+	%end;
+
 
 	%if &ten. = OWN %then %do;
 		if ownershp = 1;
@@ -204,7 +247,7 @@ data pretables;
 
 
 	/* Moved-in */
-	if year in (2016) then do;
+	%if &yrs. = 2000 %then %do;
 
 	if movedin in (1,2,3) then movedless1 = 1;
 		else movedless1 = 0;
@@ -215,9 +258,9 @@ data pretables;
 	if movedin in (5,6,7) then moved10plus = 1;
 		else moved10plus = 0;
 
-	end;
+	%end;
 
-	else if year in (2000) then do;
+	%else %if &yrs. = ACS %then %do;
 
 	if movedin in (1,2) then movedless1 = 1;
 		else movedless1 = 0;
@@ -228,7 +271,7 @@ data pretables;
 	if movedin in (6,7,8) then moved10plus = 1;
 		else moved10plus = 0;
 
-	end; 
+	%end; 
 
 	/* Bedroom size */
 	if bedrooms = 1 then bedrooms0 = 1;
@@ -475,3 +518,9 @@ run;
 
 
 %mend ipums_lgunit;
+
+%ipums_lgunit (all,ACS);
+%ipums_lgunit (own,ACS);
+%ipums_lgunit (rent,ACS);
+
+%ipums_lgunit (all,2000);
