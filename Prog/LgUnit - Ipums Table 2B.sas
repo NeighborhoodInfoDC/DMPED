@@ -22,15 +22,6 @@
 %let indata = Acs_2012_16_dc;
 %let vacdata = acs_2012_16_vacant_dc;
 
-
-data hhwts;
-	set ipums.&indata. (where=(pernum=1 and gq in (1,2)))  
-		ipums.&vacdata. ;
-	keep serial puma hhwt;
-run;
-
-proc sort data = hhwts; by serial; run;
-
 %let cvars = allhh largeunit isschoolage isadult iskid
          issenior isdis raceW raceB raceH raceAPI raceO
 		 dcincome30 dcincome50 dcincome80 
@@ -43,8 +34,49 @@ proc sort data = hhwts; by serial; run;
 
 %let mvars = hher_age hh_inc kid_age isadult iskid;
 
+
+%macro ipums_lgunit (tenure);
+
+%let ten = upcase(&tenure.);
+
+data hhwts;
+	set ipums.&indata. (where=(pernum=1 and gq in (1,2)))  
+		ipums.&vacdata. ;
+	keep serial puma hhwt;
+
+	%if &ten. = OWN %then %do;
+		if ownershp = 1;
+	%end;
+
+	%else %if &ten. = RENT %then %do;
+		if ownershp = 2;
+	%end;
+run;
+
+proc sort data = hhwts; by serial; run;
+
+data vacdata;
+	set ipums.&vacdata. ;
+
+	%if &ten. = OWN %then %do;
+		if vacancy in (2,4);
+	%end;
+
+	%else %if &ten. = RENT %then %do;
+		if vacancy in (1,3);
+	%end;
+run;
+
 data pretables;
 	set Ipums.&indata.;
+
+	%if &ten. = OWN %then %do;
+		if ownershp = 1;
+	%end;
+
+	%else %if &ten. = RENT %then %do;
+		if ownershp = 2;
+	%end;
 
 	 /*Keep only HHs*/
 	if gq in (1,2);
@@ -310,8 +342,8 @@ run;
 
 /* Add vacancy data */
 data pretables_withvac;
-	set pretables_collapse
-	ipums.&vacdata. (keep = serial puma vacancy hhwt);
+	set pretables_collapse 
+		vacdata (keep = serial puma vacancy hhwt);
 	if vacancy ^= . then vacant = 1;
 		else vacant = 0;
 
@@ -427,7 +459,7 @@ proc transpose data = table2b_all out = table2b_csv_all;
 	pct_units1 pct_units2to4 pct_units5to9 pct_units10to19 pct_units20plus
 
 	/* Year built */
-	BuiltBefore1940 Built1940to1959 Built1960to1979 Built1980to1999 Built2000After
+	pct_BuiltBefore1940 pct_Built1940to1959 pct_Built1960to1979 pct_Built1980to1999 pct_Built2000After
 
 	;
 
@@ -436,8 +468,10 @@ proc transpose data = table2b_all out = table2b_csv_all;
 run;
 
 
-proc export data = ACS_2012_16_map
-	outfile = "&_dcdata_default_path.\DMPED\Prog\ACS_2012_16_map.csv"
+proc export data = table2b_csv_all
+	outfile = "&_dcdata_default_path.\DMPED\Prog\table2b_csv_&tenure..csv"
 	dbms = csv replace;
 run;
 
+
+%mend ipums_lgunit;
