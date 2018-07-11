@@ -190,3 +190,7 @@ data tractsummary;
 set aff1000median aff1000threequarter aff1500median aff1500threequarter;
 run;
 
+proc export data=tractsummary
+	outfile="&_dcdata_default_path\DMPED\Prog\ACS table 1B.csv"
+	dbms=csv replace;
+run;
