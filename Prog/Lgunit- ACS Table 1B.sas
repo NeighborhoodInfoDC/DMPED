@@ -96,7 +96,6 @@ proc sort data= ressale;
 by geo2010;
 run;
 
-
 proc means median data = ressale (where=(saleyear=2017)); 
 by geo2010;
 var saleprice;
@@ -121,7 +120,7 @@ by geo2010;
 run;
 
 data tract_character;
-	merge ACScharacteristics crimedata prenatal medianhomesale;
+	merge calculate_pct ACScharacteristics crimedata prenatal medianhomesale;
 	by geo2010;
 run;
 
@@ -133,6 +132,12 @@ var pctnonwht pcthispan pctnonhisblk pctcollege pctwouths pctunemployed pctpover
 ;
 	output	out=aff1000median	mean= ;
 run;
+
+proc transpose data=aff1000median out=aff1000median;
+var pctnonwht pcthispan pctnonhisblk pctcollege pctwouths pctunemployed pctpoverty
+    pctfambelow75000 pctnonfam pctpropertycrime pctviolentcrime pctprenatal
+    rentersinglefam renter2to4 renter5to9 renter10to19 renter20plus ;
+by 
 
 proc summary data=tract_character;
 class aff1000threequarter;
