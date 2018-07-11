@@ -137,7 +137,8 @@ proc transpose data=aff1000median out=aff1000median;
 var pctnonwht pcthispan pctnonhisblk pctcollege pctwouths pctunemployed pctpoverty
     pctfambelow75000 pctnonfam pctpropertycrime pctviolentcrime pctprenatal
     rentersinglefam renter2to4 renter5to9 renter10to19 renter20plus ;
-by 
+id aff1000median;
+run;
 
 proc summary data=tract_character;
 class aff1000threequarter;
@@ -146,6 +147,12 @@ var pctnonwht pcthispan pctnonhisblk pctcollege pctwouths pctunemployed pctpover
     rentersinglefam renter2to4 renter5to9 renter10to19 renter20plus 
 ;
 	output	out=aff1000threequarter	mean= ;
+run;
+proc transpose data=aff1000threequarter out=aff1000threequarter;
+var pctnonwht pcthispan pctnonhisblk pctcollege pctwouths pctunemployed pctpoverty
+    pctfambelow75000 pctnonfam pctpropertycrime pctviolentcrime pctprenatal
+    rentersinglefam renter2to4 renter5to9 renter10to19 renter20plus ;
+id aff1000threequarter;
 run;
 
 proc summary data=tract_character;
@@ -156,6 +163,12 @@ var pctnonwht pcthispan pctnonhisblk pctcollege pctwouths pctunemployed pctpover
 ;
 	output	out=aff1500median	mean= ;
 run;
+proc transpose data=aff1500median out=aff1500median;
+var pctnonwht pcthispan pctnonhisblk pctcollege pctwouths pctunemployed pctpoverty
+    pctfambelow75000 pctnonfam pctpropertycrime pctviolentcrime pctprenatal
+    rentersinglefam renter2to4 renter5to9 renter10to19 renter20plus ;
+id aff1500median;
+run;
 
 proc summary data=tract_character;
 class aff1500threequarter;
@@ -164,5 +177,16 @@ var pctnonwht pcthispan pctnonhisblk pctcollege pctwouths pctunemployed pctpover
     rentersinglefam renter2to4 renter5to9 renter10to19 renter20plus 
 ;
 	output	out=aff1500threequarter	mean= ;
+run;
+
+proc transpose data=aff1500threequarter out=aff1500threequarter;
+var pctnonwht pcthispan pctnonhisblk pctcollege pctwouths pctunemployed pctpoverty
+    pctfambelow75000 pctnonfam pctpropertycrime pctviolentcrime pctprenatal
+    rentersinglefam renter2to4 renter5to9 renter10to19 renter20plus ;
+id aff1500threequarter;
+run;
+
+data tractsummary;
+set aff1000median aff1000threequarter aff1500median aff1500threequarter;
 run;
 
