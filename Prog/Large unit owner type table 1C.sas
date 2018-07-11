@@ -171,28 +171,144 @@ proc export data=BuildingAge
 run;
 /* percent of units with 3+ bedrooms by property type*/
 
-data property_type;
-set merge_SFCondo_Wards (where=(LargeUnit=1));
-run;
-proc sort data=property_type;
-by refyear ward2012;
+/*percent large units for both SF and condo*/
+data largeunits;
+set merge_SFCondo_Wards;
 run;
 
-proc summary data=property_type;
-by refyear ward2012;
-var singlefamily condo combined total_sales;
-output  out= PropertyType sum=;
+proc sort data=largeunits;
+by ward2012 refyear;
 run;
-proc sort data=PropertyType;
+proc summary data=largeunits;
+	by ward2012 refyear;
+	var total_sales LargeUnit ;
+	output	out=largeunits_ward sum= ;
+run;
+proc sort data=largeunits_ward;
 by refyear;
 run;
-proc transpose data=PropertyType out=PropertyType;
-var total_sales singlefamily condo combined;
+proc sort data=largeunits;
+by city refyear;
+run;
+proc summary data=largeunits;
+	by city refyear;
+	var total_sales LargeUnit ;
+	output	out=largeunits_city sum= ;
+run;
+proc sort data=largeunits_city;
+by refyear;
+run;
+
+data Pctlagre;
+set largeunits_city largeunits_ward;
+if city = "1" then Ward2012 = "0";
+pctlargeunit= (LargeUnit/total_sales)*100;
+run;
+proc sort data=Pctlagre;
+by refyear;
+run;
+
+proc transpose data=Pctlagre out=Pctlagre;
+var total_sales LargeUnit pctlargeunit ;
 by refyear;
 id ward2012;
 run;
 
-proc export data=PropertyType
-	outfile="&_dcdata_default_path\DMPED\Prog\sf_condo_PropertyType.csv"
+proc export data=Pctlagre
+	outfile="&_dcdata_default_path\DMPED\Prog\sf_condo_pctlarge_all.csv"
+	dbms=csv replace;
+run;
+
+/*single family*/
+
+data singlefamily;
+set merge_SFCondo_Wards (where=(singlefamily=1));
+run;
+
+proc sort data=singlefamily;
+by ward2012 refyear;
+run;
+proc summary data=singlefamily;
+	by ward2012 refyear;
+	var total_sales LargeUnit ;
+	output	out=singlefamily_ward sum= ;
+run;
+proc sort data=singlefamily_ward;
+by refyear;
+run;
+proc sort data=singlefamily;
+by city refyear;
+run;
+proc summary data=singlefamily;
+	by city refyear;
+	var total_sales LargeUnit ;
+	output	out=singlefamily_city sum= ;
+run;
+proc sort data=singlefamily_city;
+by refyear;
+run;
+data PctlagreSF;
+set singlefamily_city singlefamily_ward;
+if city = "1" then Ward2012 = "0";
+pctlargeSF= (LargeUnit/total_sales)*100;
+run;
+proc sort data=PctlagreSF;
+by refyear;
+run;
+proc transpose data=PctlagreSF out=PctlagreSF;
+var total_sales LargeUnit pctlargeSF ;
+by refyear;
+id ward2012;
+run;
+
+proc export data=PctlagreSF
+	outfile="&_dcdata_default_path\DMPED\Prog\sf_condo_pctlarge_SF.csv"
+	dbms=csv replace;
+run;
+
+/*Condo*/
+
+data Condo;
+set merge_SFCondo_Wards (where=(condo=1));
+run;
+
+proc sort data=Condo;
+by ward2012 refyear;
+run;
+proc summary data=Condo;
+	by ward2012 refyear;
+	var total_sales LargeUnit ;
+	output	out=Condo_ward sum= ;
+run;
+proc sort data=Condo_ward;
+by refyear;
+run;
+proc sort data=Condo;
+by city refyear;
+run;
+proc summary data=Condo;
+	by city refyear;
+	var total_sales LargeUnit ;
+	output	out=Condo_city sum= ;
+run;
+proc sort data=Condo_city;
+by refyear;
+run;
+data PctlagreCondo;
+set Condo_city Condo_ward;
+if city = "1" then Ward2012 = "0";
+pctlargeCondo= (LargeUnit/total_sales)*100;
+run;
+proc sort data=PctlagreCondo;
+by refyear;
+run;
+proc transpose data=PctlagreCondo out=PctlagreCondo;
+var total_sales LargeUnit pctlargeCondo ;
+by refyear;
+id ward2012;
+run;
+
+proc export data=PctlagreCondo
+	outfile="&_dcdata_default_path\DMPED\Prog\sf_condo_pctlarge_Condo.csv"
 	dbms=csv replace;
 run;
