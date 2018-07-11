@@ -19,7 +19,8 @@
 %DCData_lib( IPUMS )
 
 
-%let indata = ipums_2000_dc;
+%let indata = Acs_2012_16_dc;
+%let vacdata = acs_2012_16_vacant_dc;
 
 
 data hhwts;
@@ -36,12 +37,15 @@ proc sort data = hhwts; by serial; run;
 		 dcincome30 dcincome50 dcincome80 
 		 before1gen before2gen after1gen
 		 movedless1 moved2to10 moved10plus
+		 bedrooms0 bedrooms1 bedrooms2 bedrooms3 bedrooms4 bedrooms5plus
+		 units1 units2to4 units5to9 units10to19 units20plus
+		 BuiltBefore1940 Built1940to1959 Built1960to1979 Built1980to1999 Built2000After
 		 ;
 
 %let mvars = hher_age hh_inc kid_age isadult iskid;
 
 data pretables;
-	set ipums.&indata.;
+	set Ipums.&indata.;
 
 	 /*Keep only HHs*/
 	if gq in (1,2);
@@ -215,7 +219,7 @@ data pretables;
 		else bedrooms5plus = 0;
 
 	/* Units in structure */
-	if unitsstr in (3,4) then units1 = 1;
+	if unitsstr in (3,4) then units1 = 1; 
 		else units1 = 0;
 
 	if unitsstr in (5,6) then units2to4 = 1;
@@ -231,14 +235,14 @@ data pretables;
 		else units20plus = 0;
 
 	/* Year built */
-	if builtyr2 = 1 then BuiltBefore1940 = 1;
+	if builtyr2 = 1 then BuiltBefore1940 = 1; 
 		else BuiltBefore1940 = 0;
 
 	if builtyr2 in (2,3) then Built1940to1959 = 1;
 		else Built1940to1959 = 0;
 
 	if builtyr2 in (4,5) then Built1960to1979 = 1;
-		else Built1940to1959 = 0;
+		else Built1960to1979 = 0;
 
 	if builtyr2 in (6,7) then Built1980to1999 = 1;
 		else Built1980to1999 = 0;
@@ -307,8 +311,7 @@ run;
 
 proc summary data = pretables_collapse;
 	class largeunit;
-	var allhh raceW raceB raceH raceAPI raceO dcincome30 dcincome50 dcincome80 multigen grouphouse issenior isdis
-		movedless1 moved2to10 moved10plus;
+	var &cvars. multigen grouphouse;
 	weight hhwt;
 	output out = table2b_pre sum=;
 run;
@@ -334,6 +337,25 @@ data table2b_pcts;
 	pct_movedless1 = movedless1 / allhh;
 	pct_moved2to10 = moved2to10 / allhh;
 	pct_moved10plus = moved10plus / allhh;
+
+	pct_bedrooms0 = bedrooms0 / allhh; 
+	pct_bedrooms1 = bedrooms1 / allhh; 
+	pct_bedrooms2 = bedrooms2 / allhh; 
+	pct_bedrooms3 = bedrooms3 / allhh; 
+	pct_bedrooms4 = bedrooms4 / allhh; 
+	pct_bedrooms5plus = bedrooms5plus / allhh; 
+
+	pct_units1 = units1 / allhh;
+	pct_units2to4 = units2to4 / allhh;
+	pct_units5to9 = units5to9 / allhh;
+	pct_units10to19 = units10to19 / allhh;
+	pct_units20plus = units20plus / allhh;
+
+	pct_BuiltBefore1940 = BuiltBefore1940 / allhh;
+	pct_Built1940to1959 = Built1940to1959 / allhh;
+	pct_Built1960to1979 = Built1960to1979 / allhh;
+	pct_Built1980to1999 = Built1980to1999 / allhh;
+	pct_Built2000After = Built2000After / allhh;
 
 run;
 
