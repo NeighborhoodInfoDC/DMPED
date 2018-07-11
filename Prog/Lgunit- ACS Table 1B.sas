@@ -42,7 +42,7 @@ run;
 
 data ACScharacteristics;
      set ACS.acs_2012_16_dc_sum_tr_tr10;
-	 keep geo2010 popaloneh_&_years.  popblacknonhispbridge_&_years.  popalonew_&_years.  popwithrace_&_years. 
+	 keep geo2010 popaloneh_&_years.  popblacknonhispbridge_&_years.  popalonew_&_years.  popwithrace_&_years. pop25andoveryears_&_years.
           pop25andoverwcollege_&_years. pop25andoverwouths_&_years. popunemployed_&_years. poppoorpersons_&_years. totpop_&_years. 
 	      famincomelt75k_&_years. numfamilies_&_years. nonfamilyhhtot_&_years. medfamincm_&_years. numhshlds_&_years.
 		  pop25andoveryears&_years. popincivlaborforce_&_years.	numrenteroccupiedhu_&_years.	
@@ -55,8 +55,8 @@ data ACScharacteristics;
 pctnonwht= (popwithrace_&_years. -popalonew_&_years.)/popwithrace_&_years.*100;
 pcthispan= (popaloneh_&_years.)/popwithrace_&_years.*100;
 pctnonhisblk= (popblacknonhispbridge_&_years.)/popwithrace_&_years.*100;
-pctcollege= (pop25andoverwcollege_&_years.)/pop25andoveryears&_years.	*100;
-pctwouths= (pop25andoverwouths_&_years.)/pop25andoveryears&_years.*100;
+pctcollege= (pop25andoverwcollege_&_years.)/pop25andoveryears_&_years.*100;
+pctwouths= (pop25andoverwouths_&_years.)/pop25andoveryears_&_years.*100;
 pctunemployed= (popunemployed_&_years.)/popincivlaborforce_&_years.*100;
 pctpoverty= (poppoorpersons_&_years.)/totpop_&_years. *100;
 pctfambelow75000 = (famincomelt75k_&_years.)/numfamilies_&_years.*100;
@@ -139,6 +139,10 @@ var pctnonwht pcthispan pctnonhisblk pctcollege pctwouths pctunemployed pctpover
     rentersinglefam renter2to4 renter5to9 renter10to19 renter20plus ;
 id aff1000median;
 run;
+data aff1000median;
+set aff1000median;
+category="1000median";
+run;
 
 proc summary data=tract_character;
 class aff1000threequarter;
@@ -153,6 +157,10 @@ var pctnonwht pcthispan pctnonhisblk pctcollege pctwouths pctunemployed pctpover
     pctfambelow75000 pctnonfam pctpropertycrime pctviolentcrime pctprenatal
     rentersinglefam renter2to4 renter5to9 renter10to19 renter20plus ;
 id aff1000threequarter;
+run;
+data aff1000threequarter;
+set aff1000threequarter;
+category="1000quarter";
 run;
 
 proc summary data=tract_character;
@@ -169,6 +177,10 @@ var pctnonwht pcthispan pctnonhisblk pctcollege pctwouths pctunemployed pctpover
     rentersinglefam renter2to4 renter5to9 renter10to19 renter20plus ;
 id aff1500median;
 run;
+data aff1500median;
+set aff1500median;
+category="1500median";
+run;
 
 proc summary data=tract_character;
 class aff1500threequarter;
@@ -184,6 +196,10 @@ var pctnonwht pcthispan pctnonhisblk pctcollege pctwouths pctunemployed pctpover
     pctfambelow75000 pctnonfam pctpropertycrime pctviolentcrime pctprenatal
     rentersinglefam renter2to4 renter5to9 renter10to19 renter20plus ;
 id aff1500threequarter;
+run;
+data aff1500threequarter;
+set aff1500threequarter;
+category="1500quarter";
 run;
 
 data tractsummary;
