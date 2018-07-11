@@ -43,23 +43,23 @@ proc sort data = hhwts; by serial; run;
 data pretables;
 	set ipums.&indata.;
 
-	 /*only households*/
+	 /*Keep only HHs*/
 	if gq in (1,2);
 
 	/* All households */
 	allhh = 1;
 
-	/*householder age */
+	/* Householder age */
 	if pernum = 1 then hher_age = age;
 
-	/*household income*/
+	/* Gousehold income */
 	if pernum = 1 then hh_inc = hhincome;
 
-    /*large unit*/
+    /* Flag large units*/
 	if numprec >= 4 then largeunit = 1;
 		else largeunit = 0;
 
-	/*adult*/
+	/* Adult*/
 	if age>=18 then isadult = 1;
 	    else isadult = 0;
 
@@ -195,6 +195,56 @@ data pretables;
 
 	end; 
 
+	/* Bedroom size */
+	if bedrooms = 1 then bedrooms0 = 1;
+		else bedrooms0 = 0;
+
+	if bedrooms = 2 then bedrooms1 = 1;
+		else bedrooms1 = 0;
+
+	if bedrooms = 3 then bedrooms2 = 1;
+		else bedrooms2 = 0;
+
+	if bedrooms = 4 then bedrooms3 = 1;
+		else bedrooms3 = 0;
+
+	if bedrooms = 5 then bedrooms4 = 1;
+		else bedrooms4 = 0;
+
+	if bedrooms > 5 then bedrooms5plus = 1;
+		else bedrooms5plus = 0;
+
+	/* Units in structure */
+	if unitsstr in (3,4) then units1 = 1;
+		else units1 = 0;
+
+	if unitsstr in (5,6) then units2to4 = 1;
+		else units2to4 = 0;
+
+	if unitsstr in (7) then units5to9 = 1;
+		else units5to9 = 0;
+
+	if unitsstr in (8) then units10to19 = 1;
+		else units10to19 = 0;
+
+	if unitsstr in (9,10) then units20plus = 1;
+		else units20plus = 0;
+
+	/* Year built */
+	if builtyr2 = 1 then BuiltBefore1940 = 1;
+		else BuiltBefore1940 = 0;
+
+	if builtyr2 in (2,3) then Built1940to1959 = 1;
+		else Built1940to1959 = 0;
+
+	if builtyr2 in (4,5) then Built1960to1979 = 1;
+		else Built1940to1959 = 0;
+
+	if builtyr2 in (6,7) then Built1980to1999 = 1;
+		else Built1980to1999 = 0;
+
+	if builtyr2 >= 9 then Built2000After = 1;
+		else Built2000After = 0;
 
 	keep &cvars. &mvars. nonrelative numkids numadults
 		  serial hhwt pernum hhtype numprec race hispan age hhincome;
