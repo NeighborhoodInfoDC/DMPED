@@ -24,11 +24,9 @@
 data ACS_2012_16_map; 
 	set acs.acs_2012_16_dc_sum_tr&geo_suffix.;
 
-	numhsgunits_2012_16 = sum(of numhsgunits0bd_2012_16 numhsgunits1bd_2012_16 numhsgunits2bd_2012_16 numhsgunits3plusbd_2012_16);
+	** Create map vars **;
 
-	keep &geo. numhsgunits_2012_16 numrenteroccupiedhu_2012_16 all3brplusrentunits numrnt3br_under1000 numrnt3br_under1500 pctrnt3br_under1000 pctrnt3br_under1500 pct3brrent
-		 pctnonfamilyhh4plus pctfamilyhh4plus
-	;
+	numhsgunits_2012_16 = sum(of numhsgunits0bd_2012_16 numhsgunits1bd_2012_16 numhsgunits2bd_2012_16 numhsgunits3plusbd_2012_16);
 
 	all3brplusrentunits = sum(of numrtohu3bunder500_2012_16 numrtohu3b500to749_2012_16 numrtohu3b750to999_2012_16
 							numrtohu3b1000to1499_2012_16 numrtohu3b1500plus_2012_16);
@@ -47,6 +45,9 @@ data ACS_2012_16_map;
 	familyhh4plus = sum(of familyhh4person_2012_16 familyhh5person_2012_16 familyhh6person_2012_16 familyhh7person_2012_16);
 	pctfamilyhh4plus = familyhh4plus / familyhhtot_2012_16	;
 
+	** Create unformatted geo var **;
+	&geo.2 = &geo.;
+
 	label all3brplusrentunits = "All 3br+ rental units"
 		  numrnt3br_under1000 = "Number of 3br+ rental units under $1,000"
 		  numrnt3br_under1500 = "Number of 3br+ rental units under $1,500"
@@ -57,11 +58,17 @@ data ACS_2012_16_map;
 		  pctfamilyhh4plus = "Percent of family households with 4+ people"
 		  ;
 
+	** Keep vars for map **;
+
+	keep &geo. &geo.2 numhsgunits_2012_16 numrenteroccupiedhu_2012_16 all3brplusrentunits numrnt3br_under1000 numrnt3br_under1500 pctrnt3br_under1000 pctrnt3br_under1500 pct3brrent
+		 pctnonfamilyhh4plus pctfamilyhh4plus
+	;
+
 run;
 
 
 proc export data = ACS_2012_16_map
-	outfile = "&_dcdata_default_path.\DMPED\Prog\ACS_2012_16_map.csv"
+	outfile = "&_dcdata_r_path.\DMPED\Maps\ACS_2012_16_map.csv"
 	dbms = csv replace;
 run;
 
