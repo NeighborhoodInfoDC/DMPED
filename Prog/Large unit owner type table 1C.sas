@@ -63,22 +63,29 @@ data merge_SFCondo_Wards;
 	if ward_a ^= " " then ward2012 = ward_a;
 		else if ward_b ^= " " then ward2012 = ward_b;
 
-run;
+	if ui_proptype="10" then singlefamily=1; else singlefamily=0;
+	if ui_proptype="11" then condo=1; else condo=0;
+	if singlefamily=1 or condo=1 then combined=1; else combined=0;
 
+run;
+proc sort data=merge_SFCondo_Wards;
+by city refyear;
+run;
 proc summary data=merge_SFCondo_Wards (where=(LargeUnit=1));
-	class city refyear;
+	by city refyear;
 	var total_sales govtown corporations cdcNFP otherind renter Owner_occ_sale renter senior;
 	output	out=City_level	sum= ;
 	format city $CITY16.;
 run;
-
+proc sort data=merge_SFCondo_Wards;
+by ward2012 refyear;
+run;
 proc summary data=merge_SFCondo_Wards(where=(LargeUnit=1));
-	class ward2012 refyear;
+	by ward2012 refyear;
 	var total_sales govtown corporations cdcNFP otherind renter Owner_occ_sale renter senior;
 	output	out=ward_level	sum= ;
 	format city $CITY16.;
 run;
-
 
 data owner_category (label="percent of large units by owner category" drop=_type_ _freq_);
 
@@ -119,20 +126,42 @@ run;
 data age;
 set merge_SFCondo_Wards;
 if AYB<2000 then before2000 = 1; else before2000=0;
-run;
 
-proc summary data=age(where=(LargeUnit=1));
-	class before2000 ward2012;
-	var total_sales LargeUnit refyear;
-	output	out=BuildingAge	sum= ;
 run;
 proc sort data=age;
-by refyear;
+by ward2012 refyear before2000;
+run;
+proc summary data=age;
+	by ward2012 refyear before2000;
+	var total_sales LargeUnit ;
+	output	out=BuildingAge_ward sum= ;
+run;
+proc sort data=BuildingAge_ward;
+by before2000 refyear;
+run;
+proc sort data=age;
+by city refyear before2000;
+run;
+proc summary data=age;
+	by city refyear before2000;
+	var total_sales LargeUnit ;
+	output	out=BuildingAge_city sum= ;
+run;
+proc sort data=BuildingAge_city;
+by before2000 refyear;
 run;
 
-proc transpose data=age out=BuildingAge;
+data BuildingAge;
+set BuildingAge_city BuildingAge_ward;
+if city = "1" then Ward2012 = "0";
+run;
+proc sort data=BuildingAge;
+by before2000 refyear;
+run;
+
+proc transpose data=BuildingAge out=BuildingAge;
 var total_sales LargeUnit;
-by refyear;
+by before2000 refyear;
 id ward2012;
 run;
 
@@ -144,13 +173,13 @@ run;
 
 data property_type;
 set merge_SFCondo_Wards (where=(LargeUnit=1));
-if ui_proptype=001 or ui_proptype=011 or ui_proptype=012 or ui_proptype=013 then singlefamily=1; else singlefamily=0;
-if ui_proptype= 016 or ui_proptype= 017 then condo=1; else condo=0;
-if condo=1 or singlefamily=1 then combined=1; else combined=0;
+run;
+proc sort data=property_type;
+by refyear ward2012;
 run;
 
-proc summary data=property_type(where=(LargeUnit=1));
-class refyear ward2012;
+proc summary data=property_type;
+by refyear ward2012;
 var singlefamily condo combined total_sales;
 output  out= PropertyType sum=;
 run;
