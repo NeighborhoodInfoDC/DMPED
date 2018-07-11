@@ -24,10 +24,10 @@
 
 
 data hhwts;
-	set ipums.acs_2012_16_dc;
-	if pernum = 1;
-	if gq in (1,2);
-	keep serial hhwt;
+	set ipums.&indata. (where=(pernum=1 and gq in (1,2)))  
+		ipums.&vacdata. ;
+
+	keep serial puma hhwt;
 run;
 
 proc sort data = hhwts; by serial; run;
@@ -309,9 +309,22 @@ data pretables_collapse;
 run;
 
 
-proc summary data = pretables_collapse;
-	class largeunit;
-	var &cvars. multigen grouphouse;
+/* Add vacancy data */
+data pretables_withvac;
+	set pretables_collapse
+	ipums.&vacdata. (keep = serial puma vacancy hhwt);
+	if vacancy ^= . then vacant = 1;
+		else vacant = 0;
+
+	allhh_withvac = 1;
+
+
+run;
+
+
+proc summary data = pretables_withvac;
+	class puma largeunit;
+	var &cvars. multigen grouphouse vacant allhh_withvac;
 	weight hhwt;
 	output out = table2b_pre sum=;
 run;
@@ -357,11 +370,13 @@ data table2b_pcts;
 	pct_Built1980to1999 = Built1980to1999 / allhh;
 	pct_Built2000After = Built2000After / allhh;
 
+	pct_vacant = vacant / allhh_withvac;
+
 run;
 
 
 proc summary data = pretables_collapse;
-	class largeunit;
+	class puma largeunit;
 	var &mvars.;
 	weight hhwt;
 	output out = table2b_m median=;
@@ -369,8 +384,20 @@ run;
 
 
 proc summary data = pretables_collapse;
-	class largeunit;
+	class puma largeunit;
 	var numkids numadults;
 	weight hhwt;
 	output out = table2b_n median=;
+run;
+
+
+data table2b_all;
+	merge table2b_pcts table2b_m table2b_n;
+run;
+
+
+
+proc transpose data = table2b_pcts;
+	var pct_raceW pct_raceB pct_raceH pct_raceAPI pct_raceO;
+	id largeunit puma;
 run;
