@@ -19,8 +19,9 @@
 %include "L:\SAS\Inc\StdLocal.sas";
 
 ** Define libraries **;
-%DCData_lib( DMPED);
-%DCData_lib( MAR);
+%DCData_lib( DMPED );
+%DCData_lib( MAR );
+%dcdata_lib( realprop );
 
 proc sort data= DMPED.SFCondo_year_2017 out = SFCondo_year_2017;
 by ssl;
@@ -55,7 +56,8 @@ run;
 
 data merge_SFCondo_Wards;
 	merge merge_SFCondo (in=a rename=(ward2012=ward_a)) 
-		  fix_address_points_2018_06 (rename=(ward2012=ward_b));
+		  fix_address_points_2018_06 (keep=address_id ssl ward2012 active_res_unit_count active_res_occupancy_count 
+										rename=(ward2012=ward_b));
     by Address_Id;
 	if a;
 	total_sales=1;
