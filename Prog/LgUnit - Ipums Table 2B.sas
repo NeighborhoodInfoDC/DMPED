@@ -26,7 +26,6 @@
 data hhwts;
 	set ipums.&indata. (where=(pernum=1 and gq in (1,2)))  
 		ipums.&vacdata. ;
-
 	keep serial puma hhwt;
 run;
 
@@ -342,7 +341,7 @@ data table2b_pcts;
 	pct_dcincome50 = dcincome50 / allhh;
 	pct_dcincome80 = dcincome80 / allhh;
 
-	pct_issenior = issenior / allhh;
+	pct_issenior = issenior / allhh; 
 	pct_isdis = isdis / allhh;
 	pct_multigen = multigen / allhh;
 	pct_grouphouse = grouphouse / allhh;
@@ -358,7 +357,7 @@ data table2b_pcts;
 	pct_bedrooms4 = bedrooms4 / allhh; 
 	pct_bedrooms5plus = bedrooms5plus / allhh; 
 
-	pct_units1 = units1 / allhh;
+	pct_units1 = units1 / allhh; 
 	pct_units2to4 = units2to4 / allhh;
 	pct_units5to9 = units5to9 / allhh;
 	pct_units10to19 = units10to19 / allhh;
@@ -393,11 +392,52 @@ run;
 
 data table2b_all;
 	merge table2b_pcts table2b_m table2b_n;
+	if _type_ in (1,3);
+	if puma = . then puma = 100;
 run;
 
 
+/* Transpose data to fit final Table shell */
 
-proc transpose data = table2b_pcts;
-	var pct_raceW pct_raceB pct_raceH pct_raceAPI pct_raceO;
+proc transpose data = table2b_all out = table2b_csv_all;
+
+	var 
+	/* HH count */
+	allhh
+
+	/* Race */
+	pct_raceW pct_raceB pct_raceH pct_raceAPI pct_raceO
+
+	/* Age */
+	hher_age
+
+	/* Income */
+	hh_inc pct_dcincome30 pct_dcincome50 pct_dcincome80
+
+	/* HH Structure */
+	pct_issenior pct_isdis pct_multigen pct_grouphouse numadults numkids 
+
+	/* Migration */
+	pct_movedless1 pct_moved2to10 pct_moved10plus
+
+	/* Bedrooms */
+	pct_bedrooms0 pct_bedrooms1 pct_bedrooms2 pct_bedrooms3 pct_bedrooms4 pct_bedrooms5plus
+
+	/* Units in structure */
+	pct_units1 pct_units2to4 pct_units5to9 pct_units10to19 pct_units20plus
+
+	/* Year built */
+	BuiltBefore1940 Built1940to1959 Built1960to1979 Built1980to1999 Built2000After
+
+	;
+
 	id largeunit puma;
+
 run;
+
+
+proc export data = ACS_2012_16_map
+	outfile = "&_dcdata_default_path.\DMPED\Prog\ACS_2012_16_map.csv"
+	dbms = csv replace;
+run;
+
