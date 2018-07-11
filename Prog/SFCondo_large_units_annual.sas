@@ -99,8 +99,8 @@ run;
       if AYB >= 2000 then BldgAgeGT2000 = 1;
       else if AYB ne . then BldgAgeGT2000 = 0;
 	
-	  if hstd_code in ("5" "B") then senior = 1;
-      else if hstd_code in("0" "1" "2" "3") then senior= 0;
+	  if hstd_code in ("5" ) then senior = 1;
+      else if hstd_code in("0" "1" "2" "3" "B") then senior= 0;
 
 	  *Taxable corporations, partnerships, associations, banks, GSEs;
 	  if ownercat in ("115" "120" "130") then corporations = 1;
@@ -143,7 +143,7 @@ run;
     ;
     
     keep 
-      ssl largeunit saledate saleyear next_saledate usecode ui_proptype ownerpt_extractdat_first ownerpt_extractdat_last city ward2012 zip geo2010 cluster2017 cluster_tr2000 x_coord y_coord usecode 
+      ssl largeunit total saledate saleyear next_saledate usecode ui_proptype ownerpt_extractdat_first ownerpt_extractdat_last city ward2012 zip geo2010 cluster2017 cluster_tr2000 x_coord y_coord usecode 
       report_dt start_dt end_dt adj_start_dt adj_end_dt renter BldgAgeGT2000 AYB hstd_code Owner_occ_sale ownercat senior corporations cdcNFP otherind govtown
 	 ;
     
@@ -170,7 +170,7 @@ run;
 
 %mend create_annual;
 
-%create_annual( out_ds=SFCondo_qtr_2017, unit=qtr, rpt_end_dt='31mar2018'd, label="Quarterly SF-Condo Parcels for Large Units Study", revisions=New file.)
+%create_annual( out_ds=SFCondo_qtr_2017, unit=qtr, rpt_end_dt='31mar2018'd, label="Quarterly SF-Condo Parcels for Large Units Study", revisions=Added total.)
 
-%create_annual( out_ds=SFCondo_year_2017, unit=year, rpt_end_dt='31mar2018'd, label="Annual SF-Condo Parcels for Large Units Study", revisions=New file. )
+%create_annual( out_ds=SFCondo_year_2017, unit=year, rpt_end_dt='31mar2018'd, label="Annual SF-Condo Parcels for Large Units Study", revisions=Added total. )
 
