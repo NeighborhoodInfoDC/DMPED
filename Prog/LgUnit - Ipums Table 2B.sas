@@ -2,7 +2,7 @@
  Program:  LgUnit - Ipums Table 2B.sas
  Library:  IPUMS
  Project:  NeighborhoodInfo DC
- Author:   Yipeng
+ Author:   Yipeng and Rob
  Created:  06/14/2018
  Version:  SAS 9.4
  Environment:  Local Windows session (desktop)
@@ -83,6 +83,14 @@ data hhwts;
 		vacdata ;
 	keep serial puma hhwt;
 
+	%if &yrs. = 2000 %then %do;
+
+	if ownershd in (12,13) then ownershp = 1;
+	else if ownershd in (21,22) then ownershp = 2;
+
+	%end;
+
+
 	%if &ten. = OWN %then %do;
 		if ownershp = 1;
 	%end;
@@ -104,6 +112,11 @@ data pretables;
 	%recode_dvars (raced,race);
 	%recode_dvars (hispand,hispan);
 	%recode_dvars (related,relate);
+
+	if ownershd in (12,13) then ownershp = 1;
+	else if ownershd in (21,22) then ownershp = 2;
+
+	/* Recode builtyr to match builtyr2 from ACS data */
 
 	if builtyr in (1,2,3,4) then builtyr2 = 6;
 		else if builtyr in (5,6) then builtyr2 = 4;
@@ -249,26 +262,26 @@ data pretables;
 	/* Moved-in */
 	%if &yrs. = 2000 %then %do;
 
-	if movedin in (1,2,3) then movedless1 = 1;
-		else movedless1 = 0;
-
-	if movedin in (4) then moved2to10 = 1;
-		else moved2to10 = 0;
-
-	if movedin in (5,6,7) then moved10plus = 1;
-		else moved10plus = 0;
-
-	%end;
-
-	%else %if &yrs. = ACS %then %do;
-
-	if movedin in (1,2) then movedless1 = 1;
+	if movedin in (1) then movedless1 = 1;
 		else movedless1 = 0;
 
 	if movedin in (2,3,4,5) then moved2to10 = 1;
 		else moved2to10 = 0;
 
 	if movedin in (6,7,8) then moved10plus = 1;
+		else moved10plus = 0;
+
+	%end;
+
+	%else %if &yrs. = ACS %then %do;
+
+	if movedin in (1) then movedless1 = 1;
+		else movedless1 = 0;
+
+	if movedin in (2,3,4) then moved2to10 = 1;
+		else moved2to10 = 0;
+
+	if movedin in (5,6,7,8) then moved10plus = 1;
 		else moved10plus = 0;
 
 	%end; 
@@ -325,7 +338,7 @@ data pretables;
 		else Built2000After = 0;
 
 	keep &cvars. &mvars. nonrelative numkids numadults
-		  serial hhwt pernum hhtype numprec race hispan age hhincome;
+		  serial hhwt pernum numprec race hispan age hhincome;
   
 run;
 
@@ -512,15 +525,19 @@ run;
 
 
 proc export data = table2b_csv_all
-	outfile = "&_dcdata_default_path.\DMPED\Prog\table2b_csv_&tenure..csv"
+	outfile = "&_dcdata_default_path.\DMPED\Prog\table2b_csv_&yrs._&tenure..csv"
 	dbms = csv replace;
 run;
 
 
 %mend ipums_lgunit;
 
+%ipums_lgunit (all,2000);
+%ipums_lgunit (own,2000);
+%ipums_lgunit (rent,2000);
+
 %ipums_lgunit (all,ACS);
 %ipums_lgunit (own,ACS);
 %ipums_lgunit (rent,ACS);
 
-%ipums_lgunit (all,2000);
+
