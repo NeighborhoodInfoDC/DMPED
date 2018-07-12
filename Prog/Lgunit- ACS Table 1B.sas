@@ -26,17 +26,22 @@ data calculate_pct;
           numrtohu3b500to749_&_years. numrtohu3b750to999_&_years.  numrtohu3bunder500_&_years. numrtohu3b1500plus_&_years.
           pct3baffordable1000 pct3baffordable1500 aff1000median aff1000threequarter aff1500median aff1500threequarter;
 
-          pct3baffordable1500= (numrentocchu3bd_&_years.-numrtohu3b1500plus_&_years.)/numrentocchu3bd_&_years.;
-          pct3baffordable1000= sum(numrtohu3b500to749_&_years.,numrtohu3b750to999_&_years., numrtohu3bunder500_&_years.)/numrentocchu3bd_&_years.;
-     if   pct3baffordable1000 >=0.5 then aff1000median=1;
+          pct3baffordable1500= (numrentocchu3plusbd_&_years.-numrtohu3b1500plus_&_years.)/numrentocchu3plusbd_&_years.;
+          pct3baffordable1000= sum(numrtohu3b500to749_&_years.,numrtohu3b750to999_&_years., numrtohu3bunder500_&_years.)/numrentocchu3plusbd_&_years.;
+
+     if   pct3baffordable1000 >=0.2476156 then aff1000median=1;
 	      else aff1000median=0;
-	 if  pct3baffordable1000 >=0.75 then  aff1000threequarter=1;
+	 if  pct3baffordable1000 >=0.4090909 then  aff1000threequarter=1;
 	      else aff1000threequarter=0;
-     if   pct3baffordable1500 >=0.5 then aff1500median=1;
+     if   pct3baffordable1500 >=0.417598 then aff1500median=1;
 	      else aff1500median=0;
-	 if  pct3baffordable1500 >=0.75 then  aff1500threequarter=1;
+	 if  pct3baffordable1500 >=0.674603 then  aff1500threequarter=1;
 	      else aff1500threequarter=0;
 
+run;
+
+proc univariate data = calculate_pct;
+	var pct3baffordable1000 pct3baffordable1500;
 run;
 
 
