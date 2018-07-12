@@ -145,7 +145,7 @@ var pctnonhispwht pcthispan pctnonhisblk pctcollege pctwouths pctunemployed pctp
     rentersinglefam renter2to4 renter5to9 renter10to19 renter20plus ;
 id aff1000median;
 run;
-data aff1000median;
+data aff1000median1;
 set aff1000median;
 category="1000median";
 run;
@@ -164,7 +164,7 @@ var pctnonhispwht pcthispan pctnonhisblk pctcollege pctwouths pctunemployed pctp
     rentersinglefam renter2to4 renter5to9 renter10to19 renter20plus ;
 id aff1000threequarter;
 run;
-data aff1000threequarter;
+data aff1000threequarter1;
 set aff1000threequarter;
 category="1000quarter";
 run;
@@ -183,7 +183,7 @@ var pctnonhispwht pcthispan pctnonhisblk pctcollege pctwouths pctunemployed pctp
     rentersinglefam renter2to4 renter5to9 renter10to19 renter20plus ;
 id aff1500median;
 run;
-data aff1500median;
+data aff1500median1;
 set aff1500median;
 category="1500median";
 run;
@@ -203,13 +203,13 @@ var pctnonhispwht pcthispan pctnonhisblk pctcollege pctwouths pctunemployed pctp
     rentersinglefam renter2to4 renter5to9 renter10to19 renter20plus ;
 id aff1500threequarter;
 run;
-data aff1500threequarter;
+data aff1500threequarter1;
 set aff1500threequarter;
 category="1500quarter";
 run;
 
 data tractsummary;
-set aff1000median aff1000threequarter aff1500median aff1500threequarter;
+set aff1000median1 aff1000threequarter1 aff1500median1 aff1500threequarter1;
 run;
 
 proc export data=tractsummary
