@@ -118,10 +118,14 @@ data pretables;
 
 	/* Recode builtyr to match builtyr2 from ACS data */
 
-	if builtyr in (1,2,3,4) then builtyr2 = 6;
-		else if builtyr in (5,6) then builtyr2 = 4;
-		else if builtyr in (7,8) then builtyr2 = 2;
-		else if builtyr in (9) then builtyr2 = 1;
+	if builtyr in (1,2) then builtyr2 = 8; /* 1995-1999 */
+		else if builtyr in (3) then builtyr2 = 7; /* 1990-1994 */
+		else if builtyr in (4) then builtyr2 = 6; /* 1980-1989 */
+		else if builtyr in (5) then builtyr2 = 5; /* 1970-1979 */
+		else if builtyr in (6) then builtyr2 = 4; /* 1960-1969 */
+		else if builtyr in (7) then builtyr2 = 3; /* 1950-1959 */
+		else if builtyr in (8) then builtyr2 = 2; /* 1940-1949 */
+		else if builtyr in (9) then builtyr2 = 1; /* 1939 or earlier */
 
 	%end;
 
