@@ -70,13 +70,13 @@ data vacdata;
 	set ipums.&vacdata. ;
 
 	%if &ten. = OWN %then %do;
-		if vacancy in (2,4) then vac = 1;
+		if vacancy in (2) then vac = 1;
 			else if valueh > 0 then vac = 1;
 		if vac = 1;
 	%end;
 
 	%else %if &ten. = RENT %then %do;
-		if vacancy in (1,3) then vac = 1;
+		if vacancy in (1) then vac = 1;
 			else if rent > 0 then vac = 1;
 		if vac = 1;
 	%end;
