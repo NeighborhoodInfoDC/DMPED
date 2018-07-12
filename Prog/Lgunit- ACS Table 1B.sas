@@ -44,7 +44,7 @@ run;
 
 data ACScharacteristics;
      set calculate_pct;
-	 keep  pctnonhispwht pcthispan pctnonhisblk pctcollege pctwouths pctunemployed pctpoverty pctfambelow75000 pctnonfam
+	 keep geo2010 pctnonhispwht pcthispan pctnonhisblk pctcollege pctwouths pctunemployed pctpoverty pctfambelow75000 pctnonfam
 		  rentersinglefam renter2to4 renter5to9 renter10to19 renter20plus personspovertydefined_&_years. 
 		  aff1000median aff1000threequarter aff1500median aff1500threequarter
 
@@ -131,7 +131,7 @@ by geo2010;
 run;
 
 data tract_character;
-	merge calculate_pct ACScharacteristics crimedata prenatal medianhomesale;
+	merge  ACScharacteristics crimedata prenatal medianhomesale;
 	by geo2010;
 run;
 
