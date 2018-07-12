@@ -200,9 +200,10 @@ data pretables;
 
 	/*3 generation household*/
 
-	/* Child or stepchild or foster child*/
+	/* Child or stepchild or foster child or any other relative under 18*/
 	if relate in (3,4) then before1gen = 1;
 		else if related in (1242) then before1gen = 1;
+		else if relate in (10) and age < 18 then before1gen = 1;
 		else before1gen = 0;
 
 	/* Grandchild */
