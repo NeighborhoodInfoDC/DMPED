@@ -29,17 +29,9 @@ data calculate_pct;
           pct3baffordable1500= (numrentocchu3plusbd_&_years.-numrtohu3b1500plus_&_years.)/numrentocchu3plusbd_&_years.;
           pct3baffordable1000= sum(numrtohu3b500to749_&_years.,numrtohu3b750to999_&_years., numrtohu3bunder500_&_years.)/numrentocchu3plusbd_&_years.;
 
-     if   pct3baffordable1000 >=0.2476156 then aff1000median=1;
-	      else aff1000median=0;
-	 if  pct3baffordable1000 >=0.4090909 then  aff1000threequarter=1;
-	      else aff1000threequarter=0;
-     if   pct3baffordable1500 >=0.417598 then aff1500median=1;
-	      else aff1500median=0;
-	 if  pct3baffordable1500 >=0.674603 then  aff1500threequarter=1;
-	      else aff1500threequarter=0;
 
 run;
-
+/*get percentiles*/
 proc univariate data = calculate_pct;
 	var pct3baffordable1000 pct3baffordable1500;
 run;
@@ -56,6 +48,15 @@ data ACScharacteristics;
 		  rentersinglefam renter2to4 renter5to9 renter10to19 renter20plus personspovertydefined_&_years.
 
 ;  
+
+  if   pct3baffordable1000 >=0.2476156 then aff1000median=1;
+	      else aff1000median=0;
+	 if  pct3baffordable1000 >=0.4090909 then  aff1000threequarter=1;
+	      else aff1000threequarter=0;
+     if   pct3baffordable1500 >=0.417598 then aff1500median=1;
+	      else aff1500median=0;
+	 if  pct3baffordable1500 >=0.674603 then  aff1500threequarter=1;
+	      else aff1500threequarter=0;
 
 pctnonhispwht= popwhitenonhispbridge_&_years./popwithrace_&_years.*100;
 pcthispan= (popaloneh_&_years.)/popwithrace_&_years.*100;
