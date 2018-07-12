@@ -1,5 +1,5 @@
 /************************************************************************** 
-Program:  LargeUnits_Affordability.sas 
+Program:  LargeUnits_ACS Table 1B.sas 
 Library:  
 Project:  NeighborhoodInfo DC 
 Author:   Yipeng Su 
