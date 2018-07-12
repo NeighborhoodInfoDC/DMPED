@@ -24,7 +24,12 @@ data calculate_pct;
      set ACS.acs_2012_16_dc_sum_tr_tr10;
 	 keep geo2010 numrenterhsgunits_&_years. numownocchu3plusbd_&_years. numrentocchu3bd_&_years.
           numrtohu3b500to749_&_years. numrtohu3b750to999_&_years.  numrtohu3bunder500_&_years. numrtohu3b1500plus_&_years.
-          pct3baffordable1000 pct3baffordable1500 aff1000median aff1000threequarter aff1500median aff1500threequarter;
+          pct3baffordable1000 pct3baffordable1500 aff1000median aff1000threequarter aff1500median aff1500threequarter
+		  geo2010 popaloneh_&_years.  popblacknonhispbridge_&_years.  popalonew_&_years.  popwithrace_&_years. pop25andoveryears_&_years.
+          pop25andoverwcollege_&_years. pop25andoverwouths_&_years. popunemployed_&_years. poppoorpersons_&_years. totpop_&_years. 
+	      famincomelt75k_&_years. numfamilies_&_years. nonfamilyhhtot_&_years. medfamincm_&_years. numhshlds_&_years.
+		  pop25andoveryears&_years. popincivlaborforce_&_years.	numrenteroccupiedhu_&_years. popwhitenonhispbridge_&_years.
+          NumRtOHU1u_&_years. NumRtOHU2to4u_&_years. NumRtOHU5to9u_&_years. NumRtOHU10to19u_&_years. NumRtOHU20plusu_&_years.;
 
           pct3baffordable1500= (numrentocchu3plusbd_&_years.-numrtohu3b1500plus_&_years.)/numrentocchu3plusbd_&_years.;
           pct3baffordable1000= sum(numrtohu3b500to749_&_years.,numrtohu3b750to999_&_years., numrtohu3bunder500_&_years.)/numrentocchu3plusbd_&_years.;
@@ -38,14 +43,10 @@ run;
 
 
 data ACScharacteristics;
-     set ACS.acs_2012_16_dc_sum_tr_tr10;
-	 keep geo2010 popaloneh_&_years.  popblacknonhispbridge_&_years.  popalonew_&_years.  popwithrace_&_years. pop25andoveryears_&_years.
-          pop25andoverwcollege_&_years. pop25andoverwouths_&_years. popunemployed_&_years. poppoorpersons_&_years. totpop_&_years. 
-	      famincomelt75k_&_years. numfamilies_&_years. nonfamilyhhtot_&_years. medfamincm_&_years. numhshlds_&_years.
-		  pop25andoveryears&_years. popincivlaborforce_&_years.	numrenteroccupiedhu_&_years. popwhitenonhispbridge_&_years.
-          NumRtOHU1u_&_years. NumRtOHU2to4u_&_years. NumRtOHU5to9u_&_years. NumRtOHU10to19u_&_years. NumRtOHU20plusu_&_years.
-          pctnonhispwht pcthispan pctnonhisblk pctcollege pctwouths pctunemployed pctpoverty pctfambelow75000 pctnonfam
-		  rentersinglefam renter2to4 renter5to9 renter10to19 renter20plus personspovertydefined_&_years.
+     set calculate_pct;
+	 keep  pctnonhispwht pcthispan pctnonhisblk pctcollege pctwouths pctunemployed pctpoverty pctfambelow75000 pctnonfam
+		  rentersinglefam renter2to4 renter5to9 renter10to19 renter20plus personspovertydefined_&_years. 
+		  aff1000median aff1000threequarter aff1500median aff1500threequarter
 
 ;  
 
@@ -112,6 +113,10 @@ run;
 proc sort data= ACScharacteristics;
 by geo2010;
 run;
+proc summary data=ACScharacteristics;
+var aff1000median aff1000threequarter aff1500median aff1500threequarter;
+output out=tract_count sum=;
+run; 
 
 proc sort data= crimedata;
 by geo2010;
@@ -130,6 +135,7 @@ data tract_character;
 	by geo2010;
 run;
 
+
 proc summary data=tract_character;
 class aff1000median;
 var pctnonhispwht pcthispan pctnonhisblk pctcollege pctwouths pctunemployed pctpoverty
@@ -147,6 +153,7 @@ id aff1000median;
 run;
 data aff1000median1;
 set aff1000median;
+length category $11.;
 category="1000median";
 run;
 
@@ -184,7 +191,7 @@ var pctnonhispwht pcthispan pctnonhisblk pctcollege pctwouths pctunemployed pctp
 id aff1500median;
 run;
 data aff1500median1;
-set aff1500median;
+set aff1500median;length category $11.;
 category="1500median";
 run;
 
@@ -212,6 +219,31 @@ data tractsummary;
 set aff1000median1 aff1000threequarter1 aff1500median1 aff1500threequarter1;
 run;
 
+proc transpose data=tract_count out=num_tracts;
+run;
+data num_tracts1 (drop=_name_);
+	set num_tracts ;
+
+	if _name_ in ("_TYPE_" "_FREQ_" ) then delete;
+
+	length category $11.; 
+
+	if _name_ = "aff1000median" then category="1000median";
+	if _name_="aff1000threequarter" then category="1000quarter";
+	if _name_ = "aff1500median" then category="1500median";
+	if _name_="aff1500threequarter" then category="1500quarter";
+
+	rename col1=num_tracts; 
+
+	run; 
+
+proc sort data=tractsummary;
+	by category;
+data tractsummary1;
+	merge tractsummary num_tracts1;
+	by category;
+
+run; 
 proc export data=tractsummary
 	outfile="&_dcdata_default_path\DMPED\Prog\ACS table 1B.csv"
 	dbms=csv replace;
