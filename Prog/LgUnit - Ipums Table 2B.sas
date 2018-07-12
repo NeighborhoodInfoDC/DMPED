@@ -504,7 +504,7 @@ proc transpose data = table2b_all out = table2b_csv_all;
 	allhh
 
 	/* Race */
-	pct_raceW pct_raceB pct_raceH pct_raceAPI pct_raceO
+	pct_raceW pct_raceB pct_raceAPI pct_raceO pct_raceH
 
 	/* Age */
 	hher_age
