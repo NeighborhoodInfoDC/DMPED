@@ -19,7 +19,7 @@
 %DCData_lib( IPUMS )
 
 
-%let cvars = allhh largeunit isschoolage isadult iskid
+%let cvars = allhh largehh isschoolage isadult iskid
          issenior isdis raceW raceB raceH raceAPI raceO
 		 dcincome30 dcincome50 dcincome80 
 		 before1gen before2gen after1gen
@@ -151,8 +151,8 @@ data pretables;
 	if pernum = 1 then hh_inc = hhincome;
 
     /* Flag large units*/
-	if numprec >= 4 then largeunit = 1;
-		else largeunit = 0;
+	if numprec >= 4 then largehh = 1;
+		else largehh = 0;
 
 	/* Adult*/
 	if age>=18 then isadult = 1;
@@ -414,7 +414,7 @@ run;
 
 
 proc summary data = pretables_withvac;
-	class puma largeunit;
+	class puma largehh;
 	var &cvars. multigen grouphouse vacant allhh_withvac;
 	weight hhwt;
 	output out = table2b_pre sum=;
@@ -467,7 +467,7 @@ run;
 
 
 proc summary data = pretables_collapse;
-	class puma largeunit;
+	class puma largehh;
 	var &mvars.;
 	weight hhwt;
 	output out = table2b_m median=;
@@ -475,7 +475,7 @@ run;
 
 
 proc summary data = pretables_collapse;
-	class puma largeunit;
+	class puma largehh;
 	var numkids numadults;
 	weight hhwt;
 	output out = table2b_n median=;
@@ -523,7 +523,7 @@ proc transpose data = table2b_all out = table2b_csv_all;
 
 	;
 
-	id largeunit puma;
+	id largehh puma;
 
 run;
 
