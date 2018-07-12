@@ -104,7 +104,7 @@ run;
 proc means median data = ressale (where=(saleyear=2017)); 
 by geo2010;
 var saleprice;
-output out=medianhomesale;
+output out=medianhomesale median=;
 run;
 
 
