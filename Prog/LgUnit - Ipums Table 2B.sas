@@ -70,11 +70,15 @@ data vacdata;
 	set ipums.&vacdata. ;
 
 	%if &ten. = OWN %then %do;
-		if vacancy in (2,4);
+		if vacancy in (2,4) then vac = 1;
+			else if valueh > 0 then vac = 1;
+		if vac = 1;
 	%end;
 
 	%else %if &ten. = RENT %then %do;
-		if vacancy in (1,3);
+		if vacancy in (1,3) then vac = 1;
+			else if rent > 0 then vac = 1;
+		if vac = 1;
 	%end;
 run;
 
@@ -404,7 +408,7 @@ run;
 /* Add vacancy data */
 data pretables_withvac;
 	set pretables_collapse 
-		vacdata (keep = serial puma vacancy hhwt);
+		vacdata ;
 	if vacancy ^= . then vacant = 1;
 		else vacant = 0;
 
