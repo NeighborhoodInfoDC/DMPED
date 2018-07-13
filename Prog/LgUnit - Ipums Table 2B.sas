@@ -21,7 +21,7 @@
 
 %let cvars = allhh largehh isschoolage isadult iskid
          issenior isdis raceW raceB raceH raceAPI raceO
-		 dcincome30 dcincome50 dcincome80 
+		 hudincome30 hudincome50 hudincome80 
 		 before1gen before2gen after1gen
 		 movedless1 moved2to10 moved10plus
 		 bedrooms0 bedrooms1 bedrooms2 bedrooms3 bedrooms4 bedrooms5plus
@@ -111,6 +111,15 @@ proc sort data = hhwts; by serial; run;
 data pretables;
 	set Ipums.&indata.;
 
+	%if &ten. = OWN %then %do;
+		if ownershp = 1;
+	%end;
+
+	%else %if &ten. = RENT %then %do;
+		if ownershp = 2;
+	%end;
+
+
 	%if &yrs. = 2000 %then %do;
 		
 	%recode_dvars (raced,race);
@@ -143,17 +152,17 @@ data pretables;
        or (numprec=4 and hhincome <= 40300) or (numprec=5 and hhincome <= 43500) or (numprec=6 and hhincome <= 46750 ) 
        or (numprec=7 and hhincome <= 49950) or (numprec=8 and hhincome <= 53200) then hud_inc=2;                                                                               
 	    
- 	if (numprec = 1 and hhincome <= 35150) or (numprec=2 and hhincome <= 40150 ) or  (numprec=3 and hhincome <= 45200)
+ 	else if (numprec = 1 and hhincome <= 35150) or (numprec=2 and hhincome <= 40150 ) or  (numprec=3 and hhincome <= 45200)
        or (numprec=4 and hhincome <= 50200) or (numprec=5 and hhincome <= 54200) or (numprec=6 and hhincome <= 58250) 
        or (numprec=7 and hhincome <= 62250) or (numprec=8 and hhincome <= 66250) then hud_inc=3;    
 
- 	if (numprec = 1 and hhincome <= 53960) or (numprec=2 and hhincome <= 61660 ) or  (numprec=3 and hhincome <= 69420)
+ 	else if (numprec = 1 and hhincome <= 53960) or (numprec=2 and hhincome <= 61660 ) or  (numprec=3 and hhincome <= 69420)
        or (numprec=4 and hhincome <= 77080) or (numprec=5 and hhincome <= 83240) or (numprec=6 and hhincome <= 89460) 
        or (numprec=7 and hhincome <= 95580) or (numprec=8 and hhincome <= 101760) then hud_inc=4;    
 
-	if (numprec = 1 and hhincome > 53960) or (numprec=2 and hhincome > 61660 ) or  (numprec=3 and hhincome > 69420)
+	else if (numprec = 1 and hhincome > 53960) or (numprec=2 and hhincome > 61660 ) or  (numprec=3 and hhincome > 69420)
        or (numprec=4 and hhincome > 77080) or (numprec=5 and hhincome > 83240) or (numprec=6 and hhincome > 89460) 
-       or (numprec=7 and hhincome > 95580) or (numprec=8 and hhincome > 101760) then hud_inc=4;
+       or (numprec=7 and hhincome > 95580) or (numprec=8 and hhincome > 101760) then hud_inc=5;
 
 	%end;
 
@@ -163,14 +172,16 @@ data pretables;
 
 	%end;
 
+	/* HUD income categories */
 
-	%if &ten. = OWN %then %do;
-		if ownershp = 1;
-	%end;
+	if hud_inc = 1 then hudincome30 =1;
+		else hudincome30 =0;
 
-	%else %if &ten. = RENT %then %do;
-		if ownershp = 2;
-	%end;
+	if hud_inc = 2 then hudincome50 = 1;
+		else hudincome50 = 0;
+
+	if hud_inc = 3 then hudincome80 = 1;
+		else hudincome80 = 0;
 
 	 /*Keep only HHs*/
 	if gq in (1,2);
@@ -259,11 +270,10 @@ data pretables;
 
 	end;
 
-  /*flag for nonrelative living together*/
+  /* Nonrelatives living together */
 
      if related = 1115 or related = 1241 or related = 1260 then nonrelative = 1;
 	     else nonrelative = 0;
-
 
 	/* Moved-in */
 	%if &yrs. = 2000 %then %do;
@@ -343,8 +353,8 @@ data pretables;
 	if builtyr2 >= 9 then Built2000After = 1;
 		else Built2000After = 0;
 
-	keep &cvars. &mvars. nonrelative numkids numadults
-		  serial hhwt pernum numprec race hispan age hhincome_i;
+	keep &cvars. &mvars. hud_inc nonrelative numkids numadults
+		  serial hhwt pernum numprec race hispan age hhincome_i hhincome;
   
 run;
 
@@ -431,9 +441,9 @@ data table2b_pcts;
 	pct_raceAPI = raceAPI / allhh;
 	pct_raceO = raceO / allhh;
 
-	pct_dcincome30 = dcincome30 / allhh;
-	pct_dcincome50 = dcincome50 / allhh;
-	pct_dcincome80 = dcincome80 / allhh;
+	pct_hudincome30 = hudincome30 / allhh;
+	pct_hudincome50 = hudincome50 / allhh;
+	pct_hudincome80 = hudincome80 / allhh;
 
 	pct_issenior = issenior / allhh; 
 	pct_isdis = isdis / allhh;
@@ -506,7 +516,7 @@ proc transpose data = table2b_all out = table2b_csv_all;
 	hher_age
 
 	/* Income */
-	hh_inc pct_dcincome30 pct_dcincome50 pct_dcincome80
+	hh_inc pct_hudincome30 pct_hudincome50 pct_hudincome80
 
 	/* HH Structure */
 	pct_issenior pct_isdis pct_multigen pct_grouphouse numadults numkids 
@@ -530,11 +540,11 @@ proc transpose data = table2b_all out = table2b_csv_all;
 run;
 
 
-proc export data = table2b_csv_all
+/*proc export data = table2b_csv_all
 	outfile = "&_dcdata_default_path.\DMPED\Prog\table2b_csv_&yrs._&tenure..csv"
 	dbms = csv replace;
 run;
-
+*/
 
 %mend ipums_lgunit;
 
