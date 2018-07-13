@@ -370,6 +370,8 @@ data xACS_2006_10;
 	set acs.acs_2006_10_dc_sum_tr&geo_suffix.;
 
 	numhsgunits_2006_10 = sum(of numhsgunits0bd_2006_10 numhsgunits1bd_2006_10 numhsgunits2bd_2006_10 numhsgunits3plusbd_2006_10);
+	familyhh4plus_2006_10 = sum(of familyhh4person_2006_10 familyhh5person_2006_10 familyhh6person_2006_10 familyhh7person_2006_10);
+	nonfamilyhh4plus_2006_10 = sum(of nonfamilyhh4person_2006_10 nonfamilyhh5person_2006_10 nonfamilyhh6person_2006_10 nonfamilyhh7person_2006_10);
 
 	keep &geo. 
 
@@ -388,6 +390,14 @@ data xACS_2006_10;
 
 	pctrtohu3bunder500_2006_10 pctrtohu3b500to749_2006_10 pctrtohu3b750to999_2006_10 pctrtohu3b1000plus_2006_10
 
+	numhshlds_2006_10 pctfamily_2006_10 pctfamily4plus_2006_10 pctnonfamily_2006_10 pctnonfamily4plus_2006_10
+
+	familyhhtot_2006_10 familyhh1person_2006_10 familyhh2person_2006_10 familyhh3person_2006_10 familyhh4person_2006_10
+	familyhh5person_2006_10 familyhh6person_2006_10 familyhh7person_2006_10
+
+	nonfamilyhhtot_2006_10 nonfamilyhh1person_2006_10 nonfamilyhh2person_2006_10 nonfamilyhh3person_2006_10 nonfamilyhh4person_2006_10
+	nonfamilyhh5person_2006_10 nonfamilyhh6person_2006_10 nonfamilyhh7person_2006_10
+
 	;
 
 	pct3brall_2006_10 = numhsgunits3plusbd_2006_10 / numhsgunits_2006_10;
@@ -399,6 +409,11 @@ data xACS_2006_10;
 	pctrtohu3b750to999_2006_10 = numrtohu3b750to999_2006_10 / numrentocchu3plusbd_2006_10;
 	pctrtohu3b1000plus_2006_10 = numrtohu3b1000plus_2006_10 / numrentocchu3plusbd_2006_10;
 
+	pctfamily_2006_10 = familyhhtot_2006_10	/ numhshlds_2006_10;
+	pctfamily4plus_2006_10 = familyhh4plus_2006_10 / numhshlds_2006_10;
+	pctnonfamily_2006_10 = nonfamilyhhtot_2006_10 / numhshlds_2006_10;
+	pctnonfamily4plus_2006_10 = nonfamilyhh4plus_2006_10 / numhshlds_2006_10;
+
 	label pct3brall_2006_10 = "Pct. of All Units with 3+ bedrooms"
 		  pct3brrent_2006_10 = "Pct. of Rental Units with 3+ bedrooms" 
 		  pct3brown_2006_10 = "Pct. of Owner Units with 3+ bedrooms" 
@@ -406,6 +421,10 @@ data xACS_2006_10;
 		  pctrtohu3b500to749_2006_10 = "Pct of renter units $500 - $749"
 		  pctrtohu3b750to999_2006_10 = "Pct of renter units $750 - $999"
 		  pctrtohu3b1000plus_2006_10 = "Pct of renter units $1,000+"
+		  pctfamily_2006_10 = "Pct. of households that are family"
+		  pctfamily4plus_2006_10 = "Pct. of households that are family with 4+ people"
+		  pctnonfamily_2006_10 = "Pct. of households that are nonfamily" 
+		  pctnonfamily4plus_2006_10 = "Pct. of households that are nonfamily with 4+ people"
 	;
 
 run;
@@ -430,12 +449,26 @@ proc transpose data=xACS_2006_10 out=table2006_10_rent_&geo.;
 	id &geo.; 
 run; 
 
+proc transpose data=xACS_2006_10 out=table2006_10_fam_&geo.;
+	var pctfamily_2006_10 pctfamily4plus_2006_10 pctnonfamily_2006_10 pctnonfamily4plus_2006_10
+		familyhhtot_2006_10 familyhh1person_2006_10 familyhh2person_2006_10 familyhh3person_2006_10 familyhh4person_2006_10
+		familyhh5person_2006_10 familyhh6person_2006_10 familyhh7person_2006_10
+		nonfamilyhhtot_2006_10 nonfamilyhh1person_2006_10 nonfamilyhh2person_2006_10 nonfamilyhh3person_2006_10 nonfamilyhh4person_2006_10
+		nonfamilyhh5person_2006_10 nonfamilyhh6person_2006_10 nonfamilyhh7person_2006_10
+	 	;
+	id &geo.; 
+run; 
+
+
 /* ACS 2012-16 */
 
 data xACS_2012_16; 
 	set acs.acs_2012_16_dc_sum_tr&geo_suffix.;
 
 	numhsgunits_2012_16 = sum(of numhsgunits0bd_2012_16 numhsgunits1bd_2012_16 numhsgunits2bd_2012_16 numhsgunits3plusbd_2012_16);
+	numhsgunits_2012_16 = sum(of numhsgunits0bd_2012_16 numhsgunits1bd_2012_16 numhsgunits2bd_2012_16 numhsgunits3plusbd_2012_16);
+	familyhh4plus_2012_16 = sum(of familyhh4person_2012_16 familyhh5person_2012_16 familyhh6person_2012_16 familyhh7person_2012_16);
+	nonfamilyhh4plus_2012_16 = sum(of nonfamilyhh4person_2012_16 nonfamilyhh5person_2012_16 nonfamilyhh6person_2012_16 nonfamilyhh7person_2012_16);
 
 	keep &geo. 
 
@@ -455,6 +488,12 @@ data xACS_2012_16;
 
 	pctrtohu3bunder500_2012_16 pctrtohu3b500to749_2012_16 pctrtohu3b750to999_2012_16
 	pctrtohu3b1000plus_2012_16 pctrtohu3b1000to1499_2012_16 pctrtohu3b1500plus_2012_16
+
+	familyhhtot_2012_16 familyhh1person_2012_16 familyhh2person_2012_16 familyhh3person_2012_16 familyhh4person_2012_16
+	familyhh5person_2012_16 familyhh6person_2012_16 familyhh7person_2012_16
+
+	nonfamilyhhtot_2012_16 nonfamilyhh1person_2012_16 nonfamilyhh2person_2012_16 nonfamilyhh3person_2012_16 nonfamilyhh4person_2012_16
+	nonfamilyhh5person_2012_16 nonfamilyhh6person_2012_16 nonfamilyhh7person_2012_16
 
 	;
 
@@ -480,6 +519,10 @@ data xACS_2012_16;
 		  pctrtohu3b1000plus_2012_16 = "Pct of renter units $1,000+"
 		  pctrtohu3b1000to1499_2012_16 = "Pct of renter units $1,000 - $1,499"
 		  pctrtohu3b1500plus_2012_16 = "Pct of renter units $1,000+" 
+		  pctfamily_2012_16 = "Pct. of households that are family"
+		  pctfamily4plus_2012_16 = "Pct. of households that are family with 4+ people"
+		  pctnonfamily_2012_16 = "Pct. of households that are nonfamily" 
+		  pctnonfamily4plus_2012_16 = "Pct. of households that are nonfamily with 4+ people"
 
 	;
 
@@ -501,6 +544,16 @@ run;
 proc transpose data=xACS_2012_16 out=table2012_16_rent_&geo.;
 	var pctrtohu3bunder500_2012_16 pctrtohu3b500to749_2012_16 pctrtohu3b750to999_2012_16 pctrtohu3b1000plus_2012_16
 		pctrtohu3b1000to1499_2012_16 pctrtohu3b1500plus_2012_16
+	 	;
+	id &geo.; 
+run; 
+
+proc transpose data=xACS_2012_16 out=table2012_16_fam_&geo.;
+	var pctfamily_2012_16 pctfamily4plus_2012_16 pctnonfamily_2012_16 pctnonfamily4plus_2012_16
+		familyhhtot_2012_16 familyhh1person_2012_16 familyhh2person_2012_16 familyhh3person_2012_16 familyhh4person_2012_16
+		familyhh5person_2012_16 familyhh6person_2012_16 familyhh7person_2012_16
+		nonfamilyhhtot_2012_16 nonfamilyhh1person_2012_16 nonfamilyhh2person_2012_16 nonfamilyhh3person_2012_16 nonfamilyhh4person_2012_16
+		nonfamilyhh5person_2012_16 nonfamilyhh6person_2012_16 nonfamilyhh7person_2012_16
 	 	;
 	id &geo.; 
 run; 
@@ -552,13 +605,13 @@ run;
 
 data table_city_stack;
 	set table1980_city table1990_city table2000_city Table2006_10_city Table2012_16_city Table_ch_city 
-		Table2006_10_rent_city Table2012_16_rent_city;
+		Table2006_10_rent_city Table2012_16_rent_city table2006_10_fam_city table2012_16_fam_city;
 	SortNo + 1;
 run;
 
 data table_ward2012_stack;
 	set table1980_ward2012 table1990_ward2012 table2000_ward2012 Table2006_10_ward2012 Table2012_16_ward2012 Table_ch_ward2012 
-		Table2006_10_rent_ward2012 Table2012_16_rent_ward2012;
+		Table2006_10_rent_ward2012 Table2012_16_rent_ward2012 table2006_10_fam_ward2012 table2012_16_fam_ward2012;
 	SortNo + 1;
 run;
 
