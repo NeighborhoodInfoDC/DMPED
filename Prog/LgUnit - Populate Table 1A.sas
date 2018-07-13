@@ -635,7 +635,7 @@ run;
 /* Export final file */
 
 proc export data = table_all_final
-   outfile="L:\Libraries\DMPED\Prog\table1a_raw.csv"
+   outfile="&_dcdata_default_path.\DMPED\Prog\table1a_raw.csv"
    dbms=csv
    replace;
 run;
