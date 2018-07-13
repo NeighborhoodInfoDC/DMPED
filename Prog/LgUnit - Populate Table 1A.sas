@@ -450,7 +450,7 @@ proc transpose data=xACS_2006_10 out=table2006_10_rent_&geo.;
 run; 
 
 proc transpose data=xACS_2006_10 out=table2006_10_fam_&geo.;
-	var pctfamily_2006_10 pctfamily4plus_2006_10 pctnonfamily_2006_10 pctnonfamily4plus_2006_10
+	var numhshlds_2006_10 pctfamily_2006_10 pctfamily4plus_2006_10 pctnonfamily_2006_10 pctnonfamily4plus_2006_10
 		familyhhtot_2006_10 familyhh2person_2006_10 familyhh3person_2006_10 familyhh4person_2006_10
 		familyhh5person_2006_10 familyhh6person_2006_10 familyhh7person_2006_10
 		nonfamilyhhtot_2006_10 nonfamilyhh1person_2006_10 nonfamilyhh2person_2006_10 nonfamilyhh3person_2006_10 nonfamilyhh4person_2006_10
@@ -489,7 +489,7 @@ data xACS_2012_16;
 	pctrtohu3bunder500_2012_16 pctrtohu3b500to749_2012_16 pctrtohu3b750to999_2012_16
 	pctrtohu3b1000plus_2012_16 pctrtohu3b1000to1499_2012_16 pctrtohu3b1500plus_2012_16
 
-	pctfamily_2012_16 pctfamily4plus_2012_16 pctnonfamily_2012_16 pctnonfamily4plus_2012_16
+	numhshlds_2012_16 pctfamily_2012_16 pctfamily4plus_2012_16 pctnonfamily_2012_16 pctnonfamily4plus_2012_16
 
 	familyhhtot_2012_16 familyhh2person_2012_16 familyhh3person_2012_16 familyhh4person_2012_16
 	familyhh5person_2012_16 familyhh6person_2012_16 familyhh7person_2012_16
@@ -556,7 +556,7 @@ proc transpose data=xACS_2012_16 out=table2012_16_rent_&geo.;
 run; 
 
 proc transpose data=xACS_2012_16 out=table2012_16_fam_&geo.;
-	var pctfamily_2012_16 pctfamily4plus_2012_16 pctnonfamily_2012_16 pctnonfamily4plus_2012_16
+	var numhshlds_2006_10 pctfamily_2012_16 pctfamily4plus_2012_16 pctnonfamily_2012_16 pctnonfamily4plus_2012_16
 		familyhhtot_2012_16 familyhh2person_2012_16 familyhh3person_2012_16 familyhh4person_2012_16
 		familyhh5person_2012_16 familyhh6person_2012_16 familyhh7person_2012_16
 		nonfamilyhhtot_2012_16 nonfamilyhh1person_2012_16 nonfamilyhh2person_2012_16 nonfamilyhh3person_2012_16 nonfamilyhh4person_2012_16
