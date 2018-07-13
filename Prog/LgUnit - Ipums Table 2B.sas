@@ -131,6 +131,14 @@ data pretables;
 		else if builtyr in (8) then builtyr2 = 2; /* 1940-1949 */
 		else if builtyr in (9) then builtyr2 = 1; /* 1939 or earlier */
 
+	%Dollar_convert(hhincome,hhincome_i,1999,2016);
+
+	%end;
+
+	%else %if &yrs. = 2000 %then %do;
+
+	hhincome_i = hhincome;
+
 	%end;
 
 
@@ -152,7 +160,7 @@ data pretables;
 	if pernum = 1 then hher_age = age;
 
 	/* Gousehold income */
-	if pernum = 1 then hh_inc = hhincome;
+	if pernum = 1 then hh_inc = hhincome_i;
 
     /* Flag large units*/
 	if numprec >= 4 then largehh = 1;
@@ -348,7 +356,7 @@ data pretables;
 		else Built2000After = 0;
 
 	keep &cvars. &mvars. nonrelative numkids numadults
-		  serial hhwt pernum numprec race hispan age hhincome;
+		  serial hhwt pernum numprec race hispan age hhincome_i;
   
 run;
 
