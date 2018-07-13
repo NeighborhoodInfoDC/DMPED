@@ -133,6 +133,28 @@ data pretables;
 
 	%Dollar_convert(hhincome,hhincome_i,1999,2016);
 
+	/* Re-create hud_inc from 2000 data */
+
+	if (numprec = 1 and hhincome <= 16950) or (numprec=2 and hhincome <= 19350) or  (numprec=3 and hhincome <= 21750)
+       or (numprec=4 and hhincome <= 24200) or (numprec=5 and hhincome <= 26100) or (numprec=6 and hhincome <= 28050) 
+       or (numprec=7 and hhincome <= 30000) or (numprec=8 and hhincome <= 31900) then hud_inc=1;                                                                               
+
+	else if (numprec = 1 and hhincome <= 28200) or (numprec=2 and hhincome <= 32250  ) or  (numprec=3 and hhincome <= 36250)
+       or (numprec=4 and hhincome <= 40300) or (numprec=5 and hhincome <= 43500) or (numprec=6 and hhincome <= 46750 ) 
+       or (numprec=7 and hhincome <= 49950) or (numprec=8 and hhincome <= 53200) then hud_inc=2;                                                                               
+	    
+ 	if (numprec = 1 and hhincome <= 35150) or (numprec=2 and hhincome <= 40150 ) or  (numprec=3 and hhincome <= 45200)
+       or (numprec=4 and hhincome <= 50200) or (numprec=5 and hhincome <= 54200) or (numprec=6 and hhincome <= 58250) 
+       or (numprec=7 and hhincome <= 62250) or (numprec=8 and hhincome <= 66250) then hud_inc=3;    
+
+ 	if (numprec = 1 and hhincome <= 53960) or (numprec=2 and hhincome <= 61660 ) or  (numprec=3 and hhincome <= 69420)
+       or (numprec=4 and hhincome <= 77080) or (numprec=5 and hhincome <= 83240) or (numprec=6 and hhincome <= 89460) 
+       or (numprec=7 and hhincome <= 95580) or (numprec=8 and hhincome <= 101760) then hud_inc=4;    
+
+	if (numprec = 1 and hhincome > 53960) or (numprec=2 and hhincome > 61660 ) or  (numprec=3 and hhincome > 69420)
+       or (numprec=4 and hhincome > 77080) or (numprec=5 and hhincome > 83240) or (numprec=6 and hhincome > 89460) 
+       or (numprec=7 and hhincome > 95580) or (numprec=8 and hhincome > 101760) then hud_inc=4;
+
 	%end;
 
 	%else %if &yrs. = 2000 %then %do;
@@ -221,40 +243,6 @@ data pretables;
 	/* Parent or stepparent*/
 	if relate in (5,6) then after1gen = 1;
 		else after1gen = 0;
-
-    /*income category according to HUD definition*/
-
-	if (numprec = 1 and hhincome <= 24650) or (numprec=2 and hhincome <= 28150) or  (numprec=3 and hhincome <= 31540)
-       or (numprec=4 and hhincome <= 35150) or (numprec=5 and hhincome <= 38000) or (numprec=6 and hhincome <= 40800) 
-       or (numprec=7 and hhincome <= 43600) or (numprec=8 and hhincome <= 46400) then hudincome30=1;                                                                               
-	   else hudincome30 = 0;
-
-	if (numprec = 1 and hhincome <= 41050) or (numprec=2 and hhincome <= 46900  ) or  (numprec=3 and hhincome <= 5750)
-       or (numprec=4 and hhincome <= 58600) or (numprec=5 and hhincome <= 63300) or (numprec=6 and hhincome <= 68000 ) 
-       or (numprec=7 and hhincome <= 72700) or (numprec=8 and hhincome <= 77400) then hudincome50=1;                                                                               
-	   else hudincome50 = 0;
-	    
- 	if (numprec = 1 and hhincome <= 54250) or (numprec=2 and hhincome <= 62000 ) or  (numprec=3 and hhincome <= 69750)
-       or (numprec=4 and hhincome <= 77450) or (numprec=5 and hhincome <= 83650) or (numprec=6 and hhincome <= 89850) 
-       or (numprec=7 and hhincome <= 96050) or (numprec=8 and hhincome <= 102250) then hudincome80=1;                                                                               
-	   else hudincome80 = 0;
-
-   /*income category according to DC Council*/
-	if (numprec = 1 and hhincome <= 108600*0.3*0.7) or (numprec=2 and hhincome <= 108600*0.3*0.8) or  (numprec=3 and hhincome <= 108600*0.3*0.9)
-       or (numprec=4 and hhincome <= 108600*0.3) or (numprec=5 and hhincome <= 108600*0.3*1.1) or (numprec=6 and hhincome <= 108600*0.3*1.2 ) 
-       or (numprec=7 and hhincome <= 108600*0.3*1.3) or (numprec=8 and hhincome <= 108600*0.3*1.4) then dcincome30=1;                                                                               
-	   else dcincome30 = 0;
-
-	if (numprec = 1 and hhincome <= 108600*0.5*0.7) or (numprec=2 and hhincome <= 108600*0.5*0.8) or  (numprec=3 and hhincome <= 108600*0.5*0.9)
-       or (numprec=4 and hhincome <= 108600*0.5) or (numprec=5 and hhincome <= 108600*0.5*1.1) or (numprec=6 and hhincome <= 108600*0.5*1.2 ) 
-       or (numprec=7 and hhincome <= 108600*0.5*1.3) or (numprec=8 and hhincome <= 108600*0.5*1.4) then dcincome50=1;                                                                               
-	   else dcincome50 = 0;
-	    
-	if (numprec = 1 and hhincome <= 108600*0.8*0.7) or (numprec=2 and hhincome <= 108600*0.8*0.8) or  (numprec=3 and hhincome <= 108600*0.8*0.9)
-       or (numprec=4 and hhincome <= 108600*0.8) or (numprec=5 and hhincome <= 108600*0.8*1.1) or (numprec=6 and hhincome <= 108600*0.8*1.2 ) 
-       or (numprec=7 and hhincome <= 108600*0.8*1.3) or (numprec=8 and hhincome <= 108600*0.8*1.4) then dcincome80=1;                                                                               
-	   else dcincome80 = 0;
-
 
 	/* Race variables */
 	if pernum = 1 then do;
