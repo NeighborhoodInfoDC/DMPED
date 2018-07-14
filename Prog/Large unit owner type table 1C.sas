@@ -182,7 +182,7 @@ proc sort data=BuildingAge;
 by before2000 refyear;
 run;
 
-proc transpose data=BuildingAge (where=(refyear=2017)) out=BuildingAge_transpose;
+proc transpose data=BuildingAge (where=(refyear=2018)) out=BuildingAge_transpose;
 var total LargeUnit;
 by before2000 refyear;
 id ward2012;
