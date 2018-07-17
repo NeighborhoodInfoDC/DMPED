@@ -260,7 +260,7 @@ run;
     %Finalize_data_set( 
       /** Finalize data set parameters **/
       data=iz_bed_mar,
-      out=DMPED_IZ_BED_&year,
+      out=IZ_BED_Pipeline_&year,
       outlib=DMPED,
       label="&ds_label, %upcase(&v)",
       sortby=Project_name,
@@ -278,7 +278,7 @@ run;
     %Finalize_data_set( 
       /** Finalize data set parameters **/
       data=iz_proj_mar,
-      out=DMPED_IZ_&year,
+      out=IZ_Pipeline_&year,
       outlib=DMPED,
       label="&ds_label, %upcase(&v)",
       sortby=Project_name,
@@ -295,7 +295,7 @@ run;
       %Finalize_data_set( 
       /** Finalize data set parameters **/
       data=hptf_proj_mar,
-      out=DMPED_HPTF_&year,
+      out=HPTF_Pipeline_&year,
       outlib=DMPED,
       label="&ds_label, %upcase(&v)",
       sortby=Project_name,
