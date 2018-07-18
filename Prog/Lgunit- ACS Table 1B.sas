@@ -20,6 +20,7 @@ Modifications:
 
 %let _years = 2012_16;
 
+
 data calculate_pct;
      set ACS.acs_2012_16_dc_sum_tr_tr10;
 	 keep geo2010 numrenterhsgunits_&_years. numownocchu3plusbd_&_years. numrentocchu3bd_&_years.
@@ -78,6 +79,12 @@ renter20plus = (NumRtOHU20plusu_&_years. )/numrenteroccupiedhu_&_years.*100
 
 run;
 
+proc import datafile='L:\Libraries\DMPED\Raw\DCpull_forLeah.csv'
+out=affh
+dbms=csv
+replace;
+run;
+
 data crimedata;
      set Police.Crimes_sum_tr10;
 	 keep geo2010 crimes_pt1_property_2017 crimes_pt1_violent_2017 crime_rate_pop_2017 pctpropertycrime pctviolentcrime ;
@@ -109,10 +116,10 @@ var saleprice;
 output out=medianhomesale median=;
 run;
 
-
 proc sort data= ACScharacteristics;
 by geo2010;
 run;
+
 proc summary data=ACScharacteristics;
 var aff1000median aff1000threequarter aff1500median aff1500threequarter;
 output out=tract_count sum=;
@@ -130,8 +137,12 @@ proc sort data= medianhomesale;
 by geo2010;
 run;
 
+proc sort data= AFFH;
+by geo2010;
+run;
+
 data tract_character;
-	merge  ACScharacteristics crimedata prenatal medianhomesale;
+	merge  ACScharacteristics crimedata prenatal medianhomesale AFFH;
 	by geo2010;
 run;
 
@@ -140,7 +151,7 @@ proc summary data=tract_character;
 class aff1000median;
 var pctnonhispwht pcthispan pctnonhisblk pctcollege pctwouths pctunemployed pctpoverty
     pctfambelow75000 pctnonfam pctpropertycrime pctviolentcrime pctprenatal
-    rentersinglefam renter2to4 renter5to9 renter10to19 renter20plus 
+    rentersinglefam renter2to4 renter5to9 renter10to19 renter20plus lbreng envhealth transcost
 ;
 	output	out=aff1000median	mean= ;
 run;
@@ -148,7 +159,7 @@ run;
 proc transpose data=aff1000median out=aff1000median;
 var pctnonhispwht pcthispan pctnonhisblk pctcollege pctwouths pctunemployed pctpoverty
     pctfambelow75000 pctnonfam pctpropertycrime pctviolentcrime pctprenatal
-    rentersinglefam renter2to4 renter5to9 renter10to19 renter20plus ;
+    rentersinglefam renter2to4 renter5to9 renter10to19 renter20plus lbreng envhealth transcost;
 id aff1000median;
 run;
 data aff1000median1;
@@ -161,14 +172,14 @@ proc summary data=tract_character;
 class aff1000threequarter;
 var pctnonhispwht pcthispan pctnonhisblk pctcollege pctwouths pctunemployed pctpoverty
     pctfambelow75000 pctnonfam pctpropertycrime pctviolentcrime pctprenatal
-    rentersinglefam renter2to4 renter5to9 renter10to19 renter20plus 
+    rentersinglefam renter2to4 renter5to9 renter10to19 renter20plus lbreng envhealth transcost
 ;
 	output	out=aff1000threequarter	mean= ;
 run;
 proc transpose data=aff1000threequarter out=aff1000threequarter;
 var pctnonhispwht pcthispan pctnonhisblk pctcollege pctwouths pctunemployed pctpoverty
     pctfambelow75000 pctnonfam pctpropertycrime pctviolentcrime pctprenatal
-    rentersinglefam renter2to4 renter5to9 renter10to19 renter20plus ;
+    rentersinglefam renter2to4 renter5to9 renter10to19 renter20plus lbreng envhealth transcost;
 id aff1000threequarter;
 run;
 data aff1000threequarter1;
@@ -180,14 +191,14 @@ proc summary data=tract_character;
 class aff1500median;
 var pctnonhispwht pcthispan pctnonhisblk pctcollege pctwouths pctunemployed pctpoverty
     pctfambelow75000 pctnonfam pctpropertycrime pctviolentcrime pctprenatal
-    rentersinglefam renter2to4 renter5to9 renter10to19 renter20plus 
+    rentersinglefam renter2to4 renter5to9 renter10to19 renter20plus lbreng envhealth transcost
 ;
 	output	out=aff1500median	mean= ;
 run;
 proc transpose data=aff1500median out=aff1500median;
 var pctnonhispwht pcthispan pctnonhisblk pctcollege pctwouths pctunemployed pctpoverty
     pctfambelow75000 pctnonfam pctpropertycrime pctviolentcrime pctprenatal
-    rentersinglefam renter2to4 renter5to9 renter10to19 renter20plus ;
+    rentersinglefam renter2to4 renter5to9 renter10to19 renter20plus lbreng envhealth transcost;
 id aff1500median;
 run;
 data aff1500median1;
@@ -199,7 +210,7 @@ proc summary data=tract_character;
 class aff1500threequarter;
 var pctnonhispwht pcthispan pctnonhisblk pctcollege pctwouths pctunemployed pctpoverty
     pctfambelow75000 pctnonfam pctpropertycrime pctviolentcrime pctprenatal
-    rentersinglefam renter2to4 renter5to9 renter10to19 renter20plus 
+    rentersinglefam renter2to4 renter5to9 renter10to19 renter20plus lbreng envhealth transcost
 ;
 	output	out=aff1500threequarter	mean= ;
 run;
@@ -207,7 +218,7 @@ run;
 proc transpose data=aff1500threequarter out=aff1500threequarter;
 var pctnonhispwht pcthispan pctnonhisblk pctcollege pctwouths pctunemployed pctpoverty
     pctfambelow75000 pctnonfam pctpropertycrime pctviolentcrime pctprenatal
-    rentersinglefam renter2to4 renter5to9 renter10to19 renter20plus ;
+    rentersinglefam renter2to4 renter5to9 renter10to19 renter20plus lbreng envhealth transcost;
 id aff1500threequarter;
 run;
 data aff1500threequarter1;
