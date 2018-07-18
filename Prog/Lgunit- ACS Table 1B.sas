@@ -98,9 +98,9 @@ data crimedata;
 run;
 
 data prenatal;
-     set vital.Births_2016;
-     keep births_prenat_adeq births_w_prenat births_total pctprenatal geo2010;
-	 pctprenatal= births_prenat_adeq/births_w_prenat*100
+     set vital.births_sum_tr10;
+     keep births_prenat_adeq_2016 births_w_prenat_2016 births_total_2016 pctprenatal geo2010;
+	 pctprenatal= births_prenat_adeq_2016/births_w_prenat_2016*100
 	 ;
 run;
 
@@ -148,7 +148,7 @@ run;
 data tract_character ;
 	merge  ACScharacteristics (in=a) crimedata prenatal medianhomesale AFFH;
 	by geo2010;
-	if 
+	if a;
 run;
 
 proc summary data=tract_character;
@@ -258,7 +258,7 @@ data tractsummary1;
 	merge tractsummary num_tracts1;
 	by category;
 run; 
-proc export data=tractsummary
+/*proc export data=tractsummary
 	outfile="&_dcdata_default_path\DMPED\Prog\ACS table 1B.csv"
 	dbms=csv replace;
-run;
+run;*/
