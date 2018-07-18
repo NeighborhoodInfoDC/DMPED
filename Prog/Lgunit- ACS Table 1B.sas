@@ -30,11 +30,12 @@ data calculate_pct;
           pop25andoverwcollege_&_years. pop25andoverwouths_&_years. popunemployed_&_years. poppoorpersons_&_years. totpop_&_years. 
 	      famincomelt75k_&_years. numfamilies_&_years. nonfamilyhhtot_&_years. medfamincm_&_years. numhshlds_&_years.
 		  pop25andoveryears&_years. popincivlaborforce_&_years.	numrenteroccupiedhu_&_years. popwhitenonhispbridge_&_years.
-          NumRtOHU1u_&_years. NumRtOHU2to4u_&_years. NumRtOHU5to9u_&_years. NumRtOHU10to19u_&_years. NumRtOHU20plusu_&_years.;
+          NumRtOHU1u_&_years. NumRtOHU2to4u_&_years. NumRtOHU5to9u_&_years. NumRtOHU10to19u_&_years. NumRtOHU20plusu_&_years.
+          personspovertydefined_&_years.
+;
 
           pct3baffordable1500= (numrentocchu3plusbd_&_years.-numrtohu3b1500plus_&_years.)/numrentocchu3plusbd_&_years.;
           pct3baffordable1000= sum(numrtohu3b500to749_&_years.,numrtohu3b750to999_&_years., numrtohu3bunder500_&_years.)/numrentocchu3plusbd_&_years.;
-
 
 run;
 /*get percentiles*/
@@ -46,9 +47,8 @@ run;
 data ACScharacteristics;
      set calculate_pct;
 	 keep geo2010 pctnonhispwht pcthispan pctnonhisblk pctcollege pctwouths pctunemployed pctpoverty pctfambelow75000 pctnonfam
-		  rentersinglefam renter2to4 renter5to9 renter10to19 renter20plus personspovertydefined_&_years. 
+		  rentersinglefam renter2to4 renter5to9 renter10to19 renter20plus 
 		  aff1000median aff1000threequarter aff1500median aff1500threequarter
-
 ;  
 
   if   pct3baffordable1000 >=0.2476156 then aff1000median=1;
@@ -83,6 +83,10 @@ proc import datafile='L:\Libraries\DMPED\Raw\DCpull_forLeah.csv'
 out=affh
 dbms=csv
 replace;
+run;
+
+data affh;set affh;
+Geo2010 = put(tractid,z11.);
 run;
 
 data crimedata;
@@ -141,11 +145,11 @@ proc sort data= AFFH;
 by geo2010;
 run;
 
-data tract_character;
-	merge  ACScharacteristics crimedata prenatal medianhomesale AFFH;
+data tract_character ;
+	merge  ACScharacteristics (in=a) crimedata prenatal medianhomesale AFFH;
 	by geo2010;
+	if 
 run;
-
 
 proc summary data=tract_character;
 class aff1000median;
@@ -253,7 +257,6 @@ proc sort data=tractsummary;
 data tractsummary1;
 	merge tractsummary num_tracts1;
 	by category;
-
 run; 
 proc export data=tractsummary
 	outfile="&_dcdata_default_path\DMPED\Prog\ACS table 1B.csv"
