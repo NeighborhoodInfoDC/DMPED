@@ -861,11 +861,11 @@ run;
 
 proc format;
   value rntrang
-    0-300 = 'Under $300'
-	300-500= '$300 to $500'
-    500-750 = '$500 to $749'
+    0-299 = 'Under $300'
+	300-499= '$300 to $500'
+    500-749 = '$500 to $749'
     750-999 = '$750 to $1,000'
-    1000-2000 = '$1,000 or more'
+    1000-3000 = '$1,000 or more'
   
 run;
 proc sort data=Gross_rent_&START_YR._&END_YR.a;
