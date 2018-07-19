@@ -85,8 +85,9 @@ dbms=csv
 replace;
 run;
 
-data affh;set affh;
-Geo2010 = put(tractid,z11.);
+data affh1;
+	set affh;
+	Geo2010 = put(tractid,z11.);
 run;
 
 data crimedata;
@@ -141,12 +142,12 @@ proc sort data= medianhomesale;
 by geo2010;
 run;
 
-proc sort data= AFFH;
+proc sort data= affh1;
 by geo2010;
 run;
 
 data tract_character ;
-	merge  ACScharacteristics (in=a) crimedata prenatal medianhomesale AFFH;
+	merge  ACScharacteristics (in=a) crimedata prenatal medianhomesale affh1;
 	by geo2010;
 	if a;
 run;
@@ -237,7 +238,7 @@ run;
 proc transpose data=tract_count out=num_tracts;
 run;
 data num_tracts1 (drop=_name_);
-	set num_tracts ;
+	set num_tracts (rename=(col1=num_tracts));
 
 	if _name_ in ("_TYPE_" "_FREQ_" ) then delete;
 
@@ -248,17 +249,26 @@ data num_tracts1 (drop=_name_);
 	if _name_ = "aff1500median" then category="1500median";
 	if _name_="aff1500threequarter" then category="1500quarter";
 
-	rename col1=num_tracts; 
+
+
+
 
 	run; 
 
 proc sort data=tractsummary;
 	by category;
 data tractsummary1;
-	merge tractsummary num_tracts1;
+	merge tractsummary (rename=( _1=LargeAffConctr
+		  						 _0=NotLargeAffCont))
+		  num_tracts1;
 	by category;
+
+		label LargeAffConctr="Average for Tracts with Concentration of Large Affordable Rental Units"
+		 NotLargeAffCont="Average for Tracts without Concentration of Large Affordable Rental Units"
+		  ;
+	
 run; 
-/*proc export data=tractsummary
+proc export data=tractsummary1
 	outfile="&_dcdata_default_path\DMPED\Prog\ACS table 1B.csv"
 	dbms=csv replace;
-run;*/
+run;
