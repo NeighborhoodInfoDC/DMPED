@@ -18,7 +18,7 @@
  Upper ranges for 2015 and later were collapsed into $2,000 or more.
 
  Modifications: 
-07/16/18 LH Modify for table B25068 for large units. 
+07/16/18 LH Modify for table B25068 for bedrooms size. 
 **************************************************************************/
 
 %include "L:\SAS\Inc\StdLocal.sas";
@@ -28,7 +28,7 @@
 
 %let START_YR = 2005;
 %let END_YR = 2016;
-%let output_path = &_dcdata_default_path\DPMED\Prog\;
+%let output_path = &_dcdata_default_path\DMPED\Prog;
 libname raw "L:\Libraries\DMPED\Raw\"; 
 
 %let year=05 06 07 08 09 10 11 12 13 14 15 16;
@@ -282,22 +282,66 @@ data WORK.grossrent_&yr.   ;
 
     run;
 
-	data grossrent_&yr.a (drop=HD01_VD31 HD01_VD32 HD01_VD33 HD01_VD34 HD01_VD35 
-							rename=(new_HD01_VD31=HD01_VD31
+	data grossrent_&yr.a (drop=HD01_VD04  HD01_VD05  HD01_VD13  HD01_VD14 HD01_VD06  HD01_VD15 HD01_VD07  HD01_VD16 HD01_VD08  HD01_VD17  HD01_VD09  HD01_VD18
+		  		HD01_VD22 HD01_VD23 HD01_VD24 HD01_VD25 HD01_VD26 HD01_VD31 HD01_VD32 HD01_VD33 HD01_VD34 HD01_VD35 HD01_VD10 HD01_VD11 HD01_VD02 HD01_VD19 HD01_VD20 HD01_VD28 HD01_VD29
+				HD01_VD37
+							rename=(
+									new_HD01_VD13=HD01_VD13
+									new_HD01_VD14=HD01_VD14
+									new_HD01_VD15=HD01_VD15
+									new_HD01_VD16=HD01_VD16
+									new_HD01_VD17=HD01_VD17 
+									new_HD01_VD22=HD01_VD22
+									new_HD01_VD23=HD01_VD23
+									new_HD01_VD24=HD01_VD24
+									new_HD01_VD25=HD01_VD25
+									new_HD01_VD31=HD01_VD31
 									new_HD01_VD32=HD01_VD32
 									new_HD01_VD33=HD01_VD33
-									new_HD01_VD34=HD01_VD34);
+									new_HD01_VD34=HD01_VD34));
 		set grossrent_&yr.;
+
+	drop HD02: ;
+
+	new_HD01_VD13=HD01_VD04 + HD01_VD05 + HD01_VD13 + HD01_VD14;
+	new_HD01_VD14=HD01_VD06 + HD01_VD15;
+	new_HD01_VD15=HD01_VD07 + HD01_VD16;
+	new_HD01_VD16=HD01_VD08 + HD01_VD17;
+	new_HD01_VD17=HD01_VD09 + HD01_VD18; 
+
+	new_HD01_VD22=HD01_VD22+ HD01_VD23;
+	new_HD01_VD23=HD01_VD24;
+	new_HD01_VD24=HD01_VD25;
+	new_HD01_VD25=HD01_VD26;
 
 	new_HD01_VD31=HD01_VD31+HD01_VD32;
 	new_HD01_VD32=HD01_VD33;
 	new_HD01_VD33=HD01_VD34;
 	new_HD01_VD34=HD01_VD35;
 	
+	label 
+
+		  new_HD01_VD13=" 0 to 1 bedrooms: - With cash rent: - Less than $300"
+		  new_HD01_VD14=" 0 to 1 bedrooms: - With cash rent: -  $300 to $499"
+		  new_HD01_VD15=" 0 to 1 bedrooms: - With cash rent: -  $500 to $749" 
+		  new_HD01_VD16=" 0 to 1 bedrooms: - With cash rent: - 	$750 to $999" 
+		  new_HD01_VD17=" 0 to 1 bedrooms: - With cash rent: -  $1,000 or more"
+		  
+		  new_HD01_VD22=" 2 bedrooms: - With cash rent: - Less than $300"
+		  new_HD01_VD23=" 2 bedrooms: - With cash rent: - $300 to $499"
+		  new_HD01_VD24=" 2 bedrooms: - With cash rent: - $500 to $749" 
+		  new_HD01_VD25=" 2 bedrooms: - With cash rent: - $750 to $999" 
+
+	      new_HD01_VD31=" 3 or more bedrooms: - With cash rent: - Less than $300"
+		  new_HD01_VD32=" 3 or more bedrooms: - With cash rent: - $300 to $499"
+		  new_HD01_VD33=" 3 or more bedrooms: - With cash rent: - $500 to $749" 
+		  new_HD01_VD34=" 3 or more bedrooms: - With cash rent: - $750 to $999" 
+
+		
 	run;
 
 
-	proc transpose data=grossrent_&yr.a . out=long_grossrent_&yr.;
+	proc transpose data=grossrent_&yr.a  out=long_grossrent_&yr.;
 		
 		run;
 
@@ -311,6 +355,7 @@ data WORK.grossrent_&yr.   ;
 	proc sort data=long_grossrent_&yr.a;
 	by _name_;
 	run;
+%end;
 %mend all_years;
 %all_years;
 
@@ -553,7 +598,7 @@ data WORK.grossrent_&yr.   ;
 		HD02_VD33="Margin of Error 3 or more bedrooms: - With cash rent: - $500 to $749"
 		HD01_VD34=" 3 or more bedrooms: - With cash rent: - $750 to $999"
 		HD02_VD34="Margin of Error 3 or more bedrooms: - With cash rent: - $750 to $999"
-		HD01_VD35=" 3 or more bedrooms: - With cash rent: - $1,000 to $1,4999"
+		HD01_VD35=" 3 or more bedrooms: - With cash rent: - $1,000 to $1,499"
 		HD02_VD35="Margin of Error 3 or more bedrooms: - With cash rent: - $1,000 to $1,499"
 		HD01_VD36=" 3 or more bedrooms: - With cash rent: - $1,500 or more"
 		HD02_VD36="Margin of Error 3 or more bedrooms: - With cash rent: - $1,500 or more"
@@ -564,7 +609,40 @@ data WORK.grossrent_&yr.   ;
 
     run;
 
-	proc transpose data=grossrent_&yr. out=long_grossrent_&yr.;
+	data grossrent_&yr.a (drop=HD01_VD08 HD01_VD09 HD01_VD17 HD01_VD18 HD01_VD26 HD01_VD27 HD01_VD35 HD01_VD36 HD01_VD04 HD01_VD13 HD01_VD05 HD01_VD14 HD01_VD06 HD01_VD15  
+							   HD01_VD07 HD01_VD16 HD01_VD02 HD01_VD10 HD01_VD11 HD01_VD19 HD01_VD20 HD01_VD28 HD01_VD29 HD01_VD37
+						  rename=(
+								  new_HD01_VD13=HD01_VD13
+								  new_HD01_VD14=HD01_VD14
+								  new_HD01_VD15=HD01_VD15
+								  new_HD01_VD16=HD01_VD16
+								  new_HD01_VD17=HD01_VD17
+						  	      new_HD01_VD27=HD01_VD27
+								  new_HD01_VD36=HD01_VD36)); 
+		set grossrent_&yr.;
+	
+		drop HD02: ;
+
+		new_HD01_VD13=HD01_VD04+HD01_VD13;
+		new_HD01_VD14=HD01_VD05+HD01_VD14;
+		new_HD01_VD15=HD01_VD06+HD01_VD15;
+		new_HD01_VD16=HD01_VD07+HD01_VD16; 
+		new_HD01_VD17=HD01_VD08+HD01_VD09+HD01_VD17+HD01_VD18;
+
+		new_HD01_VD27=HD01_VD26+HD01_VD27;
+		new_HD01_VD36=HD01_VD35+HD01_VD36;
+
+		label 
+			  new_HD01_VD13=" 0 to 1 bedroom: - With cash rent: - Less than $300"
+			  new_HD01_VD14=" 0 to 1 bedroom: - With cash rent: - $300 to $499"
+              new_HD01_VD15=" 0 to 1 bedroom: - With cash rent: - $500 to $749"
+			  new_HD01_VD16=" 0 to 1 bedroom: - With cash rent: - $750 to $999"
+			  new_HD01_VD17=" 0 to 1 bedroom: - With cash rent: - $1,000 or more"
+			  new_HD01_VD27=" 2 bedrooms: - With cash rent: - $1,000 or more"
+			  new_HD01_VD36=" 3 or more bedrooms: - With cash rent: - $1,000 or more"
+			  ;
+
+	proc transpose data=grossrent_&yr.a out=long_grossrent_&yr.;
 		
 		run;
 
@@ -588,8 +666,6 @@ data all_years_large;
 merge long_grossrent_05a long_grossrent_06a long_grossrent_07a long_grossrent_08a long_grossrent_09a long_grossrent_10a long_grossrent_11a long_grossrent_12a
 		long_grossrent_13a long_grossrent_14a long_grossrent_15a long_grossrent_16a;
 by _name_;
-
-if _name_ in ("HD01_VD30" "HD01_VD31" "HD01_VD32" "HD01_VD33" "HD01_VD34" "HD01_VD35" "HD01_VD36" "HD01_VD37");
 
 run;
 proc export data=all_years_large 
@@ -637,7 +713,7 @@ data
 
     rcount_input + 1;
 
-    infile datalines missover dlm='09'x;
+    infile datalines missover dlm=',';
 
     input
       %enum_all( Units )
@@ -713,27 +789,21 @@ data
    *drop i Low&START_YR-Low&END_YR High&START_YR-High&END_YR Carry&START_YR-Carry&END_YR;
 
 datalines;
-2211	1616	1481	1972	1923	1364	745	1086	1148	1195	1152	2889	0	100
-2324	2744	1551	1504	874	1070	1268	1191	1637	1010	709	991	100	150
-3883	5436	3543	3828	3440	2999	2856	3218	2132	1659	1095	1533	150	200
-2563	2672	2725	2286	2169	2107	2810	2236	4649	3324	4641	4733	200	250
-2229	2210	1842	2361	3270	1891	2470	2596	2892	3008	2230	2614	250	300
-1919	2131	1273	2603	2262	2339	2802	1329	1562	2030	1870	1690	300	350
-2249	2579	1818	1071	1913	1413	1968	2007	1150	1713	1828	2226	350	400
-2978	1854	2695	1468	1001	1222	1970	1586	1160	1569	1703	2536	400	450
-4108	1907	2221	1347	1876	1967	1513	1954	944	1641	2233	1342	450	500
-4119	4214	3283	3981	3149	2232	2033	2951	1267	1329	1179	753	500	550
-6017	3812	4317	2922	1683	1988	2827	1765	1657	1493	1646	1368	550	600
-7504	4892	5957	3808	3035	2583	2196	2732	1796	1203	2536	1695	600	650
-7003	5448	5919	5284	3117	3017	3125	2360	2030	2021	1614	2543	650	700
-9488	6452	7215	4907	4698	4282	4137	3257	2737	2394	2427	2598	700	750
-7856	5495	6397	6582	4167	3222	3321	3766	4133	3121	2195	2393	750	800
-11569	11124	11688	12304	13519	11739	11811	11139	9205	9874	7445	7837	800	900
-13492	12249	10115	10060	9919	9882	10101	9769	10280	10542	9158	9462	900	1000
-18437	21907	20368	22937	21710	18883	22200	22838	23547	22928	23858	23248	1000	1250
-11314	12332	13860	14350	16240	21077	22244	20226	19068	16401	18579	20639	1250	1500
-11767	11353	14381	16689	16373	22599	26570	27905	28618	28183	34371	30320	1500	2000
-7348	10110	12074	16365	17911	22618	25325	26934	34887	41867	41352	42337	2000	.
+8442,7693,6815,6327,6313,5697,6494,6326,7455,6362,6216,8367,0,300
+5381,4934,4608,3058,3629,3769,3695,3072,2269,4146,3375,4678,300,500
+22163,15785,17315,12792,9268,9067,8213,7836,5354,4228,5058,5299,500,750
+22685,17604,18130,17442,18087,14607,14631,15939,14200,13134,10662,11755,750,1000
+26009,30166,32936,38745,38282,45769,56104,54926,56618,60561,62335,66987,1000,.
+2150,4165,2615,3663,3923,2067,2606,2742,3658,2367,2918,2125,0,300
+4311,2348,2314,1870,1908,2121,2778,2117,2242,1844,2572,1941,300,500
+9121,7209,5455,5987,4456,2950,3865,3307,2790,2904,2522,2383,500,750
+8217,8678,7932,9488,7289,8420,8159,7339,7771,8072,6193,5372,750,1000
+13782,15532,17619,19152,21421,25064,26125,29119,29698,32314,36496,31881,1000,.
+2618,2820,1712,1961,1440,1667,1049,1259,1345,1467,693,2268,0,300
+1562,1189,1085,1561,1515,1051,1780,1687,305,963,1687,1175,300,500
+2847,1824,3921,2123,1958,2085,2240,1922,1343,1308,1822,1275,500,750
+2015,2586,2138,2016,2229,1816,2443,1396,1647,2331,1943,2565,750,1000
+9075,10004,10128,12444,12531,14344,14110,13858,19804,16504,19329,17676,1000,.
 ;
 
 run;
@@ -779,21 +849,30 @@ run;
 
 /**********************************/
 
+data Gross_rent_&START_YR._&END_YR.a;
+ 	set Gross_rent_&START_YR._&END_YR. ;
 
-%File_info( data=Gross_rent_&START_YR._&END_YR., printobs=50 )
+if rcount_output <= 5 then bedrooms="0 to 1 bedrooms";
+if 6 <=rcount_output <=10 then bedrooms="2 bedrooms";
+if rcount_output > 10 then bedrooms="3+ bedrooms";
+
+run; 
+%File_info( data=Gross_rent_&START_YR._&END_YR.a, printobs=50 )
 
 proc format;
   value rntrang
-    0-450 = 'Under $500'
-    500-650 = '$500 to $699'
-    700-750 = '$700 to $799'
-    800-900 = '$800 to $999'
-    1000-1250 = '$1,000 to $1,499'
-    1500-2000 = '$1,500 or more';
+    0-300 = 'Under $300'
+	300-500= '$300 to $500'
+    500-750 = '$500 to $749'
+    750-999 = '$750 to $1,000'
+    1000-2000 = '$1,000 or more'
+  
 run;
-
-proc tabulate data=Gross_rent_&START_YR._&END_YR. format=comma10.0 noseps missing;
-  class low;
+proc sort data=Gross_rent_&START_YR._&END_YR.a;
+by bedrooms;
+proc tabulate data=Gross_rent_&START_YR._&END_YR.a format=comma10.0 noseps missing;
+  by bedrooms; 
+  class low ;
   var Units&START_YR.-Units&END_YR.;
   table 
     /** Rows **/
@@ -805,12 +884,13 @@ proc tabulate data=Gross_rent_&START_YR._&END_YR. format=comma10.0 noseps missin
   label 
     %label_all( Units )
   ;
-  title2 "Renter-Occupied Housing Units by Gross Rent, District of Columbia (UNADJUSTED)";
+  title2 "Renter-Occupied Housing Units by Bedroom Size by Gross Rent, District of Columbia (UNADJUSTED)";
 run;
     
-ods csvall body="&output_path\Gross_rent_&START_YR._&END_YR..csv";
+ods csvall body="&output_path\Gross_bedrooms_rent_&START_YR._&END_YR..csv";
 
-proc tabulate data=Gross_rent_&START_YR._&END_YR. format=comma10.0 noseps missing;
+proc tabulate data=Gross_rent_&START_YR._&END_YR.a format=comma10.0 noseps missing;
+ by bedrooms;
   class low;
   var UnitsAdj&START_YR.-UnitsAdj&END_YR.;
   table 
@@ -823,7 +903,7 @@ proc tabulate data=Gross_rent_&START_YR._&END_YR. format=comma10.0 noseps missin
   label 
     %label_all( UnitsAdj )
   ;
-  title2 "Renter-Occupied Housing Units by Gross Rent, District of Columbia (constant &END_YR. $)";
+  title2 "Renter-Occupied Housing Units by Bedroom Size by Gross Rent, District of Columbia (constant &END_YR. $)";
 run;
 
 ods csvall close;
