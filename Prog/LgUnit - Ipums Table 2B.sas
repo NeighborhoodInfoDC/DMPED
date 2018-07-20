@@ -114,22 +114,14 @@ data pretables;
 
 	 /* Flag large units*/
 
-	%if &largedef. = PEOPLE %then %do;
+	%if &largedef. = PERSON %then %do;
 	if numprec >= 4 then largehh = 1;
 		else largehh = 0;
 	%end;
 
 	%else %if &largedef. = BEDROOMS %then %do;
-	if bedrooms >= 3 then largehh = 1;
+	if bedrooms >= 4 then largehh = 1;
 		else largehh = 0;
-	%end;
-
-	%if &ten. = OWN %then %do;
-		if ownershp = 1;
-	%end;
-
-	%else %if &ten. = RENT %then %do;
-		if ownershp = 2;
 	%end;
 
 
@@ -179,10 +171,19 @@ data pretables;
 
 	%end;
 
-	%else %if &yrs. = 2000 %then %do;
+	%else %if &yrs. = ACS %then %do;
 
 	hhincome_i = hhincome;
 
+	%end;
+
+
+	%if &ten. = OWN %then %do;
+		if ownershp = 1;
+	%end;
+
+	%else %if &ten. = RENT %then %do;
+		if ownershp = 2;
 	%end;
 
 	/* HUD income categories */
@@ -560,20 +561,23 @@ proc transpose data = table2b_all out = table2b_csv_all;
 run;
 
 
-/*proc export data = table2b_csv_all
-	outfile = "&_dcdata_default_path.\DMPED\Prog\table2b_csv_&yrs._&tenure..csv"
+proc export data = table2b_csv_all
+	outfile = "&_dcdata_default_path.\DMPED\Prog\table2b_csv_&yrs._&tenure._&largedef..csv"
 	dbms = csv replace;
 run;
-*/
+
 
 %mend ipums_lgunit;
 
-%ipums_lgunit (all,2000,bedrooms);
-%ipums_lgunit (own,2000);
-%ipums_lgunit (rent,2000);
+%macro output_lg (define);
+	%ipums_lgunit (all,2000,&define.);
+	%ipums_lgunit (own,2000,&define.);
+	%ipums_lgunit (rent,2000,&define.);
 
-%ipums_lgunit (all,ACS);
-%ipums_lgunit (own,ACS);
-%ipums_lgunit (rent,ACS);
+	%ipums_lgunit (all,ACS,&define.);
+	%ipums_lgunit (own,ACS,&define.);
+	%ipums_lgunit (rent,ACS,&define.);
 
-
+%mend output_lg;
+%output_lg (person);
+%output_lg (bedrooms);
