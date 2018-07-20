@@ -19,7 +19,7 @@
 %DCData_lib( IPUMS )
 
 
-%let cvars = allhh largehh isschoolage isadult iskid
+%let cvars = allhh largehh isschoolage isadult iskid isstudent
          issenior isdis raceW raceB raceH raceAPI raceO
 		 hudincome30 hudincome50 hudincome80 
 		 before1gen before2gen after1gen
@@ -214,6 +214,12 @@ data pretables;
 
 	numadults = isadult;
 
+	/* Student */
+	if school = 2 then isstudent = 1;
+		else isstudent = 0;
+
+	numstudents = isstudent;
+
 	/*adult but not senior*/
 	if 18<=age<65 then nonsenioradult = 1;
         else nonsenioradult = 0;
@@ -362,7 +368,7 @@ data pretables;
 	if builtyr2 >= 9 then Built2000After = 1;
 		else Built2000After = 0;
 
-	keep &cvars. &mvars. hud_inc nonrelative numkids numadults
+	keep &cvars. &mvars. hud_inc nonrelative numkids numadults numstudents
 		  serial hhwt pernum numprec race hispan age hhincome_i hhincome;
   
 run;
@@ -370,7 +376,7 @@ run;
 
 proc summary data = pretables;
 	class serial;
-	var &cvars. nonrelative numkids numadults;
+	var &cvars. nonrelative numkids numadults numstudents;
 	output out= pretables_s sum=;
 run;
 
@@ -417,6 +423,10 @@ data pretables_collapse;
 	if nonrelative >= 3 then grouphouse = 1;
 		else grouphouse = 0;
 
+	/* Flag "student house" */
+	if grouphouse = 1 and numstudents >= 2 then studenthouse = 1;
+		else studenthouse = 0;
+
 
 run;
 
@@ -436,7 +446,7 @@ run;
 
 proc summary data = pretables_withvac;
 	class puma largehh;
-	var &cvars. multigen grouphouse vacant allhh_withvac;
+	var &cvars. multigen grouphouse studenthouse vacant allhh_withvac;
 	weight hhwt;
 	output out = table2b_pre sum=;
 run;
@@ -458,6 +468,7 @@ data table2b_pcts;
 	pct_isdis = isdis / allhh;
 	pct_multigen = multigen / allhh;
 	pct_grouphouse = grouphouse / allhh;
+	pct_studenthouse = studenthouse / allhh;
 
 	pct_movedless1 = movedless1 / allhh;
 	pct_moved2to10 = moved2to10 / allhh;
@@ -528,7 +539,7 @@ proc transpose data = table2b_all out = table2b_csv_all;
 	hh_inc pct_hudincome30 pct_hudincome50 pct_hudincome80
 
 	/* HH Structure */
-	pct_issenior pct_isdis pct_multigen pct_grouphouse numadults numkids 
+	pct_issenior pct_isdis pct_multigen pct_grouphouse pct_studenthouse numadults numkids 
 
 	/* Migration */
 	pct_movedless1 pct_moved2to10 pct_moved10plus
@@ -557,7 +568,7 @@ run;
 
 %mend ipums_lgunit;
 
-%ipums_lgunit (all,2000);
+%ipums_lgunit (all,2000,bedrooms);
 %ipums_lgunit (own,2000);
 %ipums_lgunit (rent,2000);
 
