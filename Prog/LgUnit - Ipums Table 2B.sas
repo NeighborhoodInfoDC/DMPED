@@ -369,8 +369,72 @@ data pretables;
 	if builtyr2 >= 9 then Built2000After = 1;
 		else Built2000After = 0;
 
-	keep &cvars. &mvars. hud_inc nonrelative numkids numadults numstudents
-		  serial hhwt pernum numprec race hispan age hhincome_i hhincome;
+/***** FROM HOUSING_NEEDS_BASELINE ****/
+	 if ownershpd in (21, 22) or vacancy = 1 then do;
+    
+    ****** Rental units ******;
+    
+    Tenure = 1;
+    
+    if vacancy=1 then do;
+    		** Impute gross rent for vacant units **;
+  		rentgrs = rent*&RATIO_RENTGRS_RENT_2009_11;
+  		Max_income = ( rentgrs * 12 ) / 0.30;
+    end;
+    else Max_income = ( rentgrs * 12 ) / 0.30;
+    
+  end;
+  else if ownershpd in ( 12,13 ) or vacancy = 2 then do;
+
+    ****** Owner units ******;
+    
+    Tenure = 2;
+
+    **** 
+    Calculate max income for first-time homebuyers. 
+    Using 4.62% as the effective mortgage rate for DC in 2011, 
+    calculate monthly P & I payment using monthly mortgage rate and compounded interest calculation
+    ******; 
+    
+    loan = .9 * valueh;
+    month_mortgage= (4.62 / 12) / 100; 
+    monthly_PI = loan * month_mortgage * ((1+month_mortgage)**360)/(((1+month_mortgage)**360)-1);
+
+    ****
+    Calculate PMI and taxes/insurance to add to Monthly_PI to find total monthly payment
+    ******;
+    
+    PMI = (.007 * loan ) / 12; **typical annual PMI is .007 of loan amount;
+    tax_ins = .25 * monthly_PI; **taxes assumed to be 25% of monthly PI; 
+    total_month = monthly_PI + PMI + tax_ins; **Sum of monthly payment components;
+
+    ** Calculate annual_income necessary to finance house **;
+    Max_income = 12 * total_month / .28;
+
+  end;
+  
+  ** Determine maximum HH size based on bedrooms **;
+  
+  select ( bedrooms );
+    when ( 1 )       /** Efficiency **/
+      Max_hh_size = 1;
+    when ( 2 )       /** 1 bedroom **/
+      Max_hh_size = 2;
+    when ( 3 )       /** 2 bedroom **/
+      Max_hh_size = 3;
+    when ( 4 )       /** 3 bedroom **/
+      Max_hh_size = 4;
+    when ( 5 )       /** 4 bedroom **/
+      Max_hh_size = 5;
+    when ( 6, 7, 8, 9, 10, 11, 12 )       /** 5+ bedroom **/
+      Max_hh_size = 7;
+    otherwise
+      do; 
+        %err_put( msg="Invalid bedroom size: " serial= bedrooms= ) 
+      end;
+  end;
+
+
   
 run;
 
@@ -440,6 +504,7 @@ data pretables_withvac;
 		else vacant = 0;
 
 	allhh_withvac = 1;
+
 
 
 run;
