@@ -369,41 +369,31 @@ run;
 data xACS_2006_10; 
 	set acs.acs_2006_10_dc_sum_tr&geo_suffix.;
 
+	/* Create sum variabels */
 	numhsgunits_2006_10 = sum(of numhsgunits0bd_2006_10 numhsgunits1bd_2006_10 numhsgunits2bd_2006_10 numhsgunits3plusbd_2006_10);
 	familyhh4plus_2006_10 = sum(of familyhh4person_2006_10 familyhh5person_2006_10 familyhh6person_2006_10 familyhh7person_2006_10);
 	nonfamilyhh4plus_2006_10 = sum(of nonfamilyhh4person_2006_10 nonfamilyhh5person_2006_10 nonfamilyhh6person_2006_10 nonfamilyhh7person_2006_10);
 
-	keep &geo. 
+	numrtohu02bnocash_2006_10 = sum(of numrtohu0bnocash_2006_10 numrtohu1bnocash_2006_10 numrtohu2bnocash_2006_10);
+	numrtohu02bunder500_2006_10 = sum(of numrtohu0bunder500_2006_10 numrtohu1bunder500_2006_10 numrtohu2bunder500_2006_10);
+	numrtohu02b500to749_2006_10 = sum(of numrtohu0b500to749_2006_10 numrtohu1b500to749_2006_10 numrtohu2b500to749_2006_10);
+	numrtohu02b750to999_2006_10 = sum(of numrtohu0b750to999_2006_10 numrtohu1b750to999_2006_10 numrtohu2b750to999_2006_10);
+	numrtohu02b1000plus_2006_10 = sum(of numrtohu0b1000plus_2006_10 numrtohu1b1000plus_2006_10 numrtohu2b1000plus_2006_10);
 
-	numhsgunits_2006_10 numhsgunits0bd_2006_10 numhsgunits1bd_2006_10 numhsgunits2bd_2006_10 numhsgunits3bd_2006_10 numhsgunits3plusbd_2006_10
-	numhsgunits4bd_2006_10 numhsgunits5plusbd_2006_10 
+	numrentocchu02b_2006_10 = sum(of numrentocchu0bd_2006_10 numrentocchu1bd_2006_10 numrentocchu2bd_2006_10);
 
-	numrenteroccupiedhu_2006_10 numrentocchu0bd_2006_10 numrentocchu1bd_2006_10 numrentocchu2bd_2006_10 numrentocchu3bd_2006_10
-	numrentocchu3plusbd_2006_10 numrentocchu4bd_2006_10 numrentocchu5plusbd_2006_10 
-
-	numowneroccupiedhu_2006_10 numownocchu0bd_2006_10 numownocchu1bd_2006_10
-	numownocchu2bd_2006_10 numownocchu3bd_2006_10 numownocchu3plusbd_2006_10 numownocchu4bd_2006_10 numownocchu5plusbd_2006_10
-
-	numrtohu3bunder500_2006_10 numrtohu3b500to749_2006_10 numrtohu3b750to999_2006_10 numrtohu3b1000plus_2006_10
-
-	pct3brall_2006_10 pct3brrent_2006_10 pct3brown_2006_10
-
-	pctrtohu3bunder500_2006_10 pctrtohu3b500to749_2006_10 pctrtohu3b750to999_2006_10 pctrtohu3b1000plus_2006_10
-
-	numhshlds_2006_10 pctfamily_2006_10 pctfamily4plus_2006_10 pctnonfamily_2006_10 pctnonfamily4plus_2006_10
-
-	familyhhtot_2006_10 familyhh2person_2006_10 familyhh3person_2006_10 familyhh4person_2006_10
-	familyhh5person_2006_10 familyhh6person_2006_10 familyhh7person_2006_10
-
-	nonfamilyhhtot_2006_10 nonfamilyhh1person_2006_10 nonfamilyhh2person_2006_10 nonfamilyhh3person_2006_10 nonfamilyhh4person_2006_10
-	nonfamilyhh5person_2006_10 nonfamilyhh6person_2006_10 nonfamilyhh7person_2006_10
-
-	;
-
+	/* Create percent variabels */
 	pct3brall_2006_10 = numhsgunits3plusbd_2006_10 / numhsgunits_2006_10;
 	pct3brrent_2006_10 = numrentocchu3plusbd_2006_10 / numrenteroccupiedhu_2006_10;
 	pct3brown_2006_10 = numownocchu3plusbd_2006_10 / numowneroccupiedhu_2006_10;
 
+	pctrtohu02bnocash_2006_10 = numrtohu02bnocash_2006_10 / numrentocchu02b_2006_10;
+	pctrtohu02bunder500_2006_10 = numrtohu02bunder500_2006_10 / numrentocchu02b_2006_10;
+	pctrtohu02b500to749_2006_10 = numrtohu02b500to749_2006_10 / numrentocchu02b_2006_10;
+	pctrtohu02b750to999_2006_10 = numrtohu02b750to999_2006_10 / numrentocchu02b_2006_10;
+	pctrtohu02b1000plus_2006_10 = numrtohu02b1000plus_2006_10 / numrentocchu02b_2006_10;
+
+	pctrtohu3bnocash_2006_10 = numrtohu3bnocash_2006_10 / numrentocchu3plusbd_2006_10;
 	pctrtohu3bunder500_2006_10 = numrtohu3bunder500_2006_10 / numrentocchu3plusbd_2006_10;
 	pctrtohu3b500to749_2006_10 = numrtohu3b500to749_2006_10 / numrentocchu3plusbd_2006_10;
 	pctrtohu3b750to999_2006_10 = numrtohu3b750to999_2006_10 / numrentocchu3plusbd_2006_10;
@@ -417,10 +407,16 @@ data xACS_2006_10;
 	label pct3brall_2006_10 = "Pct. of All Units with 3+ bedrooms"
 		  pct3brrent_2006_10 = "Pct. of Rental Units with 3+ bedrooms" 
 		  pct3brown_2006_10 = "Pct. of Owner Units with 3+ bedrooms" 
-		  pctrtohu3bunder500_2006_10 = "Pct of renter units Under $500"
-		  pctrtohu3b500to749_2006_10 = "Pct of renter units $500 - $749"
-		  pctrtohu3b750to999_2006_10 = "Pct of renter units $750 - $999"
-		  pctrtohu3b1000plus_2006_10 = "Pct of renter units $1,000+"
+		  pctrtohu02bnocash_2006_10 = "Pct of renter units with no cash rent"
+		  pctrtohu02bunder500_2006_10 = "Pct of 0-2 bedroom renter units Under $500"
+		  pctrtohu02b500to749_2006_10 = "Pct of 0-2 bedroom renter units $500 - $749"
+		  pctrtohu02b750to999_2006_10 = "Pct of 0-2 bedroom renter units $750 - $999"
+		  pctrtohu02b1000plus_2006_10 = "Pct of 0-2 bedroom renter units $1,000+"
+		  pctrtohu3bnocash_2006_10 = "Pct of 3+ bedroom renter units with no cash rent"
+		  pctrtohu3bunder500_2006_10 = "Pct of 3+ bedroom renter units Under $500"
+		  pctrtohu3b500to749_2006_10 = "Pct of 3+ bedroom renter units $500 - $749"
+		  pctrtohu3b750to999_2006_10 = "Pct of 3+ bedroom renter units $750 - $999"
+		  pctrtohu3b1000plus_2006_10 = "Pct of 3+ bedroom renter units $1,000+"
 		  pctfamily_2006_10 = "Pct. of households that are family"
 		  pctfamily4plus_2006_10 = "Pct. of households that are family with 4+ people"
 		  pctnonfamily_2006_10 = "Pct. of households that are nonfamily" 
@@ -444,7 +440,8 @@ proc transpose data=xACS_2006_10 out=table2006_10_&geo.;
 run; 
 
 proc transpose data=xACS_2006_10 out=table2006_10_rent_&geo.;
-	var pctrtohu3bunder500_2006_10 pctrtohu3b500to749_2006_10 pctrtohu3b750to999_2006_10 pctrtohu3b1000plus_2006_10
+	var pctrtohu02bnocash_2006_10 pctrtohu02bunder500_2006_10 pctrtohu02b500to749_2006_10 pctrtohu02b750to999_2006_10 pctrtohu02b1000plus_2006_10
+		pctrtohu3bnocash_2006_10 pctrtohu3bunder500_2006_10 pctrtohu3b500to749_2006_10 pctrtohu3b750to999_2006_10 pctrtohu3b1000plus_2006_10
 	 	;
 	id &geo.; 
 run; 
@@ -465,45 +462,36 @@ run;
 data xACS_2012_16; 
 	set acs.acs_2012_16_dc_sum_tr&geo_suffix.;
 
+	/* Create sum variabels */
 	numhsgunits_2012_16 = sum(of numhsgunits0bd_2012_16 numhsgunits1bd_2012_16 numhsgunits2bd_2012_16 numhsgunits3plusbd_2012_16);
 	numhsgunits_2012_16 = sum(of numhsgunits0bd_2012_16 numhsgunits1bd_2012_16 numhsgunits2bd_2012_16 numhsgunits3plusbd_2012_16);
 	familyhh4plus_2012_16 = sum(of familyhh4person_2012_16 familyhh5person_2012_16 familyhh6person_2012_16 familyhh7person_2012_16);
 	nonfamilyhh4plus_2012_16 = sum(of nonfamilyhh4person_2012_16 nonfamilyhh5person_2012_16 nonfamilyhh6person_2012_16 nonfamilyhh7person_2012_16);
 
-	keep &geo. 
+	numrtohu02bnocash_2012_16 = sum(of numrtohu0bnocash_2012_16 numrtohu1bnocash_2012_16 numrtohu2bnocash_2012_16);
+	numrtohu02bunder500_2012_16 = sum(of numrtohu0bunder500_2012_16 numrtohu1bunder500_2012_16 numrtohu2bunder500_2012_16);
+	numrtohu02b500to749_2012_16 = sum(of numrtohu0b500to749_2012_16 numrtohu1b500to749_2012_16 numrtohu2b500to749_2012_16);
+	numrtohu02b750to999_2012_16 = sum(of numrtohu0b750to999_2012_16 numrtohu1b750to999_2012_16 numrtohu2b750to999_2012_16);
+	numrtohu02b1000plus_2012_16 = sum(of numrtohu0b1000plus_2012_16 numrtohu1b1000plus_2012_16 numrtohu2b1000plus_2012_16);
+	numrtohu02b1000to1499_2012_16 = sum(of numrtohu0b1000to1499_2012_16 numrtohu1b1000to1499_2012_16 numrtohu2b1000to1499_2012_16);
+	numrtohu02b1500plus_2012_16 = sum(of numrtohu0b1500plus_2012_16 numrtohu1b1500plus_2012_16 numrtohu2b1500plus_2012_16);
 
-	numhsgunits_2012_16 numhsgunits0bd_2012_16 numhsgunits1bd_2012_16 numhsgunits2bd_2012_16 numhsgunits3bd_2012_16 numhsgunits3plusbd_2012_16
-	numhsgunits4bd_2012_16 numhsgunits5plusbd_2012_16 
+	numrentocchu02b_2012_16 = sum(of numrentocchu0bd_2012_16 numrentocchu1bd_2012_16 numrentocchu2bd_2012_16);
 
-	numrenteroccupiedhu_2012_16 numrentocchu0bd_2012_16 numrentocchu1bd_2012_16 numrentocchu2bd_2012_16 numrentocchu3bd_2012_16
-	numrentocchu3plusbd_2012_16 numrentocchu4bd_2012_16 numrentocchu5plusbd_2012_16 
-
-	numowneroccupiedhu_2012_16 numownocchu0bd_2012_16 numownocchu1bd_2012_16
-	numownocchu2bd_2012_16 numownocchu3bd_2012_16 numownocchu3plusbd_2012_16 numownocchu4bd_2012_16 numownocchu5plusbd_2012_16
-
-	numrtohu3bunder500_2012_16 numrtohu3b500to749_2012_16 numrtohu3b750to999_2012_16 numrtohu3b1000plus_2012_16
-	numrtohu3b1000to1499_2012_16 numrtohu3b1500plus_2012_16
-
-	pct3brall_2012_16 pct3brrent_2012_16 pct3brown_2012_16
-
-	pctrtohu3bunder500_2012_16 pctrtohu3b500to749_2012_16 pctrtohu3b750to999_2012_16
-	pctrtohu3b1000plus_2012_16 pctrtohu3b1000to1499_2012_16 pctrtohu3b1500plus_2012_16
-
-	numhshlds_2012_16 pctfamily_2012_16 pctfamily4plus_2012_16 pctnonfamily_2012_16 pctnonfamily4plus_2012_16
-
-	familyhhtot_2012_16 familyhh2person_2012_16 familyhh3person_2012_16 familyhh4person_2012_16
-	familyhh5person_2012_16 familyhh6person_2012_16 familyhh7person_2012_16
-
-	nonfamilyhhtot_2012_16 nonfamilyhh1person_2012_16 nonfamilyhh2person_2012_16 nonfamilyhh3person_2012_16 nonfamilyhh4person_2012_16
-	nonfamilyhh5person_2012_16 nonfamilyhh6person_2012_16 nonfamilyhh7person_2012_16
-
-	;
-
+	/* Create percent variabels */
 	pct3brall_2012_16 = numhsgunits3plusbd_2012_16 / numhsgunits_2012_16;
 	pct3brrent_2012_16 = numrentocchu3plusbd_2012_16 / numrenteroccupiedhu_2012_16;
 	pct3brown_2012_16 = numownocchu3plusbd_2012_16 / numowneroccupiedhu_2012_16;
 
+	pctrtohu02bnocash_2012_16 = numrtohu02bnocash_2012_16 / numrentocchu02b_2012_16;
+	pctrtohu02bunder500_2012_16 = numrtohu02bunder500_2012_16 / numrentocchu02b_2012_16;
+	pctrtohu02b500to749_2012_16 = numrtohu02b500to749_2012_16 / numrentocchu02b_2012_16;
+	pctrtohu02b750to999_2012_16 = numrtohu02b750to999_2012_16 / numrentocchu02b_2012_16;
+	pctrtohu02b1000plus_2012_16 = numrtohu02b1000plus_2012_16 / numrentocchu02b_2012_16;
+	pctrtohu02b1000to1499_2012_16 = numrtohu02b1000to1499_2012_16 / numrentocchu02b_2012_16;
+	pctrtohu02b1500plus_2012_16 = numrtohu02b1500plus_2012_16 / numrentocchu02b_2012_16;
 
+	pctrtohu3bnocash_2012_16 = numrtohu3bnocash_2012_16 / numrentocchu3plusbd_2012_16;
 	pctrtohu3bunder500_2012_16 = numrtohu3bunder500_2012_16 / numrentocchu3plusbd_2012_16;
 	pctrtohu3b500to749_2012_16 = numrtohu3b500to749_2012_16 / numrentocchu3plusbd_2012_16;
 	pctrtohu3b750to999_2012_16 = numrtohu3b750to999_2012_16 / numrentocchu3plusbd_2012_16;
@@ -520,12 +508,20 @@ data xACS_2012_16;
 	label pct3brall_2012_16 = "Pct. of All Units with 3+ bedrooms"
 		  pct3brrent_2012_16 = "Pct. of Rental Units with 3+ bedrooms" 
 		  pct3brown_2012_16 = "Pct. of Owner Units with 3+ bedrooms" 
-		  pctrtohu3bunder500_2012_16 = "Pct of renter units Under $500"
-		  pctrtohu3b500to749_2012_16 = "Pct of renter units $500 - $749"
-		  pctrtohu3b750to999_2012_16 = "Pct of renter units $750 - $999"
-		  pctrtohu3b1000plus_2012_16 = "Pct of renter units $1,000+"
-		  pctrtohu3b1000to1499_2012_16 = "Pct of renter units $1,000 - $1,499"
-		  pctrtohu3b1500plus_2012_16 = "Pct of renter units $1,000+" 
+		  pctrtohu02bnocash_2012_16 = "Pct of 0-2 bedroom renter units with no cash rent"
+		  pctrtohu02bunder500_2012_16 = "Pct of 0-2 bedroom renter units Under $500"
+		  pctrtohu02b500to749_2012_16 = "Pct of 0-2 bedroom renter units $500 - $749"
+		  pctrtohu02b750to999_2012_16 = "Pct of 0-2 bedroom renter units $750 - $999"
+		  pctrtohu02b1000plus_2012_16 = "Pct of 0-2 bedroom renter units $1,000+"
+		  pctrtohu02b1000to1499_2012_16 = "Pct of 0-2 bedroom renter units $1,000 - $1,499"
+		  pctrtohu02b1500plus_2012_16 = "Pct of 0-2 bedroom renter units $1,000+" 
+		  pctrtohu3bnocash_2012_16 = "Pct of 3+ bedroom renter units with no cash rent"
+		  pctrtohu3bunder500_2012_16 = "Pct of 3+ bedroom renter units Under $500"
+		  pctrtohu3b500to749_2012_16 = "Pct of 3+ bedroom renter units $500 - $749"
+		  pctrtohu3b750to999_2012_16 = "Pct of  3+ bedroom renter units $750 - $999"
+		  pctrtohu3b1000plus_2012_16 = "Pct of 3+ bedroom renter units $1,000+"
+		  pctrtohu3b1000to1499_2012_16 = "Pct of 3+ bedroomrenter units $1,000 - $1,499"
+		  pctrtohu3b1500plus_2012_16 = "Pct of 3+ bedroom renter units $1,000+" 
 		  pctfamily_2012_16 = "Pct. of households that are family"
 		  pctfamily4plus_2012_16 = "Pct. of households that are family with 4+ people"
 		  pctnonfamily_2012_16 = "Pct. of households that are nonfamily" 
@@ -549,8 +545,10 @@ proc transpose data=xACS_2012_16 out=table2012_16_&geo.;
 run; 
 
 proc transpose data=xACS_2012_16 out=table2012_16_rent_&geo.;
-	var pctrtohu3bunder500_2012_16 pctrtohu3b500to749_2012_16 pctrtohu3b750to999_2012_16 pctrtohu3b1000plus_2012_16
-		pctrtohu3b1000to1499_2012_16 pctrtohu3b1500plus_2012_16
+	var pctrtohu02bnocash_2012_16 pctrtohu02bunder500_2012_16 pctrtohu02b500to749_2012_16 pctrtohu02b750to999_2012_16 
+		pctrtohu02b1000plus_2012_16 pctrtohu02b1000to1499_2012_16 pctrtohu02b1500plus_2012_16
+		pctrtohu3bnocash_2012_16 pctrtohu3bunder500_2012_16 pctrtohu3b500to749_2012_16 pctrtohu3b750to999_2012_16 
+		pctrtohu3b1000plus_2012_16 pctrtohu3b1000to1499_2012_16 pctrtohu3b1500plus_2012_16
 	 	;
 	id &geo.; 
 run; 
