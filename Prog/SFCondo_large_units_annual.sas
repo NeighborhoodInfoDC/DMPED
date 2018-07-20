@@ -9,6 +9,9 @@
  Environment:  Local Windows session
  
  Description: Creates quarterly and annual parcel level files. 
+ 
+ Modifications: 
+ 07/20/18 LH Added school and foreign. 
 
 **************************************************************************/
 
@@ -118,6 +121,15 @@ run;
 		if ownercat in ("040" "050" "070") then govtown = 1;
        else if ownercat in ("010" "020" "030" "060"  "090" "115" "120" "130" "100" "080" "111") then govtown= 0;
 
+	   *Private universities, colleges, and schools; 
+	   if ownercat in ("090") then school =1;
+	   else if ownercat in ("010" "020" "030" "040" "050" "060" "070"  "115" "120" "130" "100" "080" "111")  then school= 0;
+
+	   *Foreign governments;
+		if ownercat in ("060" ) then foreign =1;
+	   else if ownercat in ("010" "020" "030" "040" "050" "060" "070" "090" "115" "120" "130" "100" "080" "111")  then foreign= 0;
+
+
          total=1; 
  	  output;
 	  report_dt = intnx( "&unit", report_dt, 1, 'beginning' );
@@ -137,6 +149,8 @@ run;
 	  cdcNFP="Owner is a church, CDC or nonprofit, beginning of the period"
 	  otherind="Owner is an individual (not owner-occupied), beginning of the period" 
 	  govtown="Owner is DC or US government or quasi-public entity, beginning of the period"
+	  school="Owner is a private university, college, or school"
+	  foreign="Owner is a foreign government"
 	  adj_start_dt="Beginning of the period"
 	  adj_end_dt = "End of the period"
 	  total="All units"
@@ -144,7 +158,7 @@ run;
     
     keep 
       ssl largeunit total saledate saleyear next_saledate usecode ui_proptype ownerpt_extractdat_first ownerpt_extractdat_last city ward2012 zip geo2010 cluster2017 cluster_tr2000 x_coord y_coord usecode 
-      report_dt start_dt end_dt adj_start_dt adj_end_dt renter BldgAgeGT2000 AYB hstd_code Owner_occ_sale ownercat senior corporations cdcNFP otherind govtown
+      report_dt start_dt end_dt adj_start_dt adj_end_dt renter BldgAgeGT2000 AYB hstd_code Owner_occ_sale ownercat senior corporations cdcNFP otherind govtown school foreign
 	 ;
     
   run;
@@ -163,14 +177,14 @@ run;
   revisions=%str(&revisions),
   /** File info parameters **/
   printobs=5,
-  freqvars=largeunit senior corporations cdcNFP otherind govtown Owner_occ_sale renter BldgAgeGT2000
+  freqvars=largeunit senior corporations cdcNFP otherind govtown school foreign Owner_occ_sale renter BldgAgeGT2000
   );
 
  
 
 %mend create_annual;
 
-%create_annual( out_ds=SFCondo_qtr_2017, unit=qtr, rpt_end_dt='31mar2018'd, label="Quarterly SF-Condo Parcels for Large Units Study", revisions=Added total.)
+%create_annual( out_ds=SFCondo_qtr_2017, unit=qtr, rpt_end_dt='31mar2018'd, label="Quarterly SF-Condo Parcels for Large Units Study", revisions=Added school and foreign.)
 
-%create_annual( out_ds=SFCondo_year_2017, unit=year, rpt_end_dt='31mar2018'd, label="Annual SF-Condo Parcels for Large Units Study", revisions=Added total. )
+%create_annual( out_ds=SFCondo_year_2017, unit=year, rpt_end_dt='31mar2018'd, label="Annual SF-Condo Parcels for Large Units Study", revisions=Added school and foreign.)
 
