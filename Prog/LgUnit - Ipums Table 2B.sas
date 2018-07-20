@@ -51,10 +51,11 @@
 %mend recode_dvars;
 
 
-%macro ipums_lgunit (tenure,yrs);
+%macro ipums_lgunit (tenure,yrs,largedef);
 
 %let ten = %upcase( &tenure. );
 %let yrs = %upcase( &yrs. );
+%let largedef = %upcase( &largedef. );
 
 %if &yrs. = ACS %then %do;
 	%let indata = Acs_2012_16_dc;
@@ -110,6 +111,18 @@ proc sort data = hhwts; by serial; run;
 
 data pretables;
 	set Ipums.&indata.;
+
+	 /* Flag large units*/
+
+	%if &largedef. = PEOPLE %then %do;
+	if numprec >= 4 then largehh = 1;
+		else largehh = 0;
+	%end;
+
+	%else %if &largedef. = BEDROOMS %then %do;
+	if bedrooms >= 3 then largehh = 1;
+		else largehh = 0;
+	%end;
 
 	%if &ten. = OWN %then %do;
 		if ownershp = 1;
@@ -194,10 +207,6 @@ data pretables;
 
 	/* Gousehold income */
 	if pernum = 1 then hh_inc = hhincome_i;
-
-    /* Flag large units*/
-	if numprec >= 4 then largehh = 1;
-		else largehh = 0;
 
 	/* Adult*/
 	if age>=18 then isadult = 1;
