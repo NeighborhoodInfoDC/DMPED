@@ -93,8 +93,8 @@ run;
 data crimedata;
      set Police.Crimes_sum_tr10;
 	 keep geo2010 crimes_pt1_property_2017 crimes_pt1_violent_2017 crime_rate_pop_2017 pctpropertycrime pctviolentcrime ;
-     pctpropertycrime= crimes_pt1_property_2017/crime_rate_pop_2017*100;
-     pctviolentcrime=crimes_pt1_violent_2017/crime_rate_pop_2017*100;
+     pctpropertycrime= crimes_pt1_property_2017/crime_rate_pop_2017*1000;
+     pctviolentcrime=crimes_pt1_violent_2017/crime_rate_pop_2017*1000;
 	 ;
 run;
 
