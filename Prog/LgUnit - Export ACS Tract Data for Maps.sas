@@ -10,6 +10,8 @@
  Description:  Export CSV of 2012-16 ACS data for large units maps. 
 
  Modifications:
+
+ 07/19/18 LH Add owner-occupied units.
 **************************************************************************/
 
 %include "L:\SAS\Inc\StdLocal.sas";
@@ -45,6 +47,9 @@ data ACS_2012_16_map;
 	familyhh4plus = sum(of familyhh4person_2012_16 familyhh5person_2012_16 familyhh6person_2012_16 familyhh7person_2012_16);
 	pctfamilyhh4plus = familyhh4plus / familyhhtot_2012_16	;
 
+	pct3brown=numownocchu3plusbd_2012_16 /numowneroccupiedhu_2012_16;
+
+
 	** Create unformatted geo var **;
 	&geo.2 = &geo.;
 
@@ -56,12 +61,13 @@ data ACS_2012_16_map;
 		  pct3brrent = "Percent of all rental units that are 3br+"
 		  pctnonfamilyhh4plus = "Percent of nonfamily households with 4+ people"
 		  pctfamilyhh4plus = "Percent of family households with 4+ people"
+		  pct3brown="Percent of owner-occupied units with 3+ bedrooms"
 		  ;
 
 	** Keep vars for map **;
 
-	keep &geo. &geo.2 numhsgunits_2012_16 numrenteroccupiedhu_2012_16 all3brplusrentunits numrnt3br_under1000 numrnt3br_under1500 pctrnt3br_under1000 pctrnt3br_under1500 pct3brrent
-		 pctnonfamilyhh4plus pctfamilyhh4plus
+	keep &geo. &geo.2 numhsgunits_2012_16 numhsgunits3plusbd_2012_16 numowneroccupiedhu_2012_16 numownocchu3plusbd_2012_16 pct3brown numrenteroccupiedhu_2012_16 numrentocchu3plusbd_2012_16 pct3brrent 
+			numrnt3br_under1000 numrnt3br_under1500 pctrnt3br_under1000 pctrnt3br_under1500  pctnonfamilyhh4plus pctfamilyhh4plus
 	;
 
 run;
@@ -74,7 +80,7 @@ run;
 
 proc univariate data=acs_2012_16_map;
 id geo2010;
-var numrenteroccupiedhu_2012_16 all3brplusrentunits pct3brrent pctrnt3br_under1500 pctrnt3br_under1000;
+var numhsgunits3plusbd_2012_16 numrenteroccupiedhu_2012_16 numrentocchu3plusbd_2012_16 pct3brrent numowneroccupiedhu_2012_16  numownocchu3plusbd_2012_16 pct3brown pctrnt3br_under1500 pctrnt3br_under1000;
 run; 
 
 /* End of program */
