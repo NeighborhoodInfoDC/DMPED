@@ -259,7 +259,7 @@ run;
 proc sort data = sales_afford_SF_Condo; by saleyear; run;
 
 proc transpose data=sales_afford_SF_Condo out=sales_afford_SF_Condo_transpose(label="DC Single Family Home Sales Affordabilty by Area Median Income, 2000-17");
-	var PctSales_Large PctAffordFirst_80AMI PctAffordFirst_50AMI PctAffordRepeat_80AMI PctAffordRepeat_50AMI PctAffordFirst_30AMI PctAffordRepeat_30AMI
+	var total_sales total_sales_lg PctSales_Large PctAffordFirst_80AMI PctAffordFirst_50AMI PctAffordRepeat_80AMI PctAffordRepeat_50AMI PctAffordFirst_30AMI PctAffordRepeat_30AMI
 		;
 	by saleyear; 
 	id Ward2012;
