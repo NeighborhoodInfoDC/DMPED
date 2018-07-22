@@ -125,7 +125,12 @@ data owner_category (label="percent of large units by owner category" drop=_type
           Pctschool="Pct. of large units owned by private university, college or school"
           Pctforeign="Pct. of large units owned by foreign government"
 		  pctBldgAgeGE2000="Pct. of large units built 2000 or later"
-		  pctsenior="Pct. owner-occupied large units with senior exemption";
+		  pctsenior="Pct. owner-occupied large units with senior exemption"
+		  condo="Number of large condominiums"
+		  total="Number of large SF & condominiums"
+		  singlefamily="Number of large single family homes"
+		  bldgAgeLT2000="Number of SF & condos built before 2000"
+		  BldgAgeGT2000="Number of SF & condos built 2000 or later"
 			;
 run;
 proc sort data=owner_category;
@@ -133,7 +138,8 @@ by refyear;
 run;
 
 proc transpose data=owner_category out=owner_category;
-var Pctgov Pctcorporations PctcdcNFP Pctotherind Pctschool Pctforeign pctownerocc pctrenterocc pctsenior bldgAgeLT2000 BldgAgeGT2000 pctBldgAgeGE2000 pctbldgAgeLT2000 Pctcondo PctSinglefamily;
+var Pctgov Pctcorporations PctcdcNFP Pctotherind Pctschool Pctforeign pctownerocc pctrenterocc pctsenior bldgAgeLT2000 BldgAgeGT2000 pctBldgAgeGE2000 
+pctbldgAgeLT2000 Pctcondo PctSinglefamily total condo singlefamily;
 by refyear;
 id ward2012;run;
 	
@@ -180,7 +186,7 @@ proc sort data=BuildingAge;
 by before2000 refyear;
 run;
 
-proc transpose data=BuildingAge (where=(refyear=2017)) out=BuildingAge_transpose;
+proc transpose data=BuildingAge (where=(refyear=2018)) out=BuildingAge_transpose;
 var total LargeUnit;
 by before2000 refyear;
 id ward2012;
@@ -195,6 +201,9 @@ run;
 /*percent large units for both SF and condo*/
 data largeunits;
 set merge_SFCondo_Wards;
+
+if largeunit=1 and condo=1 then largecondo=1;
+if largeunit=1 and singlefamily=1 then largesinglefamily=1; 
 run;
 
 proc sort data=largeunits;
@@ -202,7 +211,7 @@ by ward2012 refyear;
 run;
 proc summary data=largeunits;
 	by ward2012 refyear;
-	var total_sales LargeUnit ;
+	var total_sales LargeUnit largecondo condo largesinglefamily singlefamily;
 	output	out=largeunits_ward sum= ;
 run;
 proc sort data=largeunits_ward;
@@ -213,7 +222,7 @@ by city refyear;
 run;
 proc summary data=largeunits;
 	by city refyear;
-	var total_sales LargeUnit ;
+	var total_sales LargeUnit largecondo condo largesinglefamily singlefamily;
 	output	out=largeunits_city sum= ;
 run;
 proc sort data=largeunits_city;
@@ -224,18 +233,20 @@ data Pctlagre;
 set largeunits_city largeunits_ward;
 if city = "1" then Ward2012 = "0";
 pctlargeunit= (LargeUnit/total_sales)*100;
+pctlargecondo=(largecondo/condo)*100;
+pctlargeSF=(largesinglefamily/singlefamily)*100;
 run;
 proc sort data=Pctlagre;
 by refyear;
 run;
 
-proc transpose data=Pctlagre out=Pctlagre;
-var total_sales LargeUnit pctlargeunit ;
+proc transpose data=Pctlagre out=Pctlarge;
+var total_sales LargeUnit pctlargeunit largecondo condo largesinglefamily singlefamily pctlargecondo pctlargeSF;
 by refyear;
 id ward2012;
 run;
 
-proc export data=Pctlagre
+proc export data=Pctlarge
 	outfile="&_dcdata_default_path\DMPED\Prog\sf_condo_pctlarge_all.csv"
 	dbms=csv replace;
 run;
