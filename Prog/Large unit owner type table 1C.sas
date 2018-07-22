@@ -81,7 +81,7 @@ by city refyear;
 run;
 proc summary data=merge_SFCondo_Wards (where=(LargeUnit=1));
 	by city refyear;
-	var total govtown corporations cdcNFP otherind ownercat_denom renter Owner_occ_sale owner_occ_sale_denom
+	var total govtown corporations cdcNFP otherind school foreign ownercat_denom renter Owner_occ_sale owner_occ_sale_denom
 		senior BldgAgeGT2000 condo singlefamily;
 	output	out=City_level	sum= ;
 	format city $CITY16.;
@@ -91,7 +91,7 @@ by ward2012 refyear;
 run;
 proc summary data=merge_SFCondo_Wards(where=(LargeUnit=1));
 	by ward2012 refyear;
-	var total govtown corporations cdcNFP otherind ownercat_denom renter Owner_occ_sale owner_occ_sale_denom 
+	var total govtown corporations cdcNFP otherind school foreign ownercat_denom renter Owner_occ_sale owner_occ_sale_denom 
 		senior BldgAgeGT2000 condo singlefamily;
 	output	out=ward_level	sum= ;
 	format city $CITY16.;
@@ -105,6 +105,8 @@ data owner_category (label="percent of large units by owner category" drop=_type
 	Pctcorporations=corporations/ownercat_denom*100; 
     PctcdcNFP=cdcNFP/ownercat_denom*100; 
 	Pctotherind=otherind/ownercat_denom*100; 
+	Pctschool=school/ownercat_denom*100;
+	Pctforeign=foreign/ownercat_denom*100;
 	pctownerocc= Owner_occ_sale/owner_occ_sale_denom*100; 
 	pctrenterocc= renter/owner_occ_sale_denom*100; 
 	pctsenior= senior/Owner_occ_sale*100; 
@@ -120,6 +122,8 @@ data owner_category (label="percent of large units by owner category" drop=_type
 	      Pctcorporations="Pct. of large units owned by taxable corporations"
           PctcdcNFP="Pct. of large units owned by Church, community, development corporation or other non profit"
           Pctotherind="Pct. of large units owned Other individual (not owner occupied)"
+          Pctschool="Pct. of large units owned by private university, college or school"
+          Pctforeign="Pct. of large units owned by foreign government"
 		  pctBldgAgeGE2000="Pct. of large units built 2000 or later"
 		  pctsenior="Pct. owner-occupied large units with senior exemption"
 		  condo="Number of large condominiums"
@@ -134,8 +138,8 @@ by refyear;
 run;
 
 proc transpose data=owner_category out=owner_category;
-var Pctgov Pctcorporations PctcdcNFP Pctotherind pctownerocc pctrenterocc pctsenior bldgAgeLT2000 BldgAgeGT2000 
-	pctBldgAgeGE2000 pctbldgAgeLT2000 Pctcondo PctSinglefamily total condo singlefamily;
+var Pctgov Pctcorporations PctcdcNFP Pctotherind Pctschool Pctforeign pctownerocc pctrenterocc pctsenior bldgAgeLT2000 BldgAgeGT2000 pctBldgAgeGE2000 
+pctbldgAgeLT2000 Pctcondo PctSinglefamily total condo singlefamily;
 by refyear;
 id ward2012;run;
 	
