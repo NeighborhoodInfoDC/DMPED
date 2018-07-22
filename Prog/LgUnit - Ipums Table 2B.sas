@@ -17,11 +17,11 @@
 
 ** Define libraries **;
 %DCData_lib( IPUMS )
-
+%DCData_lib( DMPED )
 
 %let cvars = allhh largehh isschoolage isadult iskid isstudent
          issenior isdis raceW raceB raceH raceAPI raceO
-		 hudincome30 hudincome50 hudincome80 
+		 hudincome30 hudincome50 hudincome80 hudincome120 hudincome120plus
 		 before1gen before2gen after1gen
 		 movedless1 moved2to10 moved10plus
 		 bedrooms0 bedrooms1 bedrooms2 bedrooms3 bedrooms4 bedrooms5plus
@@ -50,7 +50,39 @@
 	else if 1500 <= &var1. < 1600 then &var2. = 15;
 %mend recode_dvars;
 
+** Calculate average ratio of gross rent to contract rent for occupied units **;
 
+data Ratio;
+
+  set Ipums.Acs_2012_16_dc 
+    (keep=rent rentgrs pernum gq ownershpd
+     where=(pernum=1 and gq in (1,2) and ownershpd in ( 22 )));
+     
+  Ratio_rentgrs_rent_2012_16 = rentgrs / rent;
+  
+run;
+
+proc means data=Ratio;
+  var Ratio_rentgrs_rent_2012_16 rentgrs rent;
+run;
+
+%let Ratio_rentgrs_rent_2012_16 = 1.2051467;   %** Value copied from Proc Means output **;
+
+data Ratio2000;
+
+  set Ipums.Ipums_2000_dc 
+    (keep=rent rentgrs pernum gq ownershd
+     where=(pernum=1 and gq in (1,2) and ownershd in ( 22 )));
+     
+  Ratio_rentgrs_rent_2000 = rentgrs / rent;
+  
+run;
+
+proc means data=Ratio2000;
+  var Ratio_rentgrs_rent_2000 rentgrs rent;
+run;
+
+%let Ratio_rentgrs_rent_2000 = 1.1693651;   %** Value copied from Proc Means output **;
 %macro ipums_lgunit (tenure,yrs,largedef);
 
 %let ten = %upcase( &tenure. );
@@ -149,25 +181,25 @@ data pretables;
 
 	/* Re-create hud_inc from 2000 data */
 
-	if (numprec = 1 and hhincome <= 16950) or (numprec=2 and hhincome <= 19350) or  (numprec=3 and hhincome <= 21750)
-       or (numprec=4 and hhincome <= 24200) or (numprec=5 and hhincome <= 26100) or (numprec=6 and hhincome <= 28050) 
-       or (numprec=7 and hhincome <= 30000) or (numprec=8 and hhincome <= 31900) then hud_inc=1;                                                                               
+	if (numprec = 1 and hhincome_i <= 16950) or (numprec=2 and hhincome_i <= 19350) or  (numprec=3 and hhincome_i <= 21750)
+       or (numprec=4 and hhincome_i <= 24200) or (numprec=5 and hhincome_i <= 26100) or (numprec=6 and hhincome_i <= 28050) 
+       or (numprec=7 and hhincome_i <= 30000) or (numprec=8 and hhincome_i <= 31900) then hud_inc=1;                                                                               
 
-	else if (numprec = 1 and hhincome <= 28200) or (numprec=2 and hhincome <= 32250  ) or  (numprec=3 and hhincome <= 36250)
-       or (numprec=4 and hhincome <= 40300) or (numprec=5 and hhincome <= 43500) or (numprec=6 and hhincome <= 46750 ) 
-       or (numprec=7 and hhincome <= 49950) or (numprec=8 and hhincome <= 53200) then hud_inc=2;                                                                               
+	else if (numprec = 1 and hhincome_i <= 28200) or (numprec=2 and hhincome_i <= 32250  ) or  (numprec=3 and hhincome_i <= 36250)
+       or (numprec=4 and hhincome_i <= 40300) or (numprec=5 and hhincome_i <= 43500) or (numprec=6 and hhincome_i <= 46750 ) 
+       or (numprec=7 and hhincome_i <= 49950) or (numprec=8 and hhincome_i <= 53200) then hud_inc=2;                                                                               
 	    
- 	else if (numprec = 1 and hhincome <= 35150) or (numprec=2 and hhincome <= 40150 ) or  (numprec=3 and hhincome <= 45200)
-       or (numprec=4 and hhincome <= 50200) or (numprec=5 and hhincome <= 54200) or (numprec=6 and hhincome <= 58250) 
-       or (numprec=7 and hhincome <= 62250) or (numprec=8 and hhincome <= 66250) then hud_inc=3;    
+ 	else if (numprec = 1 and hhincome_i <= 35150) or (numprec=2 and hhincome_i <= 40150 ) or  (numprec=3 and hhincome_i <= 45200)
+       or (numprec=4 and hhincome_i <= 50200) or (numprec=5 and hhincome_i <= 54200) or (numprec=6 and hhincome_i <= 58250) 
+       or (numprec=7 and hhincome_i <= 62250) or (numprec=8 and hhincome_i <= 66250) then hud_inc=3;    
 
- 	else if (numprec = 1 and hhincome <= 53960) or (numprec=2 and hhincome <= 61660 ) or  (numprec=3 and hhincome <= 69420)
-       or (numprec=4 and hhincome <= 77080) or (numprec=5 and hhincome <= 83240) or (numprec=6 and hhincome <= 89460) 
-       or (numprec=7 and hhincome <= 95580) or (numprec=8 and hhincome <= 101760) then hud_inc=4;    
+ 	else if (numprec = 1 and hhincome_i <= 53960) or (numprec=2 and hhincome_i <= 61660 ) or  (numprec=3 and hhincome_i <= 69420)
+       or (numprec=4 and hhincome_i <= 77080) or (numprec=5 and hhincome_i <= 83240) or (numprec=6 and hhincome_i <= 89460) 
+       or (numprec=7 and hhincome_i <= 95580) or (numprec=8 and hhincome_i <= 101760) then hud_inc=4;    
 
-	else if (numprec = 1 and hhincome > 53960) or (numprec=2 and hhincome > 61660 ) or  (numprec=3 and hhincome > 69420)
-       or (numprec=4 and hhincome > 77080) or (numprec=5 and hhincome > 83240) or (numprec=6 and hhincome > 89460) 
-       or (numprec=7 and hhincome > 95580) or (numprec=8 and hhincome > 101760) then hud_inc=5;
+	else if (numprec = 1 and hhincome_i > 53960) or (numprec=2 and hhincome_i > 61660 ) or  (numprec=3 and hhincome_i > 69420)
+       or (numprec=4 and hhincome_i > 77080) or (numprec=5 and hhincome_i > 83240) or (numprec=6 and hhincome_i > 89460) 
+       or (numprec=7 and hhincome_i > 95580) or (numprec=8 and hhincome_i > 101760) then hud_inc=5;
 
 	%end;
 
@@ -197,6 +229,12 @@ data pretables;
 	if hud_inc = 3 then hudincome80 = 1;
 		else hudincome80 = 0;
 
+	if hud_inc= 4 then hudincome120= 1;
+		else hudincome120=0;
+
+	if hud_inc=5 then hudincome120plus=1;
+		else hudincome120plus=0;
+
 	 /*Keep only HHs*/
 	if gq in (1,2);
 
@@ -206,7 +244,7 @@ data pretables;
 	/* Householder age */
 	if pernum = 1 then hher_age = age;
 
-	/* Gousehold income */
+	/* Household income */
 	if pernum = 1 then hh_inc = hhincome_i;
 
 	/* Adult*/
@@ -377,9 +415,15 @@ data pretables;
     Tenure = 1;
     
     if vacancy=1 then do;
-    		** Impute gross rent for vacant units **;
-  		rentgrs = rent*&RATIO_RENTGRS_RENT_2009_11;
-  		Max_income = ( rentgrs * 12 ) / 0.30;
+	** Impute gross rent for vacant units **;
+		%if &yrs. = 2000 %then %do;
+				rentgrs = rent*&RATIO_RENTGRS_RENT_2000;
+		%end;
+
+		%else %if &yrs. = ACS %then %do;
+	     		rentgrs = rent*&RATIO_RENTGRS_RENT_2012_16;
+		%END;
+	  		Max_income = ( rentgrs * 12 ) / 0.30;
     end;
     else Max_income = ( rentgrs * 12 ) / 0.30;
     
@@ -392,12 +436,18 @@ data pretables;
 
     **** 
     Calculate max income for first-time homebuyers. 
-    Using 4.62% as the effective mortgage rate for DC in 2011, 
+    Using 3.69% as the effective mortgage rate for DC in 2016, 7.07% for 2000
+	  http://www.fhfa.gov/DataTools/Downloads/Documents/Historical-Summary-Tables/Table15_2015_by_State_and_Year.xls
     calculate monthly P & I payment using monthly mortgage rate and compounded interest calculation
     ******; 
     
     loan = .9 * valueh;
-    month_mortgage= (4.62 / 12) / 100; 
+	%if &yrs. = 2000 %then %do;
+    month_mortgage= (7.07 / 12) / 100; 
+	%end; 
+	%else %if &yrs. = ACS %then %do;
+    month_mortgage= (3.69 / 12) / 100; 
+	%end; 
     monthly_PI = loan * month_mortgage * ((1+month_mortgage)**360)/(((1+month_mortgage)**360)-1);
 
     ****
@@ -413,6 +463,13 @@ data pretables;
 
   end;
   
+  %if &yrs. = 2000 %then %do;
+	%Dollar_convert(Max_income,max_income_i,1999,2016);
+  %end;
+	%else %if &yrs. = ACS %then %do;
+	max_income_i=max_income;
+  %end;
+
   ** Determine maximum HH size based on bedrooms **;
   
   select ( bedrooms );
@@ -425,15 +482,106 @@ data pretables;
     when ( 4 )       /** 3 bedroom **/
       Max_hh_size = 4;
     when ( 5 )       /** 4 bedroom **/
-      Max_hh_size = 5;
-    when ( 6, 7, 8, 9, 10, 11, 12 )       /** 5+ bedroom **/
+      Max_hh_size = 6;  /*updated this value from 5 from PTs original code*/
+    when ( 6, 7, 8, 9, 10, 11, 12, 13, 14 )       /** 5+ bedroom **/
       Max_hh_size = 7;
     otherwise
       do; 
         %err_put( msg="Invalid bedroom size: " serial= bedrooms= ) 
       end;
   end;
+ 
+ if max_income_i in ( 9999999, .n ) then hud_inc_unit = .n;
+  else do;
 
+    select ( max_hh_size );
+      when ( 1 )
+        do;
+          if max_income_i <= 22850 then hud_inc_unit = 1;
+          else if 22850 < max_income_i <= 38050 then hud_inc_unit = 2;
+          else if 38050 < max_income_i <= 49150 then hud_inc_unit = 3;
+          else if 49150 < max_income_i <= 91320 then hud_inc_unit = 4;
+          else if 91320 < max_income_i then hud_inc_unit = 5;
+        end;
+      when ( 2 )
+        do;
+          if max_income_i <= 26100 then hud_inc_unit = 1;
+          else if 26100 < max_income_i <= 43450 then hud_inc_unit = 2;
+          else if 43450 < max_income_i <= 56150 then hud_inc_unit = 3;
+          else if 56150 < max_income_i <= 104280 then hud_inc_unit = 4;
+          else if 104280 < max_income_i then hud_inc_unit = 5;
+        end;
+      when ( 3 )
+        do;
+          if max_income_i <= 29350 then hud_inc_unit = 1;
+          else if 29350 < max_income_i <= 48900 then hud_inc_unit = 2;
+          else if 48900 < max_income_i <= 63150 then hud_inc_unit = 3;
+          else if 63150 < max_income_i <= 117360 then hud_inc_unit = 4;
+          else if 117360 < max_income_i then hud_inc_unit = 5;
+        end;
+      when ( 4 )
+        do;
+          if max_income_i <= 32600 then hud_inc_unit = 1;
+          else if 32600 < max_income_i <= 54300 then hud_inc_unit = 2;
+          else if 54300 < max_income_i <= 70150 then hud_inc_unit = 3;
+          else if 70150 < max_income_i <= 130320 then hud_inc_unit = 4;
+          else if 130320 < max_income_i then hud_inc_unit = 5;
+        end;
+      when ( 5 )
+        do;
+          if max_income_i <= 35250 then hud_inc_unit = 1;
+          else if 35250 < max_income_i <= 58650 then hud_inc_unit = 2;
+          else if 58650 < max_income_i <= 75800 then hud_inc_unit = 3;
+          else if 75800 < max_income_i <= 140760 then hud_inc_unit = 4;
+          else if 140760 < max_income_i then hud_inc_unit = 5;
+        end;
+      when ( 6 )
+        do;
+          if max_income_i <= 37850 then hud_inc_unit = 1;
+          else if 37850 < max_income_i <= 63000 then hud_inc_unit = 2;
+          else if 63000 < max_income_i <= 81400 then hud_inc_unit = 3;
+          else if 81400 < max_income_i <= 151200 then hud_inc_unit = 4;
+          else if 151200 < max_income_i then hud_inc_unit = 5;
+        end;
+      when ( 7 )
+        do;
+          if max_income_i <= 40450 then hud_inc_unit = 1;
+          else if 40450 < max_income_i <= 67350 then hud_inc_unit = 2;
+          else if 67350 < max_income_i <= 87000 then hud_inc_unit = 3;
+          else if 87000 < max_income_i <= 161640 then hud_inc_unit = 4;
+          else if 161640 < max_income_i then hud_inc_unit = 5;
+        end;
+      otherwise
+        do;
+          if max_income_i <= 43050 then hud_inc_unit = 1;
+          else if 43050 < max_income_i <= 71700 then hud_inc_unit = 2;
+          else if 71700 < max_income_i <= 92600 then hud_inc_unit = 3;
+          else if 92600 < max_income_i <= 172080 then hud_inc_unit = 4;
+          else if 172080 < max_income_i then hud_inc_unit = 5;
+        end;
+    end;
+
+  end;
+
+   
+  
+	max_hh_size2=max_hh_size;
+	if bedrooms = 4 then max_hh_size2=5; *three bedroom could hold up to 5; 
+	ratio_OccToCap=numprec/max_hh_size2;
+	
+	if max_hh_size2 ne . then do; 
+	if ratio_OccToCap > 1 then underhoused=1; else underhoused=0;
+	if ratio_occtocap = 1 then righthoused=1; else righthoused=0;
+	if ratio_occtocap < 1 then overhoused=1; else overhoused=0; 
+	end; 
+	
+	 label 
+	 Hud_inc_unit = 'HUD income category for unit'
+	 ratio_OccToCap='Ratio of Occupants to Capacity'
+	 underhoused='Unit has more occupants than its capacity'
+	 righthoused='Unit has the right number of occupants for capacity'
+	 overhoused='Unit has few occupants than its capacity'
+;
 
   
 run;
@@ -529,6 +677,8 @@ data table2b_pcts;
 	pct_hudincome30 = hudincome30 / allhh;
 	pct_hudincome50 = hudincome50 / allhh;
 	pct_hudincome80 = hudincome80 / allhh;
+	pct_hudincome120= hudincome120 / allhh;
+	pct_hudincome120plus= hudincome120plus / allhh;
 
 	pct_issenior = issenior / allhh; 
 	pct_isdis = isdis / allhh;
@@ -602,7 +752,7 @@ proc transpose data = table2b_all out = table2b_csv_all;
 	hher_age
 
 	/* Income */
-	hh_inc pct_hudincome30 pct_hudincome50 pct_hudincome80
+	hh_inc pct_hudincome30 pct_hudincome50 pct_hudincome80 pct_hudincome120 pct_hudincome120plus
 
 	/* HH Structure */
 	pct_issenior pct_isdis pct_multigen pct_grouphouse pct_studenthouse numadults numkids 
