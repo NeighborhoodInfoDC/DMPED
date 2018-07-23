@@ -824,6 +824,8 @@ data table2b_pcts;
 
 	pct_vacant = vacant / allhh_withvac;
 
+	id = _N_; 
+
 run;
 
 
@@ -834,6 +836,11 @@ proc summary data = pretables_collapse;
 	output out = table2b_m median=;
 run;
 
+data table2b_m_;
+	set table2b_m;
+	id = _N_; 
+run;
+
 
 proc summary data = pretables_collapse;
 	class puma largehh;
@@ -842,9 +849,16 @@ proc summary data = pretables_collapse;
 	output out = table2b_n median=;
 run;
 
+data table2b_n_;
+	set table2b_n;
+	id = _N_; 
+run;
+
+
 
 data table2b_all;
-	merge table2b_pcts table2b_m table2b_n;
+	merge table2b_pcts table2b_m_ table2b_n_;
+	by id;
 	if _type_ in (1,3);
 	if puma = . then puma = 100;
 run;
