@@ -22,6 +22,7 @@
 %let cvars = allhh largehh isschoolage isadult iskid isstudent
          issenior isdis raceW raceB raceH raceAPI raceO
 		 hudincome30 hudincome50 hudincome80 hudincome120 hudincome120plus
+		 dcincome30 dcincome50 dcincome80 dcincome120 dcincome120plus
 		 hud_inc_unit30 hud_inc_unit50 hud_inc_unit80 hud_inc_unit120 hud_inc_unit120plus
 		 righthoused overhoused underhoused
 		 before1gen before2gen after1gen
@@ -254,6 +255,42 @@ data pretables;
 
 	if hud_inc=5 then hudincome120plus=1;
 		else hudincome120plus=0;
+
+    /* income category from DC Housing Production Trust Fund */
+	if (numprec = 1 and hhincome_i <= 108600*0.3*0.7) or (numprec=2 and hhincome_i <= 108600*0.3*0.8) or  (numprec=3 and hhincome_i <= 108600*0.3*0.9)
+       or (numprec=4 and hhincome_i <= 108600*0.3) or (numprec=5 and hhincome_i <= 108600*0.3*1.1) or (numprec=6 and hhincome_i <= 108600*0.3*1.2 ) 
+       or (numprec=7 and hhincome_i <= 108600*0.3*1.3) or (numprec=8 and hhincome_i <= 108600*0.3*1.4) then dc_inc=1;                                                                               
+
+	else if (numprec = 1 and hhincome_i <= 108600*0.5*0.7) or (numprec=2 and hhincome_i <= 108600*0.5*0.8) or  (numprec=3 and hhincome_i <= 108600*0.5*0.9)
+       or (numprec=4 and hhincome_i <= 108600*0.5) or (numprec=5 and hhincome_i <= 108600*0.5*1.1) or (numprec=6 and hhincome_i <= 108600*0.5*1.2 ) 
+       or (numprec=7 and hhincome_i <= 108600*0.5*1.3) or (numprec=8 and hhincome_i <= 108600*0.5*1.4) then dc_inc=2;                                                                               
+	    
+	else if (numprec = 1 and hhincome_i <= 108600*0.8*0.7) or (numprec=2 and hhincome_i <= 108600*0.8*0.8) or  (numprec=3 and hhincome_i <= 108600*0.8*0.9)
+       or (numprec=4 and hhincome_i <= 108600*0.8) or (numprec=5 and hhincome_i <= 108600*0.8*1.1) or (numprec=6 and hhincome_i <= 108600*0.8*1.2 ) 
+       or (numprec=7 and hhincome_i <= 108600*0.8*1.3) or (numprec=8 and hhincome_i <= 108600*0.8*1.4) then dc_inc=3;       
+
+	else if (numprec = 1 and hhincome_i <= 108600*1.2*0.7) or (numprec=2 and hhincome_i <= 108600*1.2*0.8) or  (numprec=3 and hhincome_i <= 108600*1.2*0.9)
+       or (numprec=4 and hhincome_i <= 108600*1.2) or (numprec=5 and hhincome_i <= 108600*1.2*1.1) or (numprec=6 and hhincome_i <= 108600*1.2*1.2 ) 
+       or (numprec=7 and hhincome_i <= 108600*1.2*1.3) or (numprec=8 and hhincome_i <= 108600*1.2*1.4) then dc_inc=4;   
+
+	else if (numprec = 1 and hhincome_i > 108600*1.2*0.7) or (numprec=2 and hhincome_i > 108600*1.2*0.8) or  (numprec=3 and hhincome_i > 108600*1.2*0.9)
+       or (numprec=4 and hhincome_i > 108600*1.2) or (numprec=5 and hhincome_i > 108600*1.2*1.1) or (numprec=6 and hhincome_i > 108600*1.2*1.2 ) 
+       or (numprec=7 and hhincome_i > 108600*1.2*1.3) or (numprec=8 and hhincome_i > 108600*1.2*1.4) then dc_inc=5;
+
+	if dc_inc = 1 then dcincome30 =1;
+		else dcincome30 =0;
+
+	if dc_inc = 2 then dcincome50 = 1;
+		else dcincome50 = 0;
+
+	if dc_inc = 3 then dcincome80 = 1;
+		else dcincome80 = 0;
+
+	if dc_inc= 4 then dcincome120= 1;
+		else dcincome120=0;
+
+	if dc_inc=5 then dcincome120plus=1;
+		else dcincome120plus=0;
 
 	 /*Keep only HHs*/
 	if gq in (1,2);
@@ -716,6 +753,12 @@ data table2b_pcts;
 	pct_hudincome120= hudincome120 / allhh;
 	pct_hudincome120plus= hudincome120plus / allhh;
 
+	pct_dcincome30 = dcincome30 / allhh;
+	pct_dcincome50 = dcincome50 / allhh;
+	pct_dcincome80 = dcincome80 / allhh;
+	pct_dcincome120= dcincome120 / allhh;
+	pct_dcincome120plus= dcincome120plus / allhh;
+
 	pct_hud_inc_unit30 = hud_inc_unit30 / allhh;
 	pct_hud_inc_unit50 = hud_inc_unit50 / allhh;
 	pct_hud_inc_unit80 = hud_inc_unit80 / allhh;
@@ -799,6 +842,7 @@ proc transpose data = table2b_all out = table2b_csv_all;
 
 	/* Income */
 	hh_inc pct_hudincome30 pct_hudincome50 pct_hudincome80 pct_hudincome120 pct_hudincome120plus
+	pct_dcincome30 pct_dcincome50 pct_dcincome80 pct_dcincome120 pct_dcincome120plus
 
 	/* Unit affordability */
 	pct_hud_inc_unit30 pct_hud_inc_unit50 pct_hud_inc_unit80 pct_hud_inc_unit120 pct_hud_inc_unit120plus
