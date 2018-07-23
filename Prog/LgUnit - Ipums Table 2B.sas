@@ -302,14 +302,14 @@ data pretables;
 		else if hhincome > 0 then cost_burden = ( 12 * housing_costs ) / hhincome;
 		else cost_burden = 1;
 
+	if cost_burden <= .3 then not_burdened = 1;
+		else not_burdened = 0;
+
 	if cost_burden > .3 then cost_burdened = 1; 
 	  else if 0 <= cost_burden < .3 then cost_burdened = 0;
 
 	if cost_burden > .5 then severe_burdened = 1;
 	  else if 0 <= cost_burden < .5 then severe_burdened = 0;
-
-	if cost_burdened = 0 and severe_burdened = 0 then not_burdened = 1;
-		else not_burdened = 0;
 
 	 /*Keep only HHs*/
 	if gq in (1,2);
@@ -920,9 +920,6 @@ run;
 
 
 %mend ipums_lgunit;
-
-
-%ipums_lgunit (all,2000,person);
 
 
 %macro output_lg (define);
