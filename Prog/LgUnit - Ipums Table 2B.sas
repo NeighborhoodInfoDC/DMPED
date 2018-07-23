@@ -23,6 +23,7 @@
          issenior isdis raceW raceB raceH raceAPI raceO
 		 hudincome30 hudincome50 hudincome80 hudincome120 hudincome120plus
 		 hud_inc_unit30 hud_inc_unit50 hud_inc_unit80 hud_inc_unit120 hud_inc_unit120plus
+		 righthoused overhoused underhoused
 		 before1gen before2gen after1gen
 		 movedless1 moved2to10 moved10plus
 		 bedrooms0 bedrooms1 bedrooms2 bedrooms3 bedrooms4 bedrooms5plus
@@ -721,6 +722,10 @@ data table2b_pcts;
 	pct_hud_inc_unit120 = hud_inc_unit120 / allhh;
 	pct_hud_inc_unit120plus = hud_inc_unit120plus / allhh;
 
+	pct_righthoused = righthoused / allhh;
+	pct_overhoused = overhoused / allhh;
+	pct_underhoused = underhoused / allhh;
+
 	pct_issenior = issenior / allhh; 
 	pct_isdis = isdis / allhh;
 	pct_multigen = multigen / allhh;
@@ -795,11 +800,14 @@ proc transpose data = table2b_all out = table2b_csv_all;
 	/* Income */
 	hh_inc pct_hudincome30 pct_hudincome50 pct_hudincome80 pct_hudincome120 pct_hudincome120plus
 
-	/* Unit affordibility */
+	/* Unit affordability */
 	pct_hud_inc_unit30 pct_hud_inc_unit50 pct_hud_inc_unit80 pct_hud_inc_unit120 pct_hud_inc_unit120plus
 
 	/* HH Structure */
 	pct_issenior pct_isdis pct_multigen pct_grouphouse pct_studenthouse numadults numkids 
+
+	/* Over/Under Housed */
+	pct_righthoused pct_overhoused pct_underhoused
 
 	/* Migration */
 	pct_movedless1 pct_moved2to10 pct_moved10plus
