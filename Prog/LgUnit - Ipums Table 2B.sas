@@ -50,8 +50,8 @@
 	else if 1500 <= &var1. < 1600 then &var2. = 15;
 %mend recode_dvars;
 
-** Calculate average ratio of gross rent to contract rent for occupied units **;
 
+** Calculate average ratio of gross rent to contract rent for occupied units **;
 data Ratio;
 
   set Ipums.Acs_2012_16_dc 
@@ -62,7 +62,7 @@ data Ratio;
   
 run;
 
-proc means data=Ratio;
+proc summary data=Ratio;
   var Ratio_rentgrs_rent_2012_16 rentgrs rent;
   output out = Ratio_rentgrs_2012_16 mean = ;
 run;
@@ -85,7 +85,7 @@ data Ratio2000;
   
 run;
 
-proc means data=Ratio2000;
+proc summary data=Ratio2000;
   var Ratio_rentgrs_rent_2000 rentgrs rent;
   output out = Ratio_rentgrs_2000 mean = ;
 run;
@@ -99,6 +99,7 @@ quit;
 %put &Ratio_rentgrs_rent_2000;
 
 
+** Macro for remaining data processing **;
 %macro ipums_lgunit (tenure,yrs,largedef);
 
 %let ten = %upcase( &tenure. );
@@ -158,7 +159,8 @@ proc sort data = hhwts; by serial; run;
 
 
 data pretables;
-	set Ipums.&indata.;
+	set Ipums.&indata.
+		vacdata;
 
 	 /* Flag large units*/
 
@@ -424,7 +426,7 @@ data pretables;
 		else Built2000After = 0;
 
 /***** FROM HOUSING_NEEDS_BASELINE ****/
-	 if ownershpd in (21, 22) or vacancy = 1 then do;
+	 if ownershp = 2 or vacancy = 1 then do;
     
     ****** Rental units ******;
     
@@ -444,7 +446,7 @@ data pretables;
     else Max_income = ( rentgrs * 12 ) / 0.30;
     
   end;
-  else if ownershpd in ( 12,13 ) or vacancy = 2 then do;
+  else if ownershp = 1 or vacancy = 2 then do;
 
     ****** Owner units ******;
     
@@ -799,6 +801,10 @@ run;
 
 
 %mend ipums_lgunit;
+
+
+%ipums_lgunit (all,2000,person);
+
 
 %macro output_lg (define);
 	%ipums_lgunit (all,2000,&define.);
