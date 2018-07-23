@@ -24,6 +24,7 @@
 		 hudincome30 hudincome50 hudincome80 hudincome120 hudincome120plus
 		 dcincome30 dcincome50 dcincome80 dcincome120 dcincome120plus
 		 hud_inc_unit30 hud_inc_unit50 hud_inc_unit80 hud_inc_unit120 hud_inc_unit120plus
+		 not_burdened cost_burdened severe_burdened
 		 righthoused overhoused underhoused
 		 before1gen before2gen after1gen
 		 movedless1 moved2to10 moved10plus
@@ -292,6 +293,24 @@ data pretables;
 	if dc_inc=5 then dcincome120plus=1;
 		else dcincome120plus=0;
 
+	/* Cost burden */
+	if ownershp = 1 then housing_costs = owncost;
+		else if ownershp = 2 then housing_costs = rentgrs;
+
+	if housing_costs = 0 then cost_burden = 0;
+		else if missing ( hhincome ) then cost_burden = .u;
+		else if hhincome > 0 then cost_burden = ( 12 * housing_costs ) / hhincome;
+		else cost_burden = 1;
+
+	if cost_burden > .3 then cost_burdened = 1; 
+	  else if 0 <= cost_burden < .3 then cost_burdened = 0;
+
+	if cost_burden > .5 then severe_burdened = 1;
+	  else if 0 <= cost_burden < .5 then severe_burdened = 0;
+
+	if cost_burdened = 0 and severe_burdened = 0 then not_burdened = 1;
+		else not_burdened = 0;
+
 	 /*Keep only HHs*/
 	if gq in (1,2);
 
@@ -485,6 +504,7 @@ data pretables;
     else Max_income = ( rentgrs * 12 ) / 0.30;
     
   end;
+
   else if ownershp = 1 or vacancy = 2 then do;
 
     ****** Owner units ******;
@@ -765,6 +785,10 @@ data table2b_pcts;
 	pct_hud_inc_unit120 = hud_inc_unit120 / allhh;
 	pct_hud_inc_unit120plus = hud_inc_unit120plus / allhh;
 
+	pct_not_burdened = not_burdened / allhh;
+	pct_cost_burdened = cost_burdened / allhh;
+	pct_severe_burdened = severe_burdened / allhh;
+
 	pct_righthoused = righthoused / allhh;
 	pct_overhoused = overhoused / allhh;
 	pct_underhoused = underhoused / allhh;
@@ -846,6 +870,9 @@ proc transpose data = table2b_all out = table2b_csv_all;
 
 	/* Unit affordability */
 	pct_hud_inc_unit30 pct_hud_inc_unit50 pct_hud_inc_unit80 pct_hud_inc_unit120 pct_hud_inc_unit120plus
+
+	/* Cost burdened */
+	pct_not_burdened pct_cost_burdened pct_severe_burdened
 
 	/* HH Structure */
 	pct_issenior pct_isdis pct_multigen pct_grouphouse pct_studenthouse numadults numkids 
