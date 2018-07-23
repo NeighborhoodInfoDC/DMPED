@@ -64,9 +64,16 @@ run;
 
 proc means data=Ratio;
   var Ratio_rentgrs_rent_2012_16 rentgrs rent;
+  output out = Ratio_rentgrs_2012_16 mean = ;
 run;
 
-%let Ratio_rentgrs_rent_2012_16 = 1.2051467;   %** Value copied from Proc Means output **;
+proc sql noprint;
+select Ratio_rentgrs_rent_2012_16
+into :Ratio_rentgrs_rent_2012_16 separated by " "
+from Ratio_rentgrs_2012_16;
+quit;
+
+%put &Ratio_rentgrs_rent_2012_16;
 
 data Ratio2000;
 
@@ -80,9 +87,18 @@ run;
 
 proc means data=Ratio2000;
   var Ratio_rentgrs_rent_2000 rentgrs rent;
+  output out = Ratio_rentgrs_2000 mean = ;
 run;
 
-%let Ratio_rentgrs_rent_2000 = 1.1693651;   %** Value copied from Proc Means output **;
+proc sql noprint;
+select Ratio_rentgrs_rent_2000
+into :Ratio_rentgrs_rent_2000 separated by " "
+from Ratio_rentgrs_2000;
+quit;
+
+%put &Ratio_rentgrs_rent_2000;
+
+
 %macro ipums_lgunit (tenure,yrs,largedef);
 
 %let ten = %upcase( &tenure. );
