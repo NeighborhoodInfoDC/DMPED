@@ -203,25 +203,25 @@ data pretables;
 
 	/* Re-create hud_inc from 2000 data */
 
-	if (numprec = 1 and hhincome_i <= 16950) or (numprec=2 and hhincome_i <= 19350) or  (numprec=3 and hhincome_i <= 21750)
-       or (numprec=4 and hhincome_i <= 24200) or (numprec=5 and hhincome_i <= 26100) or (numprec=6 and hhincome_i <= 28050) 
-       or (numprec=7 and hhincome_i <= 30000) or (numprec=8 and hhincome_i <= 31900) then hud_inc=1;                                                                               
+	if (numprec = 1 and hhincome <= 16950) or (numprec=2 and hhincome <= 19350) or  (numprec=3 and hhincome <= 21750)
+       or (numprec=4 and hhincome <= 24200) or (numprec=5 and hhincome <= 26100) or (numprec=6 and hhincome <= 28050) 
+       or (numprec=7 and hhincome <= 30000) or (numprec=8 and hhincome <= 31900) then hud_inc=1;                                                                               
 
-	else if (numprec = 1 and hhincome_i <= 28200) or (numprec=2 and hhincome_i <= 32250  ) or  (numprec=3 and hhincome_i <= 36250)
-       or (numprec=4 and hhincome_i <= 40300) or (numprec=5 and hhincome_i <= 43500) or (numprec=6 and hhincome_i <= 46750 ) 
-       or (numprec=7 and hhincome_i <= 49950) or (numprec=8 and hhincome_i <= 53200) then hud_inc=2;                                                                               
+	else if (numprec = 1 and hhincome <= 28200) or (numprec=2 and hhincome <= 32250  ) or  (numprec=3 and hhincome <= 36250)
+       or (numprec=4 and hhincome <= 40300) or (numprec=5 and hhincome <= 43500) or (numprec=6 and hhincome <= 46750 ) 
+       or (numprec=7 and hhincome <= 49950) or (numprec=8 and hhincome <= 53200) then hud_inc=2;                                                                               
 	    
- 	else if (numprec = 1 and hhincome_i <= 35150) or (numprec=2 and hhincome_i <= 40150 ) or  (numprec=3 and hhincome_i <= 45200)
-       or (numprec=4 and hhincome_i <= 50200) or (numprec=5 and hhincome_i <= 54200) or (numprec=6 and hhincome_i <= 58250) 
-       or (numprec=7 and hhincome_i <= 62250) or (numprec=8 and hhincome_i <= 66250) then hud_inc=3;    
+ 	else if (numprec = 1 and hhincome <= 35150) or (numprec=2 and hhincome <= 40150 ) or  (numprec=3 and hhincome <= 45200)
+       or (numprec=4 and hhincome <= 50200) or (numprec=5 and hhincome <= 54200) or (numprec=6 and hhincome <= 58250) 
+       or (numprec=7 and hhincome <= 62250) or (numprec=8 and hhincome <= 66250) then hud_inc=3;    
 
- 	else if (numprec = 1 and hhincome_i <= 53960) or (numprec=2 and hhincome_i <= 61660 ) or  (numprec=3 and hhincome_i <= 69420)
-       or (numprec=4 and hhincome_i <= 77080) or (numprec=5 and hhincome_i <= 83240) or (numprec=6 and hhincome_i <= 89460) 
-       or (numprec=7 and hhincome_i <= 95580) or (numprec=8 and hhincome_i <= 101760) then hud_inc=4;    
+ 	else if (numprec = 1 and hhincome <= 53960) or (numprec=2 and hhincome <= 61660 ) or  (numprec=3 and hhincome <= 69420)
+       or (numprec=4 and hhincome <= 77080) or (numprec=5 and hhincome <= 83240) or (numprec=6 and hhincome <= 89460) 
+       or (numprec=7 and hhincome <= 95580) or (numprec=8 and hhincome <= 101760) then hud_inc=4;    
 
-	else if (numprec = 1 and hhincome_i > 53960) or (numprec=2 and hhincome_i > 61660 ) or  (numprec=3 and hhincome_i > 69420)
-       or (numprec=4 and hhincome_i > 77080) or (numprec=5 and hhincome_i > 83240) or (numprec=6 and hhincome_i > 89460) 
-       or (numprec=7 and hhincome_i > 95580) or (numprec=8 and hhincome_i > 101760) then hud_inc=5;
+	else if (numprec = 1 and hhincome > 53960) or (numprec=2 and hhincome > 61660 ) or  (numprec=3 and hhincome > 69420)
+       or (numprec=4 and hhincome > 77080) or (numprec=5 and hhincome > 83240) or (numprec=6 and hhincome > 89460) 
+       or (numprec=7 and hhincome > 95580) or (numprec=8 and hhincome > 101760) then hud_inc=5;
 
 	%end;
 
