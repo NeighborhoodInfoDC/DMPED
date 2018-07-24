@@ -22,6 +22,11 @@ Homeownership Affordability in Urban America: Past and Future;
 %DCData_lib( equity );
 %DCData_lib( realprop );
 %DCData_lib( MAR );
+%DCData_lib( ACS );
+%DCData_lib( police );
+%DCData_lib( vital );
+
+%let _years = 2012_16;
 
 %Sales_pars();
 %Clean_sales( inds=DMPED.Sales_who_owns_SF_Condo, outds=Sales_who_owns_SF_Condo_clean) ;
@@ -273,3 +278,163 @@ proc export data=sales_afford_SF_Condo_transpose
 	run;
 
 
+/*add tract characteristics of AffordFirst_80AMI concentrated neigborhoods*/
+
+proc sort data=create_flags;
+by geo2010 saleyear;
+run;
+
+proc summary data=create_flags (where=(saleyear=2017));
+ by geo2010;
+ var AMI80_first_afford total_sales;
+ output out=tractsummary sum=;
+ run;
+
+data tractsummary;
+set tractsummary;
+PctAffordFirst_80AMI=AMI80_first_afford/total_sales*100; 
+label PctAffordFirst_80AMI="Pct. of SF/Condo Sales Affordable at 80% AMI for First-time Buyer";
+run;
+
+proc sort data=tractsummary;
+by geo2010;
+run;
+proc univariate data=tractsummary;
+	var PctAffordFirst_80AMI;
+run;
+
+data affsfcondo;
+set tractsummary;
+if   PctAffordFirst_80AMI >=53.846154 then affsfcondo=1;
+	     else affsfcondo=0;
+run;
+/*ACS data*/
+
+data calculate_pct;
+     set ACS.acs_2012_16_dc_sum_tr_tr10;
+	 keep geo2010 numrenterhsgunits_&_years. numownocchu3plusbd_&_years. numrentocchu3bd_&_years.
+          numrtohu3b500to749_&_years. numrtohu3b750to999_&_years.  numrtohu3bunder500_&_years. numrtohu3b1500plus_&_years.
+		  geo2010 popaloneh_&_years.  popblacknonhispbridge_&_years.  popalonew_&_years.  popwithrace_&_years. pop25andoveryears_&_years.
+          pop25andoverwcollege_&_years. pop25andoverwouths_&_years. popunemployed_&_years. poppoorpersons_&_years. totpop_&_years. 
+	      famincomelt75k_&_years. numfamilies_&_years. nonfamilyhhtot_&_years. medfamincm_&_years. numhshlds_&_years.
+		  pop25andoveryears&_years. popincivlaborforce_&_years.	numrenteroccupiedhu_&_years. popwhitenonhispbridge_&_years.
+          NumRtOHU1u_&_years. NumRtOHU2to4u_&_years. NumRtOHU5to9u_&_years. NumRtOHU10to19u_&_years. NumRtOHU20plusu_&_years.
+          personspovertydefined_&_years.
+;
+
+run;
+
+data ACScharacteristics;
+     set calculate_pct;
+	 keep geo2010 pctnonhispwht pcthispan pctnonhisblk pctcollege pctwouths pctunemployed pctpoverty pctfambelow75000 pctnonfam
+		  rentersinglefam renter2to4 renter5to9 renter10to19 renter20plus 
+;  
+
+pctnonhispwht= popwhitenonhispbridge_&_years./popwithrace_&_years.*100;
+pcthispan= (popaloneh_&_years.)/popwithrace_&_years.*100;
+pctnonhisblk= (popblacknonhispbridge_&_years.)/popwithrace_&_years.*100;
+pctcollege= (pop25andoverwcollege_&_years.)/pop25andoveryears_&_years.*100;
+pctwouths= (pop25andoverwouths_&_years.)/pop25andoveryears_&_years.*100;
+pctunemployed= (popunemployed_&_years.)/popincivlaborforce_&_years.*100;
+pctpoverty= (poppoorpersons_&_years.)/personspovertydefined_&_years. *100;
+pctfambelow75000 = (famincomelt75k_&_years.)/numfamilies_&_years.*100;
+pctnonfam= (nonfamilyhhtot_&_years.)/numhshlds_&_years.*100;
+rentersinglefam=  (NumRtOHU1u_&_years.)/numrenteroccupiedhu_&_years.*100;
+renter2to4 = (NumRtOHU2to4u_&_years.) /numrenteroccupiedhu_&_years.*100;
+renter5to9= (NumRtOHU5to9u_&_years.)/numrenteroccupiedhu_&_years.*100;
+renter10to19 = (NumRtOHU10to19u_&_years.) /numrenteroccupiedhu_&_years.*100;
+renter20plus = (NumRtOHU20plusu_&_years. )/numrenteroccupiedhu_&_years.*100
+
+;
+
+run;
+
+proc import datafile='L:\Libraries\DMPED\Raw\DCpull_forLeah.csv'
+out=affh
+dbms=csv
+replace;
+run;
+
+data affh1;
+	set affh;
+	Geo2010 = put(tractid,z11.);
+run;
+
+data crimedata;
+     set Police.Crimes_sum_tr10;
+	 keep geo2010 crimes_pt1_property_2017 crimes_pt1_violent_2017 crime_rate_pop_2017 pctpropertycrime pctviolentcrime ;
+     pctpropertycrime= crimes_pt1_property_2017/crime_rate_pop_2017*1000;
+     pctviolentcrime=crimes_pt1_violent_2017/crime_rate_pop_2017*1000;
+	 ;
+run;
+
+data prenatal;
+     set vital.births_sum_tr10;
+     keep births_prenat_adeq_2016 births_w_prenat_2016 births_total_2016 pctprenatal geo2010;
+	 pctprenatal= births_prenat_adeq_2016/births_w_prenat_2016*100
+	 ;
+run;
+
+data ressale;
+     set realprop.sales_res_clean ;
+     keep geo2010 saleprice saledate saleyear ;
+	 saleyear=year(saledate)
+	 ;
+run;
+proc sort data= ressale;
+by geo2010;
+run;
+
+proc means median data = ressale (where=(saleyear=2017)); 
+by geo2010;
+var saleprice;
+output out=medianhomesale median=;
+run;
+
+proc sort data= ACScharacteristics;
+by geo2010;
+run;
+
+proc sort data= crimedata;
+by geo2010;
+run;
+
+proc sort data= prenatal;
+by geo2010;
+run;
+
+proc sort data= medianhomesale;
+by geo2010;
+run;
+
+proc sort data= affh1;
+by geo2010;
+run;
+
+data tract_character ;
+	merge  ACScharacteristics (in=a) crimedata prenatal medianhomesale affh1 affsfcondo;
+	by geo2010;
+	if a;
+run;
+
+proc summary data=tract_character;
+class affsfcondo;
+var pctnonhispwht pcthispan pctnonhisblk pctcollege pctwouths pctunemployed pctpoverty
+    pctfambelow75000 pctnonfam pctpropertycrime pctviolentcrime pctprenatal saleprice
+    rentersinglefam renter2to4 renter5to9 renter10to19 renter20plus lbreng envhealth transcost
+;
+	output	out=SFCondo_Concentrate	mean= ;
+run;
+
+
+proc transpose data=SFCondo_Concentrate out=SFCondo_Concentrate1;
+var pctnonhispwht pcthispan pctnonhisblk pctcollege pctwouths pctunemployed pctpoverty
+    pctfambelow75000 pctnonfam pctpropertycrime pctviolentcrime pctprenatal saleprice
+    rentersinglefam renter2to4 renter5to9 renter10to19 renter20plus lbreng envhealth transcost;
+id affsfcondo;
+run;
+
+proc export data=SFCondo_Concentrate1
+	outfile="&_dcdata_default_path\DMPED\Prog\neighborhood_sfcondo_afford.csv"
+	dbms=csv replace;
+run;
