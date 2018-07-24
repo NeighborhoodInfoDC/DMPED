@@ -19,6 +19,8 @@
 %DCData_lib( IPUMS )
 %DCData_lib( DMPED )
 
+libname ipums2 "&_dcdata_r_path.\DMPED\Raw\ipums";
+
 %let cvars = allhh largehh isschoolage isadult iskid isstudent
          issenior isdis raceW raceB raceH raceAPI raceO
 		 hudincome30 hudincome50 hudincome80 hudincome120 hudincome120plus
@@ -103,6 +105,17 @@ quit;
 %put &Ratio_rentgrs_rent_2000;
 
 
+** Add extra vars needed for 2000 data **;
+proc sort data = ipums.Ipums_2000_dc out = Ipums_2000_dc; by serial pernum; run;
+proc sort data = ipums2.Ipums_2000_dc_extra out = Ipums_2000_dc_extra; by serial pernum; run;
+
+data Ipums_2000_dc_new;
+	merge Ipums_2000_dc 
+		  Ipums_2000_dc_extra (keep = serial pernum diffmob diffcare owncost);
+	by serial pernum;
+run;
+
+
 ** Macro for remaining data processing **;
 %macro ipums_lgunit (tenure,yrs,largedef);
 
@@ -111,12 +124,12 @@ quit;
 %let largedef = %upcase( &largedef. );
 
 %if &yrs. = ACS %then %do;
-	%let indata = Acs_2012_16_dc;
+	%let indata = ipums.Acs_2012_16_dc;
 	%let vacdata = acs_2012_16_vacant_dc;
 %end;
 
 %if &yrs. = 2000 %then %do;
-	%let indata = Ipums_2000_dc;
+	%let indata = Ipums_2000_dc_new;
 	%let vacdata = Ipums_2000_vacant_dc;
 %end;
 
@@ -137,7 +150,7 @@ data vacdata;
 run;
 
 data hhwts;
-	set ipums.&indata. (where=(pernum=1 and gq in (1,2)))  
+	set &indata. (where=(pernum=1 and gq in (1,2)))  
 		vacdata ;
 	keep serial puma hhwt;
 
@@ -163,7 +176,7 @@ proc sort data = hhwts; by serial; run;
 
 
 data pretables;
-	set Ipums.&indata.
+	set &indata.
 		vacdata;
 
 	 /* Flag large units*/
