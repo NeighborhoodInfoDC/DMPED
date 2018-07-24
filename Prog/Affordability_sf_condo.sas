@@ -305,7 +305,7 @@ run;
 
 data affsfcondo;
 set tractsummary;
-if   PctAffordFirst_80AMI >=0.53846 then affsfcondo=1;
+if   PctAffordFirst_80AMI >=53.846154 then affsfcondo=1;
 	     else affsfcondo=0;
 run;
 /*ACS data*/
