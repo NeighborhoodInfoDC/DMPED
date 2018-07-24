@@ -675,11 +675,19 @@ data pretables;
 	if bedrooms = 4 then max_hh_size2=5; *three bedroom could hold up to 5; 
 	ratio_OccToCap=numprec/max_hh_size2;
 	
+	*standard overcrowding measure - persons per room; 
+	ppr=numprec/rooms;
+
+	if ppr > 1 then overcrowded=1; else overcrowded=0; 
+	
+    *need to correct to DCHA coding; 
 	if max_hh_size2 ne . then do; 
 	if ratio_OccToCap > 1 then underhoused=1; else underhoused=0;
 	if ratio_occtocap = 1 then righthoused=1; else righthoused=0;
 	if ratio_occtocap < 1 then overhoused=1; else overhoused=0; 
 	end; 
+
+	if bedrooms=2 and numprec=1 then do; righthoused=1; overhoused=0; end; *one bedroom - one person not underhoused.; 
 	
 	 label 
 	 Hud_inc_unit = 'HUD income category for unit'
