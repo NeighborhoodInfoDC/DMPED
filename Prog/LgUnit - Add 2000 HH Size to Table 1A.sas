@@ -17,53 +17,81 @@
 ** Define libraries **;
 %DCData_lib( ACS )
 
-%let filepath = "&_dcdata_r_path.\DMPED\Raw";
+%let filepath = &_dcdata_r_path.\DMPED\Raw\;
 %let filename = DEC_00_SF3_H016_with_ann.csv;
 
 
-filename fimport "&filepath.&Salesfile." lrecl=2000;
+filename fimport "&filepath.&filename." lrecl=2000;
 
-data Itspe_property_sales;
+data SF3_in;
 
   infile FIMPORT delimiter = ',' MISSOVER DSD lrecl=32767 firstobs=3 ;
 
-  	informat GEOID $20 ;
-	informat GEOID2 $11 ;
-	informat GEONAME $99 ;
-	informat VD01 best32.;
-	informat VD02 best32.;
-	informat VD03 best32.;
-	informat VD04 best32.;
-	informat VD05 best32.;
-	informat VD06 best32.;
-	informat VD07 best32.;
-	informat VD08 best32.;
+  	informat GEOID $20. ;
+	informat geo2000 $11. ;
+	informat GEONAME $99. ;
+	informat totalhh_2000 best32.;
+	informat hh1person_2000 best32.;
+	informat hh2person_2000 best32.;
+	informat hh3person_2000 best32.;
+	informat hh4person_2000 best32.;
+	informat hh5person_2000 best32.;
+	informat hh6person_2000 best32.;
+	informat hh7person_2000 best32.;
 
 	input
 	GEOID $
-	GEOID2 $
+	geo2000 $
 	GEONAME $
-	VD01
-	VD02
-	VD03
-	VD04
-	VD05
-	VD06
-	VD07
-	VD08
+	totalhh_2000
+	hh1person_2000
+	hh2person_2000
+	hh3person_2000
+	hh4person_2000
+	hh5person_2000
+	hh6person_2000
+	hh7person_2000
 	;
 
 	label GEOID = "GeoID Full"
-		  GEOID2 = "Census Tract ID"
-		  GEONAME "Census Tract Name"
-		  VD01 = "Total Households"
-		  VD02 = "1-person household"
-		  VD03 = "2-person household"
-		  VD04 = "3-person household"
-		  VD05 = "4-person household"
-		  VD06 = "5-person household"
-		  VD07 = "6-person household"
-		  VD08 = "7-or-more-person household"
+		  geo2000 = "Census Tract ID"
+		  GEONAME = "Census Tract Name"
+		  totalhh_2000 = "Total Households"
+		  hh1person_2000 = "1-person household"
+		  hh2person_2000 = "2-person household"
+		  hh3person_2000 = "3-person household"
+		  hh4person_2000 = "4-person household"
+		  hh5person_2000 = "5-person household"
+		  hh6person_2000 = "6-person household"
+		  hh7person_2000 = "7-or-more-person household"
 	;
 
 run;
+
+
+%let count_vars = totalhh_2000 hh1person_2000 hh2person_2000 hh3person_2000 
+				  hh4person_2000 hh5person_2000 hh6person_2000 hh7person_2000;
+
+%Transform_geo_data(
+	  dat_ds_name=SF3_in,
+	  dat_org_geo=geo2000,
+	  dat_count_vars=&count_vars,
+	  dat_count_moe_vars=,
+	  dat_prop_vars=,
+	  wgt_ds_name=General.Wt_tr00_ward12,
+	  wgt_org_geo=geo2000,
+	  wgt_new_geo=ward2012,
+	  wgt_id_vars=,
+	  wgt_wgt_var=popwt,
+	  out_ds_name=Cen2000_hhsize,
+	  out_ds_label=%str(Census 2000 SF3 Household Size),
+	  calc_vars=,
+	  calc_vars_labels=,
+	  keep_nonmatch=N,
+	  show_warnings=10,
+	  print_diag=Y,
+	  full_diag=N,
+	  mprint=Y
+)
+
+/* End of program */
