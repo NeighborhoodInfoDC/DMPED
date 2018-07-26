@@ -72,19 +72,30 @@ run;
 %let count_vars = totalhh_2000 hh1person_2000 hh2person_2000 hh3person_2000 
 				  hh4person_2000 hh5person_2000 hh6person_2000 hh7person_2000;
 
+
+%macro geo_out (geo);
+
+%if &geo. = ward2012 %then %do;
+	%let geo_s = ward12;
+%end;
+
+%else %if &geo. = city %then %do;
+	%let geo_s = city;
+%end;
+
 %Transform_geo_data(
 	  dat_ds_name=SF3_in,
 	  dat_org_geo=geo2000,
 	  dat_count_vars=&count_vars,
 	  dat_count_moe_vars=,
 	  dat_prop_vars=,
-	  wgt_ds_name=General.Wt_tr00_ward12,
+	  wgt_ds_name=General.Wt_tr00_&geo_s.,
 	  wgt_org_geo=geo2000,
-	  wgt_new_geo=ward2012,
+	  wgt_new_geo=&geo.,
 	  wgt_id_vars=,
 	  wgt_wgt_var=popwt,
-	  out_ds_name=Cen2000_hhsize,
-	  out_ds_label=%str(Census 2000 SF3 Household Size),
+	  out_ds_name=Cen2000_hhsize_&geo.,
+	  out_ds_label=%str(Census 2000 SF3 Household Size, &geo.),
 	  calc_vars=,
 	  calc_vars_labels=,
 	  keep_nonmatch=N,
@@ -93,5 +104,11 @@ run;
 	  full_diag=N,
 	  mprint=Y
 )
+
+%mend geo_out;
+%geo_out (ward2012);
+%geo_out (city);
+
+
 
 /* End of program */
