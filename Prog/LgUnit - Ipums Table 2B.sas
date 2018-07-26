@@ -27,7 +27,6 @@ libname ipums2 "&_dcdata_r_path.\DMPED\Raw\ipums";
 		 dcincome30 dcincome50 dcincome80 dcincome120 dcincome120plus
 		 hud_inc_unit30 hud_inc_unit50 hud_inc_unit80 hud_inc_unit120 hud_inc_unit120plus
 		 not_burdened cost_burdened severe_burdened
-		 righthoused overhoused underhoused
 		 before1gen before2gen after1gen
 		 movedless1 moved2to10 moved10plus
 		 bedrooms0 bedrooms1 bedrooms2 bedrooms3 bedrooms4 bedrooms5plus
@@ -152,7 +151,7 @@ run;
 data hhwts;
 	set &indata. (where=(pernum=1 and gq in (1,2)))  
 		vacdata ;
-	keep serial puma hhwt;
+	keep serial puma hhwt numprec bedrooms;
 
 	%if &yrs. = 2000 %then %do;
 
@@ -675,17 +674,25 @@ data pretables;
 	if bedrooms = 4 then max_hh_size2=5; *three bedroom could hold up to 5; 
 	ratio_OccToCap=numprec/max_hh_size2;
 	
-	*standard overcrowding measure - persons per room; 
+	/*standard overcrowding measure - persons per room */
 	ppr=numprec/rooms;
 
 	if ppr > 1 then overcrowded=1; else overcrowded=0; 
+
+	/* over/under housed based on DCHA defintion */
+	if related in (101) then is_hholder = 1; 
+		else if related in (201) then is_spouse = 1;
+		else if age >= 18 then is_otheradult = 1;
+		else if age <= 5 then is_youngchild = 1;
+		else if 5 < age < 18 and sex = 1 then is_malechild = 1;
+		else if 5 < age < 18 and sex = 2 then is_femalechild = 1;
 	
-    *need to correct to DCHA coding; 
+    /*need to correct to DCHA coding
 	if max_hh_size2 ne . then do; 
 	if ratio_OccToCap > 1 then underhoused=1; else underhoused=0;
 	if ratio_occtocap = 1 then righthoused=1; else righthoused=0;
 	if ratio_occtocap < 1 then overhoused=1; else overhoused=0; 
-	end; 
+	end; */
 
 	if bedrooms=2 and numprec=1 then do; righthoused=1; overhoused=0; end; *one bedroom - one person not underhoused.; 
 	
@@ -703,7 +710,8 @@ run;
 
 proc summary data = pretables;
 	class serial;
-	var &cvars. nonrelative numkids numadults numstudents;
+	var &cvars. nonrelative numkids numadults numstudents
+		is_hholder is_spouse is_otheradult is_youngchild is_malechild is_femalechild;
 	output out= pretables_s sum=;
 run;
 
@@ -754,6 +762,53 @@ data pretables_collapse;
 	if grouphouse = 1 and numstudents >= 2 then studenthouse = 1;
 		else studenthouse = 0;
 
+	/* Caclulate number of bedrooms needed based on HH comp */
+	mainroom = is_hholder;
+	adultrooms = is_otheradult;
+	if 0 < is_youngchild <= 2 then youngrooms = 1;
+		else if 0 < is_youngchild <= 4 then youngrooms = 2;
+		else if 0 < is_youngchild <= 6 then youngrooms = 3;
+		else if 0 < is_youngchild <= 8 then youngrooms = 4;
+		else if 0 < is_youngchild <= 10 then youngrooms = 5;
+	if 0 < is_malechild <= 2 then boyrooms = 1;
+		else if 0 < is_malechild <= 4 then boyrooms = 2;
+		else if 0 < is_malechild <= 6 then boyrooms = 3;
+		else if 0 < is_malechild <= 8 then boyrooms = 4;
+		else if 0 < is_malechild <= 10 then boyrooms = 5;
+	if 0 < is_femalechild <= 2 then girlrooms = 1;
+		else if 0 < is_femalechild <= 4 then girlrooms = 2;
+		else if 0 < is_femalechild <= 6 then girlrooms = 3;
+		else if 0 < is_femalechild <= 8 then girlrooms = 4;
+		else if 0 < is_femalechild <= 10 then girlrooms = 5;
+
+	bedroomsneeded = sum(of mainroom adultrooms youngrooms boyrooms girlrooms);
+
+	/* Calculate over/under housed based on rooms needed */
+	if bedrooms = 1 then actualbrooms = 0;
+		else if bedrooms = 2 then actualbrooms = 1;
+		else if bedrooms = 3 then actualbrooms = 2;
+		else if bedrooms = 4 then actualbrooms = 3;
+		else if bedrooms = 5 then actualbrooms = 4;
+		else if bedrooms = 6 then actualbrooms = 5;
+		else if bedrooms = 7 then actualbrooms = 6;
+		else if bedrooms = 8 then actualbrooms = 7;
+
+	if actualbrooms = 0 and numprec = 1 then do;
+		overunder = 1;
+	end;
+	else do;
+	if bedroomsneeded = actualbrooms then overunder = 1; /* Right sized */
+		else if bedroomsneeded > actualbrooms then overunder = 2; /* Under housed */
+		else if bedroomsneeded < actualbrooms then overunder = 3; /* Over housed */
+	end;
+
+	if overunder = 1 then righthoused = 1;
+		else righthoused = 0;
+	if overunder = 2 then underhoused = 1;
+		else underhoused = 0;
+	if overunder = 3 then overhoused = 1;
+		else overhoused = 0;
+
 
 run;
 
@@ -774,7 +829,8 @@ run;
 
 proc summary data = pretables_withvac;
 	class puma largehh;
-	var &cvars. multigen grouphouse studenthouse vacant allhh_withvac;
+	var &cvars. multigen grouphouse studenthouse righthoused overhoused underhoused 
+		vacant allhh_withvac;
 	weight hhwt;
 	output out = table2b_pre sum=;
 run;
@@ -941,6 +997,7 @@ run;
 
 
 %mend ipums_lgunit;
+	%ipums_lgunit (all,ACS,person);
 
 
 %macro output_lg (define);
