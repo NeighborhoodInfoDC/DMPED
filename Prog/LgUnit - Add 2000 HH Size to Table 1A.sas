@@ -110,5 +110,17 @@ run;
 %geo_out (city);
 
 
+data Cen2000_hhsize_combined;
+	set Cen2000_hhsize_ward2012 Cen2000_hhsize_city;
+	if ward2012 = " " then ward2012 = "City";
+run;
+
+
+proc transpose data=Cen2000_hhsize_combined out=table_1a_extra;
+	var &count_vars.;
+	id ward2012; 
+run; 
+
+
 
 /* End of program */
