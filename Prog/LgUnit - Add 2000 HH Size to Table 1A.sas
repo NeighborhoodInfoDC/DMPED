@@ -112,8 +112,10 @@ run;
 
 data Cen2000_hhsize_combined;
 	set Cen2000_hhsize_ward2012 Cen2000_hhsize_city;
-	if ward2012 = " " then ward2012 = "City";
+	if ward2012 = " " then ward2012 = "0";
 run;
+
+proc sort data = Cen2000_hhsize_combined; by ward2012;
 
 
 proc transpose data=Cen2000_hhsize_combined out=table_1a_extra;
@@ -121,6 +123,11 @@ proc transpose data=Cen2000_hhsize_combined out=table_1a_extra;
 	id ward2012; 
 run; 
 
+proc export data = table_1a_extra
+   outfile="&_dcdata_default_path.\DMPED\Prog\table1a_extra.csv"
+   dbms=csv
+   replace;
+run;
 
 
 /* End of program */
