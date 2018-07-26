@@ -19,7 +19,6 @@
   filedate=,                      /** File extract date (SAS date value) **/
   folder=&_dcdata_r_path\DMPED\Raw\Housing Pipeline,     /** Folder for input raw files **/ 
   rawfile = pipeline,             /** Name of input data set **/
-  finalize=Y,                     /** Upload and register file with metadata (Y/N) **/
   revisions=%str(New file.)       /** Metadata revision description **/
 );
 
@@ -31,14 +30,7 @@
     %goto exit_macro;
   %end;
  
-  %let finalize = %upcase( &finalize );
-  
-  %if &finalize = Y and not &_REMOTE_BATCH_SUBMIT %then %do;
-    %warn_mput( macro=DMPED_pipeline_read_update_file,
-                msg=Not remote batch submit session. Finalize will be set to N. )
-    %let finalize = N;
-  %end;
-  
+ 
   %** Define local macro variables **;
   
   %local recode_yesno month year filedate ds_label;
@@ -199,9 +191,7 @@ input
 
   run;
 
- %if &finalize = Y %then %do;
-  
- 
+
     %Finalize_data_set( 
       /** Finalize data set parameters **/
       data=HPTF_&year._&month._dc,
@@ -213,10 +203,10 @@ input
       restrictions=None,
       revisions=%str(&revisions),
       /** File info parameters **/
-      printobs=0,
+      printobs=5,
       freqvars=
     )
-	%end
+
   %exit_macro:
   
   %note_mput( macro=DMPED_pipeline_read_update_file, msg=Exiting macro. )
