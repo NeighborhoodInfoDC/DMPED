@@ -764,7 +764,11 @@ data pretables_collapse;
 
 	/* Caclulate number of bedrooms needed based on HH comp */
 	mainroom = is_hholder;
-	adultrooms = is_otheradult;
+	if 0 < is_otheradult <= 2 then adultrooms = 1;
+		else if 0 < is_otheradult <= 4 then adultrooms = 2;
+		else if 0 < is_otheradult <= 6 then adultrooms = 3;
+		else if 0 < is_otheradult <= 8 then adultrooms = 4;
+		else if 0 < is_otheradult <= 10 then adultrooms = 5;
 	if 0 < is_youngchild <= 2 then youngrooms = 1;
 		else if 0 < is_youngchild <= 4 then youngrooms = 2;
 		else if 0 < is_youngchild <= 6 then youngrooms = 3;
