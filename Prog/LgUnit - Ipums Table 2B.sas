@@ -681,7 +681,7 @@ data pretables;
 
 	/* over/under housed based on DCHA defintion */
 	if related in (101) then is_hholder = 1; 
-		else if related in (201) then is_spouse = 1;
+		else if related in (201 1114) then is_spouse = 1;
 		else if age >= 18 then is_otheradult = 1;
 		else if age <= 5 then is_youngchild = 1;
 		else if 5 < age < 18 and sex = 1 then is_malechild = 1;
