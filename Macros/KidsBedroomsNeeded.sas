@@ -51,6 +51,12 @@ data boys2;
 
 	numboys = count-3;
 
+	if numboys >= 2 then do;
+	diffboy2to1=boy2-boy1;
+	diffboy3to2=boy3-boy2;
+	diffboy4to3=boy4-boy3;
+	diffboy5to4=boy5-boy4;
+	end;
 run;
 
 /* Transpose so each girl's age is on a row */
@@ -79,10 +85,18 @@ data girls2;
 
 	numgirls = count-3;
 
+	if numgirls >= 2 then do;
+	diffgirll2to1=girl2-girl1;
+	diffgirl3to2=girl3-girl2;
+	diffgirl4to3=girl4-girl3;
+	diffgirl5to4=girl5-girl4;
+	diffgirl6to5=girl6-girl5;
+	end;
+
 run;
 
 /* Use counts and ages to determine bedrooms needed */
-data bg;
+data bg (drop=count _label_ _name_);
 	merge boys2 girls2;
 	by serial;
 
@@ -92,8 +106,9 @@ data bg;
 	if numkids = 1 then kidrooms = 1; 
 
 	else if numkids = 2 then do;
-		if numboys = 2 or numgirls = 2 then kidrooms = 1; 
-		else if boy1 <= 5 and girl1 <= 5 then kidrooms = 1;
+		if boy1 <= 5 and girl1 <= 5 then kidrooms = 1;
+		else if ( 0 <= boy1 < 13 and 0 <= boy2 < 13 ) or ( 0 <= girl1 < 13 and 0 <= girl2 < 13) then kidsrooms=1;
+	    else if (numboys=2 and diffboy2to1 < 5) or (numgirls = 2 and diffgirl2to1 < 5) then kidrooms = 1; 
 		else kidrooms = 2;
 	end;
 
