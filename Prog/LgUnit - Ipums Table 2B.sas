@@ -727,9 +727,13 @@ run;
 
 proc sort data = pretables_m; by serial; run;
 
+%KidsBedroomsNeeded (pretables, pretables_kidrooms);
+
+proc sort data = pretables_kidrooms; by serial; run;
+
 
 data pretables_collapse;
-	merge pretables_s  pretables_m hhwts;
+	merge pretables_s  pretables_m pretables_kidrooms hhwts;
 	by serial;
 	if serial ^= .;
 
@@ -769,23 +773,8 @@ data pretables_collapse;
 		else if 0 < is_otheradult <= 6 then adultrooms = 3;
 		else if 0 < is_otheradult <= 8 then adultrooms = 4;
 		else if 0 < is_otheradult <= 10 then adultrooms = 5;
-	if 0 < is_youngchild <= 2 then youngrooms = 1;
-		else if 0 < is_youngchild <= 4 then youngrooms = 2;
-		else if 0 < is_youngchild <= 6 then youngrooms = 3;
-		else if 0 < is_youngchild <= 8 then youngrooms = 4;
-		else if 0 < is_youngchild <= 10 then youngrooms = 5;
-	if 0 < is_malechild <= 2 then boyrooms = 1;
-		else if 0 < is_malechild <= 4 then boyrooms = 2;
-		else if 0 < is_malechild <= 6 then boyrooms = 3;
-		else if 0 < is_malechild <= 8 then boyrooms = 4;
-		else if 0 < is_malechild <= 10 then boyrooms = 5;
-	if 0 < is_femalechild <= 2 then girlrooms = 1;
-		else if 0 < is_femalechild <= 4 then girlrooms = 2;
-		else if 0 < is_femalechild <= 6 then girlrooms = 3;
-		else if 0 < is_femalechild <= 8 then girlrooms = 4;
-		else if 0 < is_femalechild <= 10 then girlrooms = 5;
-
-	bedroomsneeded = sum(of mainroom adultrooms youngrooms boyrooms girlrooms);
+	
+	bedroomsneeded = sum(of mainroom adultrooms kidrooms);
 
 	/* Calculate over/under housed based on rooms needed */
 	if bedrooms = 1 then actualbrooms = 0;

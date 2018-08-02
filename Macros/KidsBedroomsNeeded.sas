@@ -14,9 +14,10 @@
 **************************************************************************/
 
 
+%macro KidsBedroomsNeeded (indata,outdata);
+
 data pretables2;
-	set ipums.Acs_2012_16_dc;
-	*set pretables;
+	set &indata.;
 	if age <18;
 	s = put(serial,z7.);
 	np = put(pernum,z2.);
@@ -132,7 +133,10 @@ data bg (drop=count _label_ _name_);
 	numkids = sum(of numboys numgirls);
 
 	extra13boy = sum(of boy2flag boy3flag boy4flag );
+		if extra13boy = . then extra13boy = 0;
+
 	extra13girl = sum(of girl2flag girl3flag girl4flag girl5flag);
+		if extra13girl = . then extra13girl = 0;
 
 	
 	if numkids = 1 then kidrooms = 1; 
@@ -230,7 +234,15 @@ data bg (drop=count _label_ _name_);
 
 run;
 
-
 proc freq data = bg;
-	tables extra13;
+	tables kidrooms*numkids;
 run;
+
+data &outdata.;
+	set bg;
+	keep serial kidrooms;
+run;
+
+%mend KidsBedroomsNeeded;
+
+/* End of Macro */
