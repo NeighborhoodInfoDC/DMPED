@@ -57,6 +57,19 @@ data boys2;
 	diffboy4to3=boy4-boy3;
 	diffboy5to4=boy5-boy4;
 	end;
+
+	if boy2 >= 13 then do;
+	if diffboy2to1 > 4 and (diffboy3to2 = . or diffboy3to2 > 4) then boy2flag = 1;
+	end;
+
+	if boy3 >= 13 then do;
+	if diffboy3to2 > 4 and (diffboy4to3 = . or diffboy4to3 > 4) then boy3flag = 1;
+	end;
+
+	if boy3 >= 13 then do;
+	if diffboy4to3 > 4 and (diffboy5to4 = . or diffboy5to4 > 4) then boy4flag = 1;
+	end;
+
 run;
 
 /* Transpose so each girl's age is on a row */
@@ -93,6 +106,22 @@ data girls2;
 	diffgirl6to5=girl6-girl5;
 	end;
 
+	if girl2 >= 13 then do;
+	if diffgirl2to1 > 4 and (diffgirl3to2 = . or diffgirl3to2 > 4) then girl2flag = 1;
+	end;
+
+	if girl3 >= 13 then do;
+	if diffgirl3to2 > 4 and (diffgirl4to3 = . or diffgirl4to3 > 4) then girl3flag = 1;
+	end;
+
+	if girl3 >= 13 then do;
+	if diffgirl4to3 > 4 and (diffgirl5to4 = . or diffgirl5to4 > 4) then girl4flag = 1;
+	end;
+
+	if girl3 >= 13 then do;
+	if diffgirl5to4 > 4 and (diffgirl6to5 = . or diffgirl6to5 > 4) then girl5flag = 1;
+	end;
+
 run;
 
 /* Use counts and ages to determine bedrooms needed */
@@ -102,52 +131,100 @@ data bg (drop=count _label_ _name_);
 
 	numkids = sum(of numboys numgirls);
 
+	extra13boy = sum(of boy2flag boy3flag boy4flag );
+	extra13girl = sum(of girl2flag girl3flag girl4flag girl5flag);
+
 	
 	if numkids = 1 then kidrooms = 1; 
 
 	else if numkids = 2 then do;
 		if boy1 <= 5 and girl1 <= 5 then kidrooms = 1;
-		else if ( 0 <= boy1 < 13 and 0 <= boy2 < 13 ) or ( 0 <= girl1 < 13 and 0 <= girl2 < 13) then kidsrooms=1;
-	    else if (numboys=2 and diffboy2to1 < 5) or (numgirls = 2 and diffgirl2to1 < 5) then kidrooms = 1; 
+		else if numboys=2 then kidrooms = 1 + extra13boy;
+		else if numgirls=2 then kidrooms = 1 + extra13girl;
 		else kidrooms = 2;
 	end;
 
-	else if numkids = 3 then kidrooms = 2;
+	else if numkids = 3 then do;
+		if boy1 <= 5 and girl1 <= 5 then kidrooms = 2;
+		else if numboys=3 then kidrooms = 2 + extra13boy;
+		else if numgirls=3 then kidrooms = 2 + extra13girl;
+		else if numboys=2 then kidrooms = 2 + extra13boy;
+		else if numgirls=2 then kidrooms = 2 + extra13girl;
+	end;
 
 	else if numkids = 4 then do;
-		if numboys = 4 or numgirls = 4 then kidrooms = 2;
-		else if numboys = 2 and numgirls = 2 then kidrooms = 2;
-		else if numboys = 3 and boy1 <=5 and girl1 <=5 then kidrooms = 2;
-		else if numgirls = 3 and boy1 <=5 and girl1 <=5 then kidrooms = 2;
-		else kidrooms = 3;
+		if boy1 <= 5 and girl1 <= 5 and boy2 <= 5 and girl2 <= 5 then kidrooms = 2;
+		else if boy1 <= 5 and girl1 <= 5 and numboys=2 then kidrooms = 3;
+		else if boy1 <= 5 and girl1 <= 5 and numboys=3 then kidrooms = 2 + extra13boy;
+		else if numboys=4 then kidrooms = 2 + extra13boy;
+		else if numgirls=4 then kidrooms = 2 + extra13girl;
+		else if numboys=3 then kidrooms = 3 + extra13boy;
+		else if numgirls=3 then kidrooms = 3 + extra13girl;
+		else if numboys=2 then kidrooms = 2 + extra13boy + extra13girl;
 	end;
 
-	else if numkids = 5 then kidrooms = 3;
-
-	else if numkids = 6 then do;
-		if numboys = 6 or numgirls = 6 then kidrooms = 3;
-		else if numboys = 5 and boy1 <=5 and girl1 <=5 then kidrooms = 3;
-		else if numgirls = 5 and boy1 <=5 and girl1 <=5 then kidrooms = 3;
-		else if numboys = 4 then kidrooms = 3;
-		else if numgirls = 4 then kidrooms = 3;
-		else if numboys = 3 and boy1 <=5 and girl1 <=5 then kidrooms = 3;
-		else kidrooms = 4;
+	else if numkids = 5 then do; 
+		if boy1 <= 5 and girl1 <= 5 and boy2 <= 5 and girl2 <= 5 then kidrooms = 3;
+		else if boy1 <= 5 and girl1 <= 5 and numboys<=3 then kidrooms = 3 + extra13boy;
+		else if boy1 <= 5 and girl1 <= 5 and numgirls<=3 then kidrooms = 3 + extra13girl;
+		else if numboys=5 then kidrooms = 3 + extra13boy;
+		else if numgirls=5 then kidrooms = 3 + extra13girl;
+		else if numboys=4 then kidrooms = 3 + extra13boy;
+		else if numgirls=4 then kidrooms = 3 + extra13girl;
+		else if numboys=3 then kidrooms = 3 + extra13boy + extra13girl;
+		else if numgirls=3 then kidrooms = 3 + extra13boy + extra13girl;
 	end;
 
-	else if numkids = 7 then kidrooms = 4;
+	else if numkids = 6 then do; 
+		if boy1 <= 5 and girl1 <= 5 and boy2 <= 5 and girl2 <= 5 and boy3 <= 5 and girl3 <= 5 then kidrooms = 3;
+		else if boy1 <= 5 and girl1 <= 5 and boy2 <= 5 and girl2 <= 5 and numboys<=3 then kidrooms = 3 + extra13boy;
+		else if boy1 <= 5 and girl1 <= 5 and boy2 <= 5 and girl2 <= 5 and numgirls<=3 then kidrooms = 3 + extra13girl;
+		else if boy1 <= 5 and girl1 <= 5 and numboys = 5 then kidrooms = 3 + extra13boy;
+		else if boy1 <= 5 and girl1 <= 5 and numgirls = 5 then kidrooms = 3 + extra13girl; 
+		else if numboys=6 then kidrooms = 3 + extra13boy;
+		else if numgirls=6 then kidrooms = 3 + extra13girl;
+		else if numboys=5 then kidrooms = 4 + extra13boy;
+		else if numgirls=5 then kidrooms = 4 + extra13girl;
+		else if numboys=4 then kidrooms = 3 + extra13boy + extra13girl;
+		else if numgirls=4 then kidrooms = 3 + extra13boy + extra13girl;
+		else if numboys=3 then kidrooms = 4 + extra13boy + extra13girl;
+	end;
 
-	else if numkids = 8 then do;
-		if numboys = 8 or numgirls = 8 then kidrooms = 4;
-		else if numboys = 7 and boy1 <=5 and girl1 <=5 then kidrooms = 4;
-		else if numgirls = 7 and boy1 <=5 and girl1 <=5 then kidrooms = 4;
-		else if numboys = 6 then kidrooms = 3;
-		else if numgirls = 6 then kidrooms = 3;
-		else if numboys = 5 and boy1 <=5 and girl1 <=5 then kidrooms = 3;
-		else if numgirls = 5 and boy1 <=5 and girl1 <=5 then kidrooms = 3;
-		else if numboys = 4 then kidrooms = 3;
-		else if numgirls = 4 then kidrooms = 3;
-		else if numboys = 3 and boy1 <=5 and girl1 <=5 then kidrooms = 3;
-		else kidrooms = 4;
+	
+	else if numkids = 7 then do; 
+		if boy1 <= 5 and girl1 <= 5 and boy2 <= 5 and girl2 <= 5 and boy3 <= 5 and girl3 <= 5 then kidrooms = 4;
+		else if boy1 <= 5 and girl1 <= 5 and boy2 <= 5 and girl2 <= 5 and numboys<=5 then kidrooms = 4 + extra13boy;
+		else if boy1 <= 5 and girl1 <= 5 and boy2 <= 5 and girl2 <= 5 and numgirls<=5 then kidrooms = 4 + extra13girl;
+		else if boy1 <= 5 and girl1 <= 5 and numboys = 4 then kidrooms = 4 + extra13boy + extra13girl;
+		else if boy1 <= 5 and girl1 <= 5 and numgirls = 4 then kidrooms = 4 + extra13boy + extra13girl;
+		else if numboys = 7 then kidrooms = 4 + extra13boy;
+		else if numgirls = 7 then kidrooms = 4 + extra13girl; 
+		else if numboys = 6 then kidrooms = 4 + extra13boy;
+		else if numgirls = 6 then kidrooms = 4 + extra13girl; 
+		else if numboys = 5 then kidrooms = 4 + extra13boy + extra13girl;
+		else if numgirls = 5 then kidrooms = 4 + extra13boy + extra13girl;
+		else if numboys = 4 then kidrooms = 4 + extra13boy + extra13girl;
+		else if numgirls = 4 then kidrooms = 4 + extra13boy + extra13girl;
+	end;
+
+	else if numkids = 8 then do; 
+		if boy1 <= 5 and girl1 <= 5 and boy2 <= 5 and girl2 <= 5 and boy3 <= 5 and girl3 <= 5 and boy4 <= 5 and girl4 <= 5 then kidrooms = 4;
+		else if boy1 <= 5 and girl1 <= 5 and boy2 <= 5 and girl2 <= 5 and boy3 <= 5 and girl3 <= 5 and numboys<=5 then kidrooms = 4 + extra13boy;
+		else if boy1 <= 5 and girl1 <= 5 and boy2 <= 5 and girl2 <= 5 and boy3 <= 5 and girl3 <= 5 and numgirls<=5 then kidrooms = 4 + extra13girl;
+		else if boy1 <= 5 and girl1 <= 5 and boy2 <= 5 and girl2 <= 5 and numboys<=5 then kidrooms = 4 + extra13boy;
+		else if boy1 <= 5 and girl1 <= 5 and boy2 <= 5 and girl2 <= 5 and numgirls<=5 then kidrooms = 4 + extra13girl;
+		else if boy1 <= 5 and girl1 <= 5 and numboys = 4 then kidrooms = 4 + extra13boy + extra13girl;
+		else if boy1 <= 5 and girl1 <= 5 and numgirls = 4 then kidrooms = 4 + extra13boy + extra13girl;
+		else if numboys = 8 then kidrooms = 4 + extra13boy;
+		else if numgirls = 8 then kidrooms = 4 + extra13girl;
+		else if numboys = 7 then kidrooms = 4 + extra13boy;
+		else if numgirls = 7 then kidrooms = 4 + extra13girl; 
+		else if numboys = 6 then kidrooms = 4 + extra13boy;
+		else if numgirls = 6 then kidrooms = 4 + extra13girl; 
+		else if numboys = 5 then kidrooms = 4 + extra13boy + extra13girl;
+		else if numgirls = 5 then kidrooms = 4 + extra13boy + extra13girl;
+		else if numboys = 4 then kidrooms = 4 + extra13boy + extra13girl;
+		else if numgirls = 4 then kidrooms = 4 + extra13boy + extra13girl;
 	end;
 
 
@@ -155,5 +232,5 @@ run;
 
 
 proc freq data = bg;
-	tables kidrooms;
+	tables extra13;
 run;
