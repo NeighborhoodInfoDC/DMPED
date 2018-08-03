@@ -679,6 +679,16 @@ data pretables;
 
 	if ppr > 1 then overcrowded=1; else overcrowded=0; 
 
+	/*hud standard 2 people per bedroom*/
+	if bedrooms > 1 then do; 
+	pbr=numprec/(bedrooms-1); 
+	end;
+
+	else if bedrooms=1 then pbr=numprec; 
+
+	if pbr > 2 then overcrowedbr=1; else if pbr ne . then overcrowdedbr=0; 
+	if pbr <=1 then overhousedbr=1; else if pbr ne . then overhousedbr=0; 
+
 	/* over/under housed based on DCHA defintion */
 	if related in (101) then is_hholder = 1; 
 		else if related in (201,1114) then is_spouse = 1;
@@ -687,21 +697,11 @@ data pretables;
 		else if 5 < age < 18 and sex = 1 then is_malechild = 1;
 		else if 5 < age < 18 and sex = 2 then is_femalechild = 1;
 	
-    /*need to correct to DCHA coding
-	if max_hh_size2 ne . then do; 
-	if ratio_OccToCap > 1 then underhoused=1; else underhoused=0;
-	if ratio_occtocap = 1 then righthoused=1; else righthoused=0;
-	if ratio_occtocap < 1 then overhoused=1; else overhoused=0; 
-	end; */
-
-	if bedrooms=2 and numprec=1 then do; righthoused=1; overhoused=0; end; *one bedroom - one person not underhoused.; 
-	
-	 label 
+   	 label 
 	 Hud_inc_unit = 'HUD income category for unit'
-	 ratio_OccToCap='Ratio of Occupants to Capacity'
-	 underhoused='Unit has more occupants than its capacity'
-	 righthoused='Unit has the right number of occupants for capacity'
-	 overhoused='Unit has few occupants than its capacity'
+	 overhousedbr='Unit Has One person or less per bedroom'
+	 overcrowded='Unit has more than 1 person per room'
+	 overcrowdedbr='Unit has more than 2 peopler per bedroom' 
 ;
 
   
