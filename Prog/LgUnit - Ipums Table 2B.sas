@@ -32,6 +32,7 @@ libname ipums2 "&_dcdata_r_path.\DMPED\Raw\ipums";
 		 bedrooms0 bedrooms1 bedrooms2 bedrooms3 bedrooms4 bedrooms5plus
 		 units1 units2to4 units5to9 units10to19 units20plus
 		 BuiltBefore1940 Built1940to1959 Built1960to1979 Built1980to1999 Built2000After
+		 overcrowded overcrowdedbr overhousedbr
 		 ;
 
 %let mvars = hher_age hh_inc kid_age isadult iskid;
@@ -686,7 +687,7 @@ data pretables;
 
 	else if bedrooms=1 then pbr=numprec; 
 
-	if pbr > 2 then overcrowedbr=1; else if pbr ne . then overcrowdedbr=0; 
+	if pbr > 2 then overcrowdedbr=1; else if pbr ne . then overcrowdedbr=0; 
 	if pbr <=1 then overhousedbr=1; else if pbr ne . then overhousedbr=0; 
 
 	/* over/under housed based on DCHA defintion */
@@ -823,7 +824,7 @@ run;
 proc summary data = pretables_withvac;
 	class puma largehh;
 	var &cvars. multigen grouphouse studenthouse righthoused overhoused underhoused 
-		vacant allhh_withvac;
+		 vacant allhh_withvac;
 	weight hhwt;
 	output out = table2b_pre sum=;
 run;
@@ -862,6 +863,10 @@ data table2b_pcts;
 	pct_righthoused = righthoused / allhh;
 	pct_overhoused = overhoused / allhh;
 	pct_underhoused = underhoused / allhh;
+
+	pct_overcrowded = overcrowded / allhh;  
+	pct_overcrowdedbr = overcrowdedbr / allhh;
+	pct_overhousedbr = overhousedbr / allhh; 
 
 	pct_issenior = issenior / allhh; 
 	pct_isdis = isdis / allhh;
@@ -964,6 +969,9 @@ proc transpose data = table2b_all out = table2b_csv_all;
 	/* Over/Under Housed */
 	pct_righthoused pct_overhoused pct_underhoused
 
+	/* Over/Under HUD definition */
+	pct_overcrowded pct_overcrowdedbr pct_overhousedbr
+
 	/* Migration */
 	pct_movedless1 pct_moved2to10 pct_moved10plus
 
@@ -990,8 +998,6 @@ run;
 
 
 %mend ipums_lgunit;
-	%ipums_lgunit (all,ACS,person);
-
 
 %macro output_lg (define);
 	%ipums_lgunit (all,2000,&define.);
