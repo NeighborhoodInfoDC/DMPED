@@ -1,5 +1,5 @@
 /**************************************************************************
- Program:  LIHTC_IZ_Unit_Count.sas
+ Program:  Large_unit_subsidy_count.sas
  Library:  DMPED
  Project:  NeighborhoodInfo DC
  Author:   M. Cohen
@@ -7,7 +7,7 @@
  Version:  SAS 9.2
  Environment:  Local Windows session (desktop)
  
- Description:  Count LIHTC and IZ Bedrooms
+ Description:  Count Units by Bedroom Size
  Modifications:
 **************************************************************************/
 
@@ -17,15 +17,15 @@
 %DCData_lib( HUD )
 %DCData_lib( DMPED )
 %DCData_lib( MAR )
+%DCData_lib( PRESCAT )
 
 data lihtc;
 	set HUD.lihtc_2016_dc /*(rename =(_notes_ = notes))*/;
 	if proj_add = "TWINING TER" then proj_add = "2505 N St. SE";
 run;
 
-  data 
-    IZ_units_06_2018_dc;
- infile "L:\Libraries\DMPED\Raw\Housing Pipeline\IZ_Units_&month._&year..csv" dsd stopover lrecl=2000 firstobs=2;
+  data IZ_units_06_2018;
+ infile "L:\Libraries\DMPED\Raw\Housing Pipeline\IZ_units_06_2018.csv" dsd stopover lrecl=2000 firstobs=2;
 input
 	Project :$80.
 	Construction_Status :$40.
@@ -42,7 +42,67 @@ run;
 
 data Sec8_2018 ;
 set HUD.Sec8mf_2018_06_dc ;
+sec8 = 1;
 run ;
+
+  data 
+    PH_Unitsize;
+ infile "L:\Libraries\DMPED\Raw\Public Housing List w Unit Size.csv" dsd stopover lrecl=2000 firstobs=2;
+input
+                   program : $40.
+                   nlihc_id : $8.
+                   proj_name : $80.
+				   proj_addr: $80.
+                   units0b : 4.
+                   units1b : 4.
+                   units2b : 4.
+                   units3b : 4.
+                   units4b : 4.
+                   units5b: 4.
+                   units6b : 4.
+                   unitstot : 4.
+                   link : $80.;
+
+pubhous = 1;
+
+run;
+
+data prescat;
+	set prescat.project;
+run;
+
+
+data lihtc_subsidy;
+	set prescat.subsidy;
+	if Subsidy_Active = 0 then delete;
+	if portfolio ^= "LIHTC" then delete;
+	LIHTC = 1;
+run;
+
+
+proc sort data =prescat;
+	by nlihc_id;
+run;
+proc sort data = ph_unitsize;
+	by nlihc_id;
+run;
+proc sort data = lihtc_subsidy;
+	by nlihc_id;
+run;
+
+data other_units;
+	merge prescat ph_unitsize (keep = nlihc_id units: link pubhous) lihtc_subsidy (keep = nlihc_id lihtc);
+	by nlihc_id;
+run;
+
+proc sort data = other_units;
+	by contract_number;
+run;
+
+data other_units;
+	merge other_units sec8_2018 (keep = contract_number sec8 br:);
+	by contract_number;
+run;
 
  %DC_mar_geocode(
   data = Sec8_2018,
@@ -56,7 +116,7 @@ run ;
 );
 
  %DC_mar_geocode(
-  data = IZ_units_06_2018_dc,
+  data = IZ_units_06_2018,
   staddr = proj_address,
   zip=,
   out = iz,
@@ -89,31 +149,49 @@ proc sort data = Sec8_2018geo;
 by ward2012;
 run;
 
-proc tabulate data = Sec8_2018geo ;
+proc tabulate data = other_units;
+where pubhous = 1 and unitstot ^= . and status = "A";
+class ward2012;
+var units:;
+table units:, ward2012;
+run;
+
+proc tabulate data = other_units ;
+where Sec8 = 1 and status = "A";
 class ward2012 ;
 var br0_count br1_count br2_count br3_count br4_count br5plus_count ;
 table ward2012, br0_count br1_count br2_count br3_count br4_count br5plus_count;
 run ;
 
+proc tabulate data = other_units;
+where pubhous = 1 and unitstot = . and status = "A";
+class ward2012;
+var Proj_Units_Tot Proj_Units_Assist_Max Proj_Units_Assist_Min;
+table Proj_Units_Tot Proj_Units_Assist_Max Proj_Units_Assist_Min, ward2012;
+run;
+
 proc tabulate data = iz;
 where bedrooms = 0 or bedrooms = 1 or bedrooms = 2;
 class construction_status ward2012 ami tenure;
-*var bedrooms;
 table tenure, N, ward2012*ami*construction_status;
 run;
-
 
 proc tabulate data = iz;
 where bedrooms >= 3;
 class construction_status ward2012 ami tenure;
-*var bedrooms;
 table tenure, N, ward2012*ami*construction_status;
 run;
-
 
 proc tabulate data = lihtc;
 where nonprog ^= 1;
 class ward2012 ;
 var n_:;
 table n_:, ward2012;
+run;
+
+proc tabulate data = other_units;
+where pubhous = . and sec8 = . and lihtc = .;
+class ward2012;
+var Proj_Units_Tot Proj_Units_Assist_Max Proj_Units_Assist_Min;
+table Proj_Units_Tot Proj_Units_Assist_Max Proj_Units_Assist_Min, ward2012;
 run;
