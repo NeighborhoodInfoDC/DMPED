@@ -100,7 +100,7 @@ data girls2;
 	numgirls = count-3;
 
 	if numgirls >= 2 then do;
-	diffgirll2to1=girl2-girl1;
+	diffgirl2to1=girl2-girl1;
 	diffgirl3to2=girl3-girl2;
 	diffgirl4to3=girl4-girl3;
 	diffgirl5to4=girl5-girl4;
