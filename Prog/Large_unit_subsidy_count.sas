@@ -90,17 +90,17 @@ proc sort data = lihtc_subsidy;
 	by nlihc_id;
 run;
 
-data other_units;
+data pres_large_unit;
 	merge prescat ph_unitsize (keep = nlihc_id units: link pubhous) lihtc_subsidy (keep = nlihc_id lihtc);
 	by nlihc_id;
 run;
 
-proc sort data = other_units;
+proc sort data = pres_large_unit;
 	by contract_number;
 run;
 
-data other_units;
-	merge other_units sec8_2018 (keep = contract_number sec8 br:);
+data pres_large_unit;
+	merge pres_large_unit sec8_2018 (keep = contract_number sec8 br:);
 	by contract_number;
 run;
 
@@ -117,7 +117,7 @@ run;
 
  %DC_mar_geocode(
   data = IZ_units_06_2018,
-  staddr = proj_address,
+  staddr = project_address,
   zip=,
   out = iz,
   geo_match = Y,
@@ -149,49 +149,52 @@ proc sort data = Sec8_2018geo;
 by ward2012;
 run;
 
-proc tabulate data = other_units;
+proc tabulate data = pres_large_unit;
 where pubhous = 1 and unitstot ^= . and status = "A";
 class ward2012;
 var units:;
-table units:, ward2012;
+table units:, ward2012 = "Public Housing with Bed Count";
 run;
 
-proc tabulate data = other_units ;
-where Sec8 = 1 and status = "A";
-class ward2012 ;
-var br0_count br1_count br2_count br3_count br4_count br5plus_count ;
-table ward2012, br0_count br1_count br2_count br3_count br4_count br5plus_count;
-run ;
-
-proc tabulate data = other_units;
+proc tabulate data = pres_large_unit;
 where pubhous = 1 and unitstot = . and status = "A";
 class ward2012;
 var Proj_Units_Tot Proj_Units_Assist_Max Proj_Units_Assist_Min;
-table Proj_Units_Tot Proj_Units_Assist_Max Proj_Units_Assist_Min, ward2012;
+table Proj_Units_Tot Proj_Units_Assist_Max Proj_Units_Assist_Min, ward2012 = "Public Housing w/o Bed Count";
 run;
+
+proc tabulate data = pres_large_unit ;
+where Sec8 = 1 and status = "A";
+class ward2012 ;
+var br0_count br1_count br2_count br3_count br4_count br5plus_count ;
+table br0_count br1_count br2_count br3_count br4_count br5plus_count, ward2012 = 'Multifamily and Section 8';
+run ;
+
 
 proc tabulate data = iz;
 where bedrooms = 0 or bedrooms = 1 or bedrooms = 2;
 class construction_status ward2012 ami tenure;
-table tenure, N, ward2012*ami*construction_status;
+table tenure, N, ward2012*= 'IZ Units 0-2 Bedrooms'ami*construction_status ;
 run;
 
 proc tabulate data = iz;
 where bedrooms >= 3;
 class construction_status ward2012 ami tenure;
-table tenure, N, ward2012*ami*construction_status;
+table tenure, N, ward2012= 'IZ Units 3+ Bedrooms'*ami*construction_status ;
 run;
+
 
 proc tabulate data = lihtc;
 where nonprog ^= 1;
 class ward2012 ;
 var n_:;
-table n_:, ward2012;
+table n_:, ward2012 = 'LIHTC Units';
 run;
 
-proc tabulate data = other_units;
+
+proc tabulate data = pres_large_unit;
 where pubhous = . and sec8 = . and lihtc = .;
 class ward2012;
 var Proj_Units_Tot Proj_Units_Assist_Max Proj_Units_Assist_Min;
-table Proj_Units_Tot Proj_Units_Assist_Max Proj_Units_Assist_Min, ward2012;
+table Proj_Units_Tot Proj_Units_Assist_Max Proj_Units_Assist_Min, ward2012 = 'Other Housing Units';
 run;
