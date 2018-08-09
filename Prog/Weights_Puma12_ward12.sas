@@ -201,6 +201,7 @@ proc sql noprint;
   order by serial, pernum;
 quit;
 
+
 ** Housing unit count tables **;
 
 title3 '--- ORIGINAL WEIGHTED 2012-16 ACS MICRODATA ---';
@@ -244,12 +245,13 @@ proc tabulate data=ACS_micro_ward format=comma9.0 noseps missing;
     /** Rows **/
     all='Total' bedrooms,
     /** Columns **/
-    total='Housing units' * sum=' ' * ( all='DC' ward2012='By Ward' )
+    total='Occupied housing units' * sum=' ' * ( all='DC' ward2012='By Ward' )
   ;
   format bedrooms bedrooms_to_brsize.;
 run;
 
 title2;
+
 
 ** Population count tables **;
 
