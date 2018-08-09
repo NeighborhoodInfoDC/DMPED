@@ -1,5 +1,5 @@
 /**************************************************************************
- Program:  LgUnit - IPUMS ward weights.sas
+ Program:  Weights_Puma12_ward12.sas
  Library:  DMPED
  Project:  Urban-Greater DC
  Author:   P. Tatian
