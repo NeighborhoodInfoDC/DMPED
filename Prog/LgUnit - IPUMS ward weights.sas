@@ -19,7 +19,7 @@
 %DCData_lib( IPUMS )
 %DCData_lib( ACS )
 
-** Read Block-PUMA crosswalk **;
+** Read Block-PUMA crosswalk from MABLE **;
 
 filename geocorr "&_dcdata_r_path\DMPED\Raw\ipums\geocorr14_PUMA2012.csv";
 
@@ -72,11 +72,11 @@ run;
 
 filename geocorr clear;
 
-
 %File_info( data=geocorr14_PUMA2012 )
 
 
-** ACS SF data on housing units by bedroom size **;
+** ACS SF block group data on housing units by bedroom size 
+** Transpose data so bedroom size counts are in separate rows;
 
 proc transpose data=Acs.Acs_sf_2012_16_dc_bg10 out=ACS_tr;
   by geobg2010;
@@ -85,6 +85,9 @@ run;
 
 %File_info( data=ACS_tr )
 
+
+** Join block/PUMA crosswalk to ACS block group data. 
+** Use block group data to reapportion block housing units by bedroom size.;
 
 proc sql noprint;
   create table A as
@@ -109,6 +112,8 @@ proc print data=A (obs=50);
  var _label_ puma ward2012 hus10 col1 B25041e1 wt;
 run;
 
+** Aggregate reapportioned block counts by PUMA/Ward and PUMA **;
+
 proc summary data=A nway;
   class _label_ puma ward2012;
   var wt;
@@ -124,7 +129,10 @@ proc summary data=A nway;
   output out=A_puma (drop=_type_ _freq_ rename=(_label_=BrSize)) sum=wt_puma;
 run;
 
-data Puma12_ward2012_weights;
+** Combine aggregated data to calculate weight adjustment factor 
+** Weight adjustment is share of PUMA housing units that are in ward, by bedroom size.;
+
+data Weights_Puma12_ward12;
 
   merge
     A_ward
@@ -133,17 +141,31 @@ data Puma12_ward2012_weights;
  
   adjwt = wt / wt_puma;
   
+  label
+    BrSize = "Bedroom size of housing unit"
+    Puma = "Public use microdata area (2012)"
+    wt = "Housing unit count for PUMA/ward segment"
+    wt_puma = "Housing unit count for PUMA"
+    adjwt = "Weight adjustment factor (= wt / wt_puma)";
+  
 run;
 
-%File_info( data=Puma12_ward2012_weights, printobs=0 )
+%Finalize_data_set( 
+  data=Weights_Puma12_ward12,
+  out=Weights_Puma12_ward12,
+  outlib=DMPED,
+  label="PUMA 2012 to Ward 2012 weight adjustment factors for ACS microdata",
+  sortby=BrSize Puma,
+  revisions=%str(New file.),
+  printobs=0
+)
 
-proc print data=Puma12_ward2012_weights (obs=50);
+proc print data=Weights_Puma12_ward12 (obs=50);
   by BrSize puma;
   id BrSize puma;
   sumby puma;
   sum adjwt;
 run;
-
 
 
 ** Test weights **;
@@ -174,10 +196,12 @@ proc sql noprint;
   select ACS_micro.*, Wt.BrSize, Wt.Puma, Wt.Ward2012, Wt.adjwt, perwt * adjwt as wperwt, hhwt * adjwt as whhwt from 
   ACS_micro
   full join
-  Puma12_ward2012_weights as Wt
+  Weights_Puma12_ward12 as Wt
   on ACS_micro.puma = Wt.puma and put( ACS_micro.bedrooms, bedrooms_to_brsize. ) = Wt.BrSize
   order by serial, pernum;
 quit;
+
+** Housing unit count tables **;
 
 title3 '--- ORIGINAL WEIGHTED 2012-16 ACS MICRODATA ---';
 
@@ -227,8 +251,9 @@ run;
 
 title2;
 
+** Population count tables **;
 
-title3 '--- ORIGINAL WEIGHTED DATA ---';
+title3 '--- ORIGINAL WEIGHTED 2012-16 ACS MICRODATA ---';
 
 proc tabulate data=ACS_micro format=comma12.0 noseps missing;
   class puma bedrooms;
@@ -243,7 +268,7 @@ proc tabulate data=ACS_micro format=comma12.0 noseps missing;
   format bedrooms bedrooms_to_brsize.;
 run;
 
-title3 '--- REWEIGHTED DATA ---';
+title3 '--- REWEIGHTED 2012-16 ACS MICRODATA ---';
 
 proc tabulate data=ACS_micro_ward format=comma12.0 noseps missing;
   class puma bedrooms;
