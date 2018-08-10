@@ -128,7 +128,7 @@ run;
   mprint = Y
 );
 
-options orientation=landscape;
+options orientation=landscape missing='-';
 
 ods rtf file="&_dcdata_default_path\DMPED\Prog\Large_unit_subsidy_count.rtf" style=Styles.Rtf_arial_9pt;
 ods listing close;
@@ -163,13 +163,23 @@ proc format;
     3-high = '3+ bedrooms';
   value $blankns
     ' ' = 'Not specified';
+  value yr_pis
+    .c = 'Unknown'
+    1990-1999 = '1990-1999'
+    2000-2009 = '2000-2009'
+    2010-2016 = '2010-2016';
 run;
 
 proc tabulate data = iz missing format=comma10.0;
 class bedrooms construction_status ward2012 ami tenure /preloadfmt;
 table 
-  (all='DC' ward2012= ' ')*(all='Total IZ units' tenure), 
+  (all='Total IZ units' tenure), 
   (all='Total' construction_status=' '), 
+  N='IZ Units by AMI and Bedroom Size' * (all='Total' ami=' ')*bedrooms=' ' 
+  / printmiss;
+table 
+  (all='Total IZ units' tenure), 
+  (all='Total' Ward2012=' '), 
   N='IZ Units by AMI and Bedroom Size' * (all='Total' ami=' ')*bedrooms=' ' 
   / printmiss;
 format bedrooms bedrooms3p. tenure ami $blankns.;
@@ -177,9 +187,11 @@ run;
 
 proc tabulate data = lihtc missing format=comma10.0;
 where nonprog ^= 1 and not( missing( ward2012 ) );
-class ward2012 ;
+class ward2012 yr_pis;
 var n_:;
 table n='Projects' (n_:)*sum=' ', (all='DC' ward2012='Units in LIHTC Projects');
+table n='Projects' (n_:)*sum=' ', (all='DC' yr_pis='Units in LIHTC Projects by Year Placed in Service');
+format yr_pis yr_pis.;
 run;
 
 
