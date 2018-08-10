@@ -69,6 +69,7 @@ run;
 
 data prescat;
 	set prescat.project;
+  where status = 'A';
 run;
 
 
@@ -79,41 +80,31 @@ data lihtc_subsidy;
 	LIHTC = 1;
 run;
 
-
 proc sort data =prescat;
 	by nlihc_id;
 run;
 proc sort data = ph_unitsize;
 	by nlihc_id;
 run;
-proc sort data = lihtc_subsidy;
+proc sort data = lihtc_subsidy nodupkey;
 	by nlihc_id;
 run;
 
-data pres_large_unit;
-	merge prescat ph_unitsize (keep = nlihc_id units: link pubhous) lihtc_subsidy (keep = nlihc_id lihtc);
+data pres_large_unit_a;
+	merge prescat (in=in1) ph_unitsize (keep = nlihc_id units: link pubhous) lihtc_subsidy (keep = nlihc_id lihtc);
 	by nlihc_id;
+  if in1;
 run;
 
-proc sort data = pres_large_unit;
+proc sort data = pres_large_unit_a;
 	by contract_number;
 run;
 
 data pres_large_unit;
-	merge pres_large_unit sec8_2018 (keep = contract_number sec8 br:);
+	merge pres_large_unit_a (in=in1) sec8_2018 (keep = contract_number sec8 br:);
 	by contract_number;
+  if in1;
 run;
-
- %DC_mar_geocode(
-  data = Sec8_2018,
-  staddr = address_line1_text,
-  zip= zip_code,
-  out = Sec8_2018geo,
-  geo_match = Y,
-  streetalt_file=,
-  debug = Y,
-  mprint = Y
-);
 
  %DC_mar_geocode(
   data = IZ_units_06_2018,
@@ -122,7 +113,7 @@ run;
   out = iz,
   geo_match = Y,
   streetalt_file=,
-  debug = Y,
+  debug = N,
   mprint = Y
 );
 
@@ -133,68 +124,73 @@ run;
   out = lihtc,
   geo_match = Y,
   streetalt_file=,
-  debug = Y,
+  debug = N,
   mprint = Y
 );
 
-proc sort data = lihtc;
-	by ward2012;
-run;
+options orientation=landscape;
 
-proc sort data = iz;
-	by construction_status ward2012 tenure ami;
-run;
+ods rtf file="&_dcdata_default_path\DMPED\Prog\Large_unit_subsidy_count.rtf" style=Styles.Rtf_arial_9pt;
+ods listing close;
 
-proc sort data = Sec8_2018geo;
-by ward2012;
-run;
-
-proc tabulate data = pres_large_unit;
+proc tabulate data = pres_large_unit missing format=comma10.0;
 where pubhous = 1 and unitstot ^= . and status = "A";
 class ward2012;
 var units:;
-table units:, ward2012 = "Public Housing with Bed Count";
+table n='Projects' (units:)*sum=' ', all='DC' ward2012 = "Public Housing with Bed Count";
 run;
 
-proc tabulate data = pres_large_unit;
+proc tabulate data = pres_large_unit missing format=comma10.0;
 where pubhous = 1 and unitstot = . and status = "A";
 class ward2012;
 var Proj_Units_Tot Proj_Units_Assist_Max Proj_Units_Assist_Min;
-table Proj_Units_Tot Proj_Units_Assist_Max Proj_Units_Assist_Min, ward2012 = "Public Housing w/o Bed Count";
+table n='Projects' (Proj_Units_Tot Proj_Units_Assist_Max Proj_Units_Assist_Min)*sum=' ', all='DC' ward2012 = "Public Housing w/o Bed Count";
 run;
 
-proc tabulate data = pres_large_unit ;
+proc tabulate data = pres_large_unit missing format=comma10.0;
 where Sec8 = 1 and status = "A";
 class ward2012 ;
 var br0_count br1_count br2_count br3_count br4_count br5plus_count ;
-table br0_count br1_count br2_count br3_count br4_count br5plus_count, ward2012 = 'Multifamily and Section 8';
+table 
+  n='Projects' (br0_count br1_count br2_count br3_count br4_count br5plus_count)*sum=' ', 
+  all='DC' ward2012 = 'Multifamily and Section 8';
 run ;
 
 
-proc tabulate data = iz;
-where bedrooms = 0 or bedrooms = 1 or bedrooms = 2;
-class construction_status ward2012 ami tenure;
-table tenure, N, ward2012*= 'IZ Units 0-2 Bedrooms'ami*construction_status ;
+proc format;
+  value bedrooms3p
+    0-2 = '0-2 bedrooms'
+    3-high = '3+ bedrooms';
+  value $blankns
+    ' ' = 'Not specified';
 run;
 
-proc tabulate data = iz;
-where bedrooms >= 3;
-class construction_status ward2012 ami tenure;
-table tenure, N, ward2012= 'IZ Units 3+ Bedrooms'*ami*construction_status ;
+proc tabulate data = iz missing format=comma10.0;
+class bedrooms construction_status ward2012 ami tenure /preloadfmt;
+table 
+  (all='DC' ward2012= ' ')*(all='Total IZ units' tenure), 
+  (all='Total' construction_status=' '), 
+  N='IZ Units by AMI and Bedroom Size' * (all='Total' ami=' ')*bedrooms=' ' 
+  / printmiss;
+format bedrooms bedrooms3p. tenure ami $blankns.;
 run;
 
-
-proc tabulate data = lihtc;
-where nonprog ^= 1;
+proc tabulate data = lihtc missing format=comma10.0;
+where nonprog ^= 1 and not( missing( ward2012 ) );
 class ward2012 ;
 var n_:;
-table n_:, ward2012 = 'LIHTC Units';
+table n='Projects' (n_:)*sum=' ', (all='DC' ward2012='Units in LIHTC Projects');
 run;
 
 
-proc tabulate data = pres_large_unit;
+proc tabulate data = pres_large_unit missing format=comma10.0;
 where pubhous = . and sec8 = . and lihtc = .;
 class ward2012;
 var Proj_Units_Tot Proj_Units_Assist_Max Proj_Units_Assist_Min;
-table Proj_Units_Tot Proj_Units_Assist_Max Proj_Units_Assist_Min, ward2012 = 'Other Housing Units';
+table 
+  n='Projects' (Proj_Units_Tot Proj_Units_Assist_Max Proj_Units_Assist_Min)*sum=' ', 
+  all='DC' ward2012 = 'Other Housing Units in Assisted Projects';
 run;
+
+ods listing;
+ods rtf close;
