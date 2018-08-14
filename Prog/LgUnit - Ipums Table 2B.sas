@@ -714,7 +714,7 @@ data pretables;
 	if bedrooms > 2 then do; 
 	if pbr <=1 then overhousedbr=1; else if pbr ne . then overhousedbr=0; 
 	end; 
-	else if bedrooms <=2 and pbr ne . then overhousedbr=0; *not over housed if one person in 1br or studio. 
+	else if bedrooms <=2 and pbr ne . then overhousedbr=0; /*not over housed if one person in 1br or studio. */
 
 	/* over/under housed based on DCHA defintion */
 	if related in (101) then is_hholder = 1; 
