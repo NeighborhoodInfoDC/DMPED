@@ -152,7 +152,7 @@ run;
 data hhwts_pre;
 	set &indata. (where=(pernum=1 and gq in (1,2)))  
 		vacdata ;
-	keep serial puma hhwt numprec bedrooms;
+	/*keep serial puma hhwt numprec bedrooms Ward2012 adjwt wperwt whhwt;*/
 
 	%if &yrs. = 2000 %then %do;
 
@@ -192,7 +192,9 @@ proc sql noprint;
   order by serial, pernum;
 quit;
 
-proc sort data = hhwts; by serial; run;
+proc sort data = hhwts (keep = serial puma hhwt numprec bedrooms Ward2012 adjwt wperwt whhwt); 
+	by serial; 
+run;
 
 
 data pretables;
@@ -842,7 +844,7 @@ run;
 
 
 proc summary data = pretables_withvac;
-	class puma largehh;
+	class ward2012 largehh;
 	var &cvars. multigen grouphouse studenthouse righthoused overhoused underhoused 
 		 vacant allhh_withvac;
 	weight hhwt;
@@ -925,7 +927,7 @@ run;
 
 
 proc summary data = pretables_collapse;
-	class puma largehh;
+	class ward2012 largehh;
 	var &mvars.;
 	weight hhwt;
 	output out = table2b_m median=;
@@ -938,7 +940,7 @@ run;
 
 
 proc summary data = pretables_collapse;
-	class puma largehh;
+	class ward2012 largehh;
 	var numkids numadults;
 	weight hhwt;
 	output out = table2b_n median=;
@@ -955,7 +957,7 @@ data table2b_all;
 	merge table2b_pcts table2b_m_ table2b_n_;
 	by id;
 	if _type_ in (1,3);
-	if puma = . then puma = 100;
+	if ward2012 = . then ward2012 = 0;
 run;
 
 
@@ -1006,7 +1008,7 @@ proc transpose data = table2b_all out = table2b_csv_all;
 
 	;
 
-	id largehh puma;
+	id largehh ward2012;
 
 run;
 
