@@ -1014,7 +1014,7 @@ run;
 
 
 proc export data = table2b_csv_all
-	outfile = "&_dcdata_default_path.\DMPED\Prog\table2b_csv_&yrs._&tenure._&largedef..csv"
+	outfile = "&_dcdata_default_path.\DMPED\Prog\table2b_wd12_&yrs._&tenure._&largedef..csv"
 	dbms = csv replace;
 run;
 
