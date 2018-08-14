@@ -149,7 +149,7 @@ data vacdata;
 	%end;
 run;
 
-data hhwts;
+data hhwts_pre;
 	set &indata. (where=(pernum=1 and gq in (1,2)))  
 		vacdata ;
 	keep serial puma hhwt numprec bedrooms;
@@ -171,8 +171,28 @@ data hhwts;
 	%end;
 run;
 
-proc sort data = hhwts; by serial; run;
+proc format;
+  value bedrooms_to_brsize
+    0 = "N/A"
+    1 = "No bedroom"
+    2 = "1 bedroom"
+    3 = "2 bedrooms"
+    4 = "3 bedrooms"
+    5 = "4 bedrooms"
+    6-high = "5 or more bedrooms";
+run;
 
+proc sql noprint;
+  create table hhwts as
+  select Dat.*, Wt.BrSize, Wt.Puma, Wt.Ward2012, Wt.adjwt, perwt * adjwt as wperwt, hhwt * adjwt as whhwt from 
+  hhwts_pre as Dat
+  full join
+  DMPED.Weights_Puma12_ward12 as Wt
+  on Dat.puma = Wt.puma and put( Dat.bedrooms, bedrooms_to_brsize. ) = Wt.BrSize
+  order by serial, pernum;
+quit;
+
+proc sort data = hhwts; by serial; run;
 
 
 data pretables;
