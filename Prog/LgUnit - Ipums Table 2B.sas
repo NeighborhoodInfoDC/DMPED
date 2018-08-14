@@ -710,7 +710,11 @@ data pretables;
 	else if bedrooms=1 then pbr=numprec; 
 
 	if pbr > 2 then overcrowdedbr=1; else if pbr ne . then overcrowdedbr=0; 
+	
+	if bedrooms > 2 then do; 
 	if pbr <=1 then overhousedbr=1; else if pbr ne . then overhousedbr=0; 
+	end; 
+	else if bedrooms <=2 and pbr ne . then overhousedbr=0; *not over housed if one person in 1br or studio. 
 
 	/* over/under housed based on DCHA defintion */
 	if related in (101) then is_hholder = 1; 
@@ -722,9 +726,9 @@ data pretables;
 	
    	 label 
 	 Hud_inc_unit = 'HUD income category for unit'
-	 overhousedbr='Unit Has One person or less per bedroom'
+	 overhousedbr='2 bedroom or larger unit has 1 person or less per bedroom'
 	 overcrowded='Unit has more than 1 person per room'
-	 overcrowdedbr='Unit has more than 2 peopler per bedroom' 
+	 overcrowdedbr='Unit has more than 2 people per bedroom' 
 ;
 
   
