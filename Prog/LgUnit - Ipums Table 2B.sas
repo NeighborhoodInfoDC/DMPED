@@ -847,7 +847,7 @@ proc summary data = pretables_withvac;
 	class ward2012 largehh;
 	var &cvars. multigen grouphouse studenthouse righthoused overhoused underhoused 
 		 vacant allhh_withvac;
-	weight hhwt;
+	weight whhwt;
 	output out = table2b_pre sum=;
 run;
 
@@ -929,7 +929,7 @@ run;
 proc summary data = pretables_collapse;
 	class ward2012 largehh;
 	var &mvars.;
-	weight hhwt;
+	weight whhwt;
 	output out = table2b_m median=;
 run;
 
@@ -942,7 +942,7 @@ run;
 proc summary data = pretables_collapse;
 	class ward2012 largehh;
 	var numkids numadults;
-	weight hhwt;
+	weight whhwt;
 	output out = table2b_n median=;
 run;
 
