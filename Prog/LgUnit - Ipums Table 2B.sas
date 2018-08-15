@@ -595,7 +595,7 @@ data pretables;
       Max_hh_size = 4;
     when ( 5 )       /** 4 bedroom **/
       Max_hh_size = 6;  /*updated this value from 5 from PTs original code*/
-    when ( 6, 7, 8, 9, 10, 11, 12, 13, 14 )       /** 5+ bedroom **/
+    when ( 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 )       /** 5+ bedroom **/
       Max_hh_size = 7;
     otherwise
       do; 
