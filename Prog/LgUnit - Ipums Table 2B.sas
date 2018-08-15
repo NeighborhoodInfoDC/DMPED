@@ -149,10 +149,10 @@ data vacdata;
 	%end;
 run;
 
-data hhwts;
+data hhwts_pre;
 	set &indata. (where=(pernum=1 and gq in (1,2)))  
 		vacdata ;
-	keep serial puma hhwt numprec bedrooms;
+	/*keep serial puma hhwt numprec bedrooms Ward2012 adjwt wperwt whhwt;*/
 
 	%if &yrs. = 2000 %then %do;
 
@@ -171,8 +171,30 @@ data hhwts;
 	%end;
 run;
 
-proc sort data = hhwts; by serial; run;
+proc format;
+  value bedrooms_to_brsize
+    0 = "N/A"
+    1 = "No bedroom"
+    2 = "1 bedroom"
+    3 = "2 bedrooms"
+    4 = "3 bedrooms"
+    5 = "4 bedrooms"
+    6-high = "5 or more bedrooms";
+run;
 
+proc sql noprint;
+  create table hhwts as
+  select Dat.*, Wt.BrSize, Wt.Puma, Wt.Ward2012, Wt.adjwt, perwt * adjwt as wperwt, hhwt * adjwt as whhwt from 
+  hhwts_pre as Dat
+  full join
+  DMPED.Weights_Puma12_ward12 as Wt
+  on Dat.puma = Wt.puma and put( Dat.bedrooms, bedrooms_to_brsize. ) = Wt.BrSize
+  order by serial, pernum;
+quit;
+
+proc sort data = hhwts (keep = serial puma hhwt numprec bedrooms Ward2012 adjwt wperwt whhwt); 
+	by serial; 
+run;
 
 
 data pretables;
@@ -573,7 +595,7 @@ data pretables;
       Max_hh_size = 4;
     when ( 5 )       /** 4 bedroom **/
       Max_hh_size = 6;  /*updated this value from 5 from PTs original code*/
-    when ( 6, 7, 8, 9, 10, 11, 12, 13, 14 )       /** 5+ bedroom **/
+    when ( 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 )       /** 5+ bedroom **/
       Max_hh_size = 7;
     otherwise
       do; 
@@ -688,7 +710,11 @@ data pretables;
 	else if bedrooms=1 then pbr=numprec; 
 
 	if pbr > 2 then overcrowdedbr=1; else if pbr ne . then overcrowdedbr=0; 
+	
+	if bedrooms > 2 then do; 
 	if pbr <=1 then overhousedbr=1; else if pbr ne . then overhousedbr=0; 
+	end; 
+	else if bedrooms <=2 and pbr ne . then overhousedbr=0; /*not over housed if one person in 1br or studio. */
 
 	/* over/under housed based on DCHA defintion */
 	if related in (101) then is_hholder = 1; 
@@ -700,9 +726,9 @@ data pretables;
 	
    	 label 
 	 Hud_inc_unit = 'HUD income category for unit'
-	 overhousedbr='Unit Has One person or less per bedroom'
+	 overhousedbr='2 bedroom or larger unit has 1 person or less per bedroom'
 	 overcrowded='Unit has more than 1 person per room'
-	 overcrowdedbr='Unit has more than 2 peopler per bedroom' 
+	 overcrowdedbr='Unit has more than 2 people per bedroom' 
 ;
 
   
@@ -822,10 +848,10 @@ run;
 
 
 proc summary data = pretables_withvac;
-	class puma largehh;
+	class ward2012 largehh;
 	var &cvars. multigen grouphouse studenthouse righthoused overhoused underhoused 
 		 vacant allhh_withvac;
-	weight hhwt;
+	weight whhwt;
 	output out = table2b_pre sum=;
 run;
 
@@ -905,9 +931,9 @@ run;
 
 
 proc summary data = pretables_collapse;
-	class puma largehh;
+	class ward2012 largehh;
 	var &mvars.;
-	weight hhwt;
+	weight whhwt;
 	output out = table2b_m median=;
 run;
 
@@ -918,9 +944,9 @@ run;
 
 
 proc summary data = pretables_collapse;
-	class puma largehh;
+	class ward2012 largehh;
 	var numkids numadults;
-	weight hhwt;
+	weight whhwt;
 	output out = table2b_n median=;
 run;
 
@@ -935,7 +961,7 @@ data table2b_all;
 	merge table2b_pcts table2b_m_ table2b_n_;
 	by id;
 	if _type_ in (1,3);
-	if puma = . then puma = 100;
+	if ward2012 = . then ward2012 = 0;
 run;
 
 
@@ -986,13 +1012,13 @@ proc transpose data = table2b_all out = table2b_csv_all;
 
 	;
 
-	id largehh puma;
+	id largehh ward2012;
 
 run;
 
 
 proc export data = table2b_csv_all
-	outfile = "&_dcdata_default_path.\DMPED\Prog\table2b_csv_&yrs._&tenure._&largedef..csv"
+	outfile = "&_dcdata_default_path.\DMPED\Prog\table2b_wd12_&yrs._&tenure._&largedef..csv"
 	dbms = csv replace;
 run;
 
