@@ -27,14 +27,7 @@
   %let geo_suffix = %sysfunc( putc( &geo_name, $geosuf. ) );
   %let geo_label = %sysfunc( putc( &geo_name, $geodlbl. ) );
 
-  /* 1980 data 
-
-data x1980 ;
-	set ncdb.ncdb_sum&geo_suffix.;
-	keep &geo. numhsgunits_1980 numhsgunits1bdrm_1980 numhsgunits2bdrms_1980 numhsgunits3bdrms_1980 
-	numhsgunits4bdrms_1980 numhsgunits5plusbdrms_1980;
-	city ="1";
-run;*/
+  /* 1980 data */
 
 data RenterOcc1980; /* Summarize */
 	set ncdb.ncdb_master_update;
@@ -42,6 +35,7 @@ data RenterOcc1980; /* Summarize */
 	If statecd = "11";
 
 	city = "1";
+	format city $city.;
 
 	numhsgunits_1980 = sum(of bdtot08 bdtot18 bdtot28 bdtot38 bdtot48 bdtot58);
 
@@ -145,14 +139,7 @@ proc transpose data=m1980 out=table1980_&geo.;
 run; 
 
 
-/* 1990 data 
-
-data x1990;
-	set ncdb.ncdb_sum&geo_suffix. ;
-	keep &geo. numhsgunits_1990 numhsgunits1bdrm_1990 numhsgunits2bdrms_1990 numhsgunits3bdrms_1990 
-	numhsgunits4bdrms_1990 numhsgunits5plusbdrms_1990;
-	city ="1";
-	run;*/
+/* 1990 data */
 
 data RenterOcc1990; 
 	set ncdb.ncdb_master_update;
@@ -160,6 +147,7 @@ data RenterOcc1990;
 	If statecd = "11";
 
 	city = "1";
+	format city $city.;
 
 	numhsgunits_1990 = sum(of bdtot09 bdtot19 bdtot29 bdtot39 bdtot49 bdtot59);
 
@@ -264,14 +252,7 @@ run;
 
 
 
-/* 2000 data 
-
-data x2000;
-	set ncdb.ncdb_sum&geo_suffix.;
-	keep &geo. numhsgunits_2000 numhsgunits0bdrms_2000 numhsgunits1bdrm_2000 numhsgunits2bdrms_2000 numhsgunits3bdrms_2000 
-	numhsgunits4bdrms_2000 numhsgunits5plusbdrms_2000;
-	city ="1";
-run;*/
+/* 2000 data */
 
 data RenterOcc2000; 
 	set ncdb.ncdb_master_update;
@@ -279,6 +260,7 @@ data RenterOcc2000;
 	If statecd = "11";
 
 	city = "1";
+	format city $city.;
 
 	numhsgunits_2000 = sum(of bdtot00 bdtot10 bdtot20 bdtot30 bdtot40 bdtot50);
 	
@@ -387,6 +369,7 @@ run;
 
 
 /* ACS 2006-10 */
+
 data xACS_2006_10; 
 	set acs.acs_2006_10_dc_sum_tr&geo_suffix.;
 
