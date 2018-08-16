@@ -2,8 +2,8 @@
  Program:  DMPED_pipeline_6_2018.sas
  Library:  HUD
  Project:  NeighborhoodInfo DC
- Author:   P. Tatian
- Created:  12/15/15
+ Author:   M. Cohen
+ Created:  08/07/2018
  Version:  SAS 9.2
  Environment:  Local Windows session (desktop)
  
@@ -18,5 +18,10 @@
 ** Define libraries **;
 %DCData_lib( DMPED )
 
+*--- EDIT PARAMETERS BELOW -----------------------------------------;
 
-%DMPED_pipeline_read_update_file( year=2018, filedate='18jun2018'd, finalize = Y )
+%DMPED_pipeline_read_update_file(
+  filedate = '18jun2018'd,  /** Enter date of DMPED database download as SAS date value, ex: '25nov2014'd **/
+  revisions = %str(New file.)
+)
+run;
