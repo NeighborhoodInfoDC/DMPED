@@ -27,14 +27,14 @@
   %let geo_suffix = %sysfunc( putc( &geo_name, $geosuf. ) );
   %let geo_label = %sysfunc( putc( &geo_name, $geodlbl. ) );
 
-  /* 1980 data */
+  /* 1980 data 
 
 data x1980 ;
 	set ncdb.ncdb_sum&geo_suffix.;
 	keep &geo. numhsgunits_1980 numhsgunits1bdrm_1980 numhsgunits2bdrms_1980 numhsgunits3bdrms_1980 
 	numhsgunits4bdrms_1980 numhsgunits5plusbdrms_1980;
 	city ="1";
-run;
+run;*/
 
 data RenterOcc1980; /* Summarize */
 	set ncdb.ncdb_master_update;
@@ -43,7 +43,14 @@ data RenterOcc1980; /* Summarize */
 
 	city = "1";
 
+	numhsgunits_1980 = sum(of bdtot08 bdtot18 bdtot28 bdtot38 bdtot48 bdtot58);
+
 	rename bdtot08=numhsgunits0bdrms_1980;
+	rename bdtot18=numhsgunits1bdrm_1980;
+	rename bdtot28=numhsgunits2bdrms_1980;
+	rename bdtot38=numhsgunits3bdrms_1980;
+	rename bdtot48=numhsgunits4bdrms_1980;
+	rename bdtot58=numhsgunits5plusbdrms_1980;
 
 	rename rntocc8 =renthsgunits_1980;
 	rename bdrnt08=renthsgunits0bdrms_1980;
@@ -64,7 +71,8 @@ data RenterOcc1980; /* Summarize */
 
 run; 
 
-%let summaryvars80 = numhsgunits0bdrms_1980 renthsgunits_1980 renthsgunits0bdrms_1980 renthsgunits1bdrm_1980 renthsgunits2bdrms_1980 renthsgunits3bdrms_1980 renthsgunits4bdrms_1980
+%let summaryvars80 = numhsgunits_1980 numhsgunits0bdrms_1980 numhsgunits1bdrm_1980 numhsgunits2bdrms_1980 numhsgunits3bdrms_1980 numhsgunits4bdrms_1980 numhsgunits5plusbdrms_1980
+	renthsgunits_1980 renthsgunits0bdrms_1980 renthsgunits1bdrm_1980 renthsgunits2bdrms_1980 renthsgunits3bdrms_1980 renthsgunits4bdrms_1980
 	renthsgunits5plusbdrms_1980 ownhsgunits_1980 ownhsgunits0bdrms_1980 ownhsgunits1bdrm_1980 ownhsgunits2bdrms_1980 ownhsgunits3bdrms_1980 ownhsgunits4bdrms_1980 
 	ownhsgunits5plusbdrms_1980;
 
@@ -103,8 +111,7 @@ run;
 %end;
 
 data m1980;
-	merge x1980 RenterOwnerOcc1980_new ;
-	by &geo. ;
+	set RenterOwnerOcc1980_new ;
 
 	pct3brall_1980 = sum(of numhsgunits3bdrms_1980 numhsgunits4bdrms_1980 numhsgunits5plusbdrms_1980) / numhsgunits_1980;
 	pct3brrent_1980 = sum(of renthsgunits3bdrms_1980 renthsgunits4bdrms_1980 renthsgunits5plusbdrms_1980) / renthsgunits_1980;
@@ -138,14 +145,14 @@ proc transpose data=m1980 out=table1980_&geo.;
 run; 
 
 
-/* 1990 data */
+/* 1990 data 
 
 data x1990;
 	set ncdb.ncdb_sum&geo_suffix. ;
 	keep &geo. numhsgunits_1990 numhsgunits1bdrm_1990 numhsgunits2bdrms_1990 numhsgunits3bdrms_1990 
 	numhsgunits4bdrms_1990 numhsgunits5plusbdrms_1990;
 	city ="1";
-	run;
+	run;*/
 
 data RenterOcc1990; 
 	set ncdb.ncdb_master_update;
@@ -154,7 +161,14 @@ data RenterOcc1990;
 
 	city = "1";
 
+	numhsgunits_1990 = sum(of bdtot09 bdtot19 bdtot29 bdtot39 bdtot49 bdtot59);
+
 	rename bdtot09=numhsgunits0bdrms_1990;
+	rename bdtot19=numhsgunits1bdrm_1990;
+	rename bdtot29=numhsgunits2bdrms_1990;
+	rename bdtot39=numhsgunits3bdrms_1990;
+	rename bdtot49=numhsgunits4bdrms_1990;
+	rename bdtot59=numhsgunits5plusbdrms_1990;
 
 	rename rntocc9 =renthsgunits_1990;
 	rename bdrnt09=renthsgunits0bdrms_1990;
@@ -175,7 +189,8 @@ data RenterOcc1990;
 
 run; 
 
-%let summaryvars90 = numhsgunits0bdrms_1990 renthsgunits_1990 renthsgunits0bdrms_1990 renthsgunits1bdrm_1990 renthsgunits2bdrms_1990 renthsgunits3bdrms_1990 renthsgunits4bdrms_1990
+%let summaryvars90 = numhsgunits_1990 numhsgunits0bdrms_1990 numhsgunits1bdrm_1990 numhsgunits2bdrms_1990 numhsgunits3bdrms_1990 numhsgunits4bdrms_1990 numhsgunits5plusbdrms_1990
+	renthsgunits_1990 renthsgunits0bdrms_1990 renthsgunits1bdrm_1990 renthsgunits2bdrms_1990 renthsgunits3bdrms_1990 renthsgunits4bdrms_1990
 	renthsgunits5plusbdrms_1990 ownhsgunits_1990 ownhsgunits0bdrms_1990 ownhsgunits1bdrm_1990 ownhsgunits2bdrms_1990 ownhsgunits3bdrms_1990 ownhsgunits4bdrms_1990 
 	ownhsgunits5plusbdrms_1990;
 
@@ -214,8 +229,7 @@ run;
 %end;
 
 data m1990;
-	merge x1990 RenterOwnerOcc1990_new ;
-	by &geo. ;
+	set RenterOwnerOcc1990_new ;
 
 	pct3brall_1990 = sum(of numhsgunits3bdrms_1990 numhsgunits4bdrms_1990 numhsgunits5plusbdrms_1990) / numhsgunits_1990;
 	pct3brrent_1990 = sum(of renthsgunits3bdrms_1990 renthsgunits4bdrms_1990 renthsgunits5plusbdrms_1990) / renthsgunits_1990;
@@ -250,14 +264,14 @@ run;
 
 
 
-/* 2000 data */
+/* 2000 data 
 
 data x2000;
-	set ncdb.ncdb_sum&geo_suffix. /*ncdb.ncdb_master_update*/;
+	set ncdb.ncdb_sum&geo_suffix.;
 	keep &geo. numhsgunits_2000 numhsgunits0bdrms_2000 numhsgunits1bdrm_2000 numhsgunits2bdrms_2000 numhsgunits3bdrms_2000 
 	numhsgunits4bdrms_2000 numhsgunits5plusbdrms_2000;
 	city ="1";
-run;
+run;*/
 
 data RenterOcc2000; 
 	set ncdb.ncdb_master_update;
@@ -265,8 +279,15 @@ data RenterOcc2000;
 	If statecd = "11";
 
 	city = "1";
+
+	numhsgunits_2000 = sum(of bdtot00 bdtot10 bdtot20 bdtot30 bdtot40 bdtot50);
 	
 	rename bdtot00=numhsgunits0bdrms_2000;
+	rename bdtot10=numhsgunits1bdrm_2000;
+	rename bdtot20=numhsgunits2bdrms_2000;
+	rename bdtot30=numhsgunits3bdrms_2000;
+	rename bdtot40=numhsgunits4bdrms_2000;
+	rename bdtot50=numhsgunits5plusbdrms_2000;
 
 	rename rntocc0 =renthsgunits_2000;
 	rename bdrnt00=renthsgunits0bdrms_2000;
@@ -288,7 +309,8 @@ data RenterOcc2000;
 run; 
 
 
-%let summaryvars00 = numhsgunits0bdrms_2000 renthsgunits_2000 renthsgunits0bdrms_2000 renthsgunits1bdrm_2000 renthsgunits2bdrms_2000 renthsgunits3bdrms_2000 renthsgunits4bdrms_2000
+%let summaryvars00 = numhsgunits_2000 numhsgunits0bdrms_2000 numhsgunits0bdrms_2000 numhsgunits1bdrm_2000 numhsgunits2bdrms_2000 numhsgunits3bdrms_2000 numhsgunits4bdrms_2000 numhsgunits5plusbdrms_2000
+	renthsgunits_2000 renthsgunits0bdrms_2000 renthsgunits1bdrm_2000 renthsgunits2bdrms_2000 renthsgunits3bdrms_2000 renthsgunits4bdrms_2000
 	renthsgunits5plusbdrms_2000 ownhsgunits_2000 ownhsgunits0bdrms_2000 ownhsgunits1bdrm_2000 ownhsgunits2bdrms_2000 ownhsgunits3bdrms_2000 ownhsgunits4bdrms_2000 
 	ownhsgunits5plusbdrms_2000;
 
@@ -327,8 +349,7 @@ run;
 %end;
 
 data m2000;
-	merge x2000 RenterOwnerOcc2000_new ;
-	by &geo. ;
+	set RenterOwnerOcc2000_new ;
 
 	numhsgunits3plusbd_2000 = sum(of numhsgunits3bdrms_2000 numhsgunits4bdrms_2000 numhsgunits5plusbdrms_2000);
 	renthsgunits3plusbd_2000 = sum(of renthsgunits3bdrms_2000 renthsgunits4bdrms_2000 renthsgunits5plusbdrms_2000);
