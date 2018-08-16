@@ -16,7 +16,7 @@
 %include "L:\SAS\Inc\StdLocal.sas";
 
 ** Define libraries **;
-%DCData_lib( DMPED )
+%DCData_lib( DMPED );
 
 *--- EDIT PARAMETERS BELOW -----------------------------------------;
 
@@ -24,4 +24,5 @@
   filedate = '18jun2018'd,  /** Enter date of DMPED database download as SAS date value, ex: '25nov2014'd **/
   revisions = %str(New file.)
 )
+
 run;

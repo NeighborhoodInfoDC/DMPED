@@ -319,8 +319,8 @@ run;
 
     %Finalize_data_set( 
       /** Finalize data set parameters **/
-      data=iz_proj_&year._&month,
-      out=iz_proj_&year._&month,
+      data=iz_&year._&month,
+      out=iz_&year._&month,
       outlib=DMPED,
       label="&ds_label, %upcase(&v)",
       sortby=Project_name,
@@ -328,17 +328,16 @@ run;
       restrictions=None,
       revisions=%str(&revisions),
       /** File info parameters **/
-      printobs=0,
+      printobs=5,
       freqvars=
     )
 
   %end;
 
-
     %Finalize_data_set( 
       /** Finalize data set parameters **/
-      data=iz_unit_&year._&month,
-      out=iz_unit_&year._&month,
+      data=iz_units_&year._&month,
+      out=iz_units_&year._&month,
       outlib=DMPED,
       label="&ds_label, %upcase(&v)",
       sortby=Project_name,
@@ -366,7 +365,6 @@ run;
       printobs=0,
       freqvars=
     )
-
 
   %end;
     
