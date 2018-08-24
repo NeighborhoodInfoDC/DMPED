@@ -147,6 +147,12 @@ data vacdata;
 			else if rent > 0 then vac = 1;
 		if vac = 1;
 	%end;
+
+	%else %if &ten. = ALL %then %do;
+		if vacancy in (1,2) then vac = 1;
+			else if rent > 0 or rent > 0 then vac = 1;
+		if vac = 1;
+	%end;
 run;
 
 data hhwts_pre;
@@ -833,6 +839,7 @@ data pretables_collapse;
 run;
 
 
+
 /* Add vacancy data */
 data pretables_withvac;
 	set pretables_collapse 
@@ -842,12 +849,18 @@ data pretables_withvac;
 
 	allhh_withvac = 1;
 
+	drop whhwt;
+run;
 
+proc sort data = pretables_withvac; by serial; run;
 
+data pretables_withvac_wts;
+	merge pretables_withvac hhwts;
+	by serial;
 run;
 
 
-proc summary data = pretables_withvac;
+proc summary data = pretables_withvac_wts;
 	class ward2012 largehh;
 	var &cvars. multigen grouphouse studenthouse righthoused overhoused underhoused 
 		 vacant allhh_withvac;
@@ -1010,6 +1023,9 @@ proc transpose data = table2b_all out = table2b_csv_all;
 	/* Year built */
 	pct_BuiltBefore1940 pct_Built1940to1959 pct_Built1960to1979 pct_Built1980to1999 pct_Built2000After
 
+	/* Vacancy */
+	pct_vacant
+
 	;
 
 	id largehh ward2012;
@@ -1037,3 +1053,7 @@ run;
 %mend output_lg;
 %output_lg (person);
 %output_lg (bedrooms);
+
+
+
+/* End of program */
