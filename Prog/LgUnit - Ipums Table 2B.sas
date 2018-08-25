@@ -155,6 +155,10 @@ data vacdata;
 	%end;
 run;
 
+proc sort data = vacdata; 
+	by serial; 
+run;
+
 data hhwts_pre;
 	set &indata. (where=(pernum=1 and gq in (1,2)))  
 		vacdata ;
@@ -169,11 +173,11 @@ data hhwts_pre;
 
 
 	%if &ten. = OWN %then %do;
-		if ownershp = 1;
+		if ownershp = 1 or vac = 1;
 	%end;
 
 	%else %if &ten. = RENT %then %do;
-		if ownershp = 2;
+		if ownershp = 2 or vac = 1;
 	%end;
 run;
 
@@ -766,7 +770,7 @@ proc sort data = pretables_kidrooms; by serial; run;
 
 
 data pretables_collapse;
-	merge pretables_s  pretables_m pretables_kidrooms hhwts;
+	merge pretables_s  pretables_m pretables_kidrooms vacdata hhwts;
 	by serial;
 	if serial ^= .;
 
@@ -835,32 +839,27 @@ data pretables_collapse;
 	if overunder = 3 then overhoused = 1;
 		else overhoused = 0;
 
+	if vac = 1 then do;
+		%if &largedef. = PERSON %then %do;
+		if numprec >= 4 then largehh = 1;
+			else largehh = 0;
+		%end;
 
-run;
+		%else %if &largedef. = BEDROOMS %then %do;
+		if bedrooms >= 4 then largehh = 1;
+			else largehh = 0;
+		%end;
+	end;
 
-
-
-/* Add vacancy data */
-data pretables_withvac;
-	set pretables_collapse 
-		vacdata ;
 	if vacancy ^= . then vacant = 1;
 		else vacant = 0;
 
 	allhh_withvac = 1;
 
-	drop whhwt;
-run;
-
-proc sort data = pretables_withvac; by serial; run;
-
-data pretables_withvac_wts;
-	merge pretables_withvac hhwts;
-	by serial;
 run;
 
 
-proc summary data = pretables_withvac_wts;
+proc summary data = pretables_collapse;
 	class ward2012 largehh;
 	var &cvars. multigen grouphouse studenthouse righthoused overhoused underhoused 
 		 vacant allhh_withvac;
