@@ -27,7 +27,7 @@ proc sort data= DMPED.SFCondo_year_2017 out = SFCondo_year_2017;
 by ssl;
 run;
 
-proc sort data= MAR.address_ssl_xref out = address_ssl_xref;
+proc sort data= MAR.address_ssl_xref nodupkey out = address_ssl_xref;
 by ssl;
 run;
 
