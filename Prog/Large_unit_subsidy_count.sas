@@ -22,6 +22,7 @@
 data lihtc;
 	set HUD.lihtc_2016_dc /*(rename =(_notes_ = notes))*/;
 	if proj_add = "TWINING TER" then proj_add = "2505 N St. SE";
+	units_w_brsize = sum( n_0br, n_1br, n_2br, n_4br, 0 );
 run;
 
   data IZ_units_06_2018;
@@ -43,6 +44,7 @@ run;
 data Sec8_2018 ;
 set HUD.Sec8mf_2018_06_dc ;
 sec8 = 1;
+units_w_brsize = sum( br0_count, br1_count, br2_count, br3_count, br4_count, br5plus_count, 0 );
 run ;
 
   data 
@@ -64,6 +66,8 @@ input
                    link : $80.;
 
 pubhous = 1;
+
+units_w_brsize = sum( units0b, units1b, units2b, units3b, units4b, units5b, units6b, 0 );
 
 run;
 
@@ -101,9 +105,11 @@ proc sort data = pres_large_unit_a;
 run;
 
 data pres_large_unit;
-	merge pres_large_unit_a (in=in1) sec8_2018 (keep = contract_number sec8 br:);
+	merge pres_large_unit_a (in=in1) sec8_2018 (keep = contract_number sec8 br: assisted_units_count units_w_brsize);
 	by contract_number;
   if in1;
+  
+  if pubhous = 1 and unitstot = . and status = "A" then unitstot = max( Proj_Units_Tot, Proj_Units_Assist_Max );
 run;
 
  %DC_mar_geocode(
@@ -133,34 +139,53 @@ options orientation=landscape missing='-';
 ods rtf file="&_dcdata_default_path\DMPED\Prog\Large_unit_subsidy_count.rtf" style=Styles.Rtf_arial_9pt;
 ods listing close;
 
-proc tabulate data = pres_large_unit missing format=comma10.0;
-where pubhous = 1 and unitstot ^= . and status = "A";
-class ward2012;
-var units:;
-table n='Projects' (units:)*sum=' ', all='DC' ward2012 = "Public Housing with Bed Count";
-run;
+title2 '** Public housing **';
 
 proc tabulate data = pres_large_unit missing format=comma10.0;
-where pubhous = 1 and unitstot = . and status = "A";
+where pubhous = 1 and status = "A";
 class ward2012;
-var Proj_Units_Tot Proj_Units_Assist_Max Proj_Units_Assist_Min;
-table n='Projects' (Proj_Units_Tot Proj_Units_Assist_Max Proj_Units_Assist_Min)*sum=' ', all='DC' ward2012 = "Public Housing w/o Bed Count";
+var units:;
+table 
+  n='Projects' (unitstot units_w_brsize units0b units1b units2b units3b units4b units5b units6b)*sum=' ', 
+  all='DC' ward2012 = " ";
+label
+  units0b = '\~ No bedrooms'
+  units1b = '\~ 1 bedroom'
+  units2b = '\~ 2 bedrooms'
+  units3b = '\~ 3 bedrooms'
+  units4b = '\~ 4 bedrooms'
+  units5b = '\~ 5 bedrooms'
+  units6b = '\~ 6+ bedrooms'
+  unitstot = 'Total units'
+  units_w_brsize = 'Units w/bedroom size';
 run;
+
+title2 '** Multifamily Section 8 **';
 
 proc tabulate data = pres_large_unit missing format=comma10.0;
 where Sec8 = 1 and status = "A";
 class ward2012 ;
-var br0_count br1_count br2_count br3_count br4_count br5plus_count ;
+var br0_count br1_count br2_count br3_count br4_count br5plus_count assisted_units_count units_w_brsize;
 table 
-  n='Projects' (br0_count br1_count br2_count br3_count br4_count br5plus_count)*sum=' ', 
-  all='DC' ward2012 = 'Multifamily and Section 8';
+  n='Projects' (assisted_units_count units_w_brsize br0_count br1_count br2_count br3_count br4_count br5plus_count)*sum=' ', 
+  all='DC' ward2012 = ' ';
+label
+  br0_count = '\~ No bedrooms'
+  br1_count = '\~ 1 bedroom'
+  br2_count = '\~ 2 bedrooms' 
+  br3_count = '\~ 3 bedrooms' 
+  br4_count = '\~ 4 bedrooms' 
+  br5plus_count = '\~ 5+ bedrooms'
+  assisted_units_count = 'Total assisted units'
+  units_w_brsize = 'Units w/bedroom size';
 run ;
 
+title2 '** Inclusionary Zoning **';
 
 proc format;
   value bedrooms3p
-    0-2 = '0-2 bedrooms'
-    3-high = '3+ bedrooms';
+    0-2 = '0-2 BR'
+    3-high = '3+ BR';
   value $blankns
     ' ' = 'Not specified';
   value yr_pis
@@ -168,6 +193,12 @@ proc format;
     1990-1999 = '1990-1999'
     2000-2009 = '2000-2009'
     2010-2016 = '2010-2016';
+  value $construction_status
+    '1. Planning' = 'In planning'
+    '2. Under Construction' = 'Under construction'
+    '3. Construction Complete/Lottery Pending',
+    '4. Construction Complete/Lottery Held',
+    '5. Subsequent Lottery Pending' = 'Construction completed';
 run;
 
 proc tabulate data = iz missing format=comma10.0;
@@ -175,25 +206,37 @@ class bedrooms construction_status ward2012 ami tenure /preloadfmt;
 table 
   (all='Total IZ units' tenure), 
   (all='Total' construction_status=' '), 
-  N='IZ Units by AMI and Bedroom Size' * (all='Total' ami=' ')*bedrooms=' ' 
-  / printmiss;
+  N=' ' * (all='Total' ami=' ')*bedrooms=' ' 
+  / printmiss condense;
 table 
   (all='Total IZ units' tenure), 
   (all='Total' Ward2012=' '), 
-  N='IZ Units by AMI and Bedroom Size' * (all='Total' ami=' ')*bedrooms=' ' 
+  N=' ' * (all='Total' ami=' ')*bedrooms=' ' 
   / printmiss;
-format bedrooms bedrooms3p. tenure ami $blankns.;
+format bedrooms bedrooms3p. construction_status $construction_status. tenure ami $blankns.;
 run;
+
+title2 '** LIHTC **';
 
 proc tabulate data = lihtc missing format=comma10.0;
 where nonprog ^= 1 and not( missing( ward2012 ) );
-class ward2012 yr_pis;
-var n_:;
-table n='Projects' (n_:)*sum=' ', (all='DC' ward2012='Units in LIHTC Projects');
-table n='Projects' (n_:)*sum=' ', (all='DC' yr_pis='Units in LIHTC Projects by Year Placed in Service');
+class ward2012 yr_pis /preloadfmt;
+var n_: li_unitr units_w_brsize;
+table n='Projects' (n_unitsr li_unitr units_w_brsize n_0br n_1br n_2br n_3br n_4br)*sum=' ', (all='DC' ward2012=' ') / printmiss;
+table n='Projects' (n_unitsr li_unitr units_w_brsize n_0br n_1br n_2br n_3br n_4br)*sum=' ', (all='DC' yr_pis='Year Placed in Service');
 format yr_pis yr_pis.;
+label
+  n_unitsr = 'Total units'
+  li_unitr = 'Low-income units'
+  units_w_brsize = 'Units w/bedroom size'
+  n_0br = '\~ No bedrooms' 
+  n_1br = '\~ 1 bedroom' 
+  n_2br = '\~ 2 bedrooms' 
+  n_3br = '\~ 3 bedrooms' 
+  n_4br = '\~ 4+ bedrooms';
 run;
 
+title2 '** Other subsidies **';
 
 proc tabulate data = pres_large_unit missing format=comma10.0;
 where pubhous = . and sec8 = . and lihtc = .;
@@ -201,8 +244,10 @@ class ward2012;
 var Proj_Units_Tot Proj_Units_Assist_Max Proj_Units_Assist_Min;
 table 
   n='Projects' (Proj_Units_Tot Proj_Units_Assist_Max Proj_Units_Assist_Min)*sum=' ', 
-  all='DC' ward2012 = 'Other Housing Units in Assisted Projects';
+  all='DC' ward2012 = ' ';
 run;
 
 ods listing;
 ods rtf close;
+
+title2;
