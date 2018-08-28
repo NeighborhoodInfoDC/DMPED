@@ -22,7 +22,7 @@
 data lihtc;
 	set HUD.lihtc_2016_dc /*(rename =(_notes_ = notes))*/;
 	if proj_add = "TWINING TER" then proj_add = "2505 N St. SE";
-	units_w_brsize = sum( n_0br, n_1br, n_2br, n_4br, 0 );
+	units_w_brsize = sum( n_0br, n_1br, n_2br, n_3br, n_4br, 0 );
 run;
 
   data IZ_units_06_2018;
