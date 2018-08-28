@@ -25,7 +25,7 @@ data lihtc;
 run;
 
   data IZ_units_06_2018;
- infile "L:\Libraries\DMPED\Raw\Housing Pipeline\IZ_units_06_2018.csv" dsd stopover lrecl=2000 firstobs=2;
+ infile "L:\Libraries\DMPED\Raw\Housing Pipeline\IZ_Units_06-18-2018.csv" dsd stopover lrecl=2000 firstobs=2;
 input
 	Project :$80.
 	Construction_Status :$40.
