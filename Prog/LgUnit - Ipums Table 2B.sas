@@ -378,7 +378,7 @@ data pretables;
 	if school = 2 then isstudent = 1;
 		else isstudent = 0;
 
-	numstudents = isstudent;
+	if isadult=1 then numstudents = isstudent;
 
 	/*adult but not senior*/
 	if 18<=age<65 then nonsenioradult = 1;
