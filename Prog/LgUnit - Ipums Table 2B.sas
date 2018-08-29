@@ -208,14 +208,16 @@ run;
 
 
 data pretables;
-	set &indata.
+	set &indata. (where=(gq in (1,2)))
 		vacdata;
 
 	 /* Flag large units*/
 
 	%if &largedef. = PERSON %then %do;
-	if numprec >= 4 then largehh = 1;
+	if vac ^= 1 then do;
+		if numprec >= 4 then largehh = 1;
 		else largehh = 0;
+	end;
 	%end;
 
 	%else %if &largedef. = BEDROOMS %then %do;
@@ -355,9 +357,6 @@ data pretables;
 
 	if cost_burden >= .5 then severe_burdened = 1;
 	  else if 0 <= cost_burden < .5 then severe_burdened = 0;
-
-	 /*Keep only HHs*/
-	if gq in (1,2);
 
 	/* All households */
 	allhh = 1;
@@ -1032,10 +1031,10 @@ proc transpose data = table2b_all out = table2b_csv_all;
 run;
 
 
-proc export data = table2b_csv_all
+/*proc export data = table2b_csv_all
 	outfile = "&_dcdata_default_path.\DMPED\Prog\table2b_wd12_&yrs._&tenure._&largedef..csv"
 	dbms = csv replace;
-run;
+run;*/
 
 
 %mend ipums_lgunit;
