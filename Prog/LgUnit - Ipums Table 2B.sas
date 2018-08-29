@@ -838,13 +838,9 @@ data pretables_collapse;
 	if overunder = 3 then overhoused = 1;
 		else overhoused = 0;
 
+	/* Only calculate large HH for bedroom definition */
 	if vac = 1 then do;
-		%if &largedef. = PERSON %then %do;
-		if numprec >= 4 then largehh = 1;
-			else largehh = 0;
-		%end;
-
-		%else %if &largedef. = BEDROOMS %then %do;
+		%if &largedef. = BEDROOMS %then %do;
 		if bedrooms >= 4 then largehh = 1;
 			else largehh = 0;
 		%end;
@@ -1031,10 +1027,10 @@ proc transpose data = table2b_all out = table2b_csv_all;
 run;
 
 
-/*proc export data = table2b_csv_all
+proc export data = table2b_csv_all
 	outfile = "&_dcdata_default_path.\DMPED\Prog\table2b_wd12_&yrs._&tenure._&largedef..csv"
 	dbms = csv replace;
-run;*/
+run;
 
 
 %mend ipums_lgunit;
