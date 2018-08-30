@@ -544,6 +544,12 @@ proc transpose data=xACS_2012_16 out=table2012_16_&geo.;
 
 	numowneroccupiedhu_2012_16 numownocchu0bd_2012_16 numownocchu1bd_2012_16 numownocchu2bd_2012_16 numownocchu3bd_2012_16
 	numownocchu4bd_2012_16 numownocchu5plusbd_2012_16 pct3brown_2012_16
+
+	NumOwnOcc1person_2012_16 NumOwnOcc2person_2012_16 NumOwnOcc3person_2012_16 NumOwnOcc4person_2012_16 NumOwnOcc5person_2012_16
+	NumOwnOcc6person_2012_16 NumOwnOcc7plusperson_2012_16
+
+	NumRentOcc1person_2012_16 NumRentOcc2person_2012_16 NumRentOcc3person_2012_16 NumRentOcc4person_2012_16 NumRentOcc5person_2012_16
+	NumRentOcc6person_2012_16 NumRentOcc7plusperson_2012_16
 	 	;
 	id &geo.; 
 run; 
@@ -567,6 +573,15 @@ proc transpose data=xACS_2012_16 out=table2012_16_fam_&geo.;
 	id &geo.; 
 run; 
 
+proc transpose data=xACS_2012_16 out=table2012_16_ten_&geo.;
+	var NumOwnOcc1person_2012_16 NumOwnOcc2person_2012_16 NumOwnOcc3person_2012_16 NumOwnOcc4person_2012_16 NumOwnOcc5person_2012_16
+	NumOwnOcc6person_2012_16 NumOwnOcc7plusperson_2012_16
+
+	NumRentOcc1person_2012_16 NumRentOcc2person_2012_16 NumRentOcc3person_2012_16 NumRentOcc4person_2012_16 NumRentOcc5person_2012_16
+	NumRentOcc6person_2012_16 NumRentOcc7plusperson_2012_16
+	 	;
+	id &geo.; 
+run; 
 
 /* Combined files for change variables */
 data allyear_&geo.;
@@ -614,13 +629,13 @@ run;
 
 data table_city_stack;
 	set table1980_city table1990_city table2000_city Table2006_10_city Table2012_16_city Table_ch_city 
-		Table2006_10_rent_city Table2012_16_rent_city table2006_10_fam_city table2012_16_fam_city;
+		Table2006_10_rent_city Table2012_16_rent_city table2006_10_fam_city table2012_16_fam_city table2012_16_ten_city;
 	SortNo + 1;
 run;
 
 data table_ward2012_stack;
 	set table1980_ward2012 table1990_ward2012 table2000_ward2012 Table2006_10_ward2012 Table2012_16_ward2012 Table_ch_ward2012 
-		Table2006_10_rent_ward2012 Table2012_16_rent_ward2012 table2006_10_fam_ward2012 table2012_16_fam_ward2012;
+		Table2006_10_rent_ward2012 Table2012_16_rent_ward2012 table2006_10_fam_ward2012 table2012_16_fam_ward2012 table2012_16_ten_ward2012;
 	SortNo + 1;
 run;
 
