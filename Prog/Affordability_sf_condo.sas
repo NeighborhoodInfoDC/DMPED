@@ -36,7 +36,7 @@ proc contents data= Sales_who_owns_SF_Condo_clean; run;
 proc sort data=Sales_who_owns_SF_Condo_clean;
 by ssl;
 run;
-proc sort data= MAR.address_ssl_xref out = address_ssl_xref;
+proc sort data= MAR.address_ssl_xref nodupkey out = address_ssl_xref;
 by ssl;
 run;
 data merge_who_owns_SF_Condo_clean;

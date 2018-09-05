@@ -27,7 +27,7 @@ proc sort data= DMPED.SFCondo_year_2017 out = SFCondo_year_2017;
 by ssl;
 run;
 
-proc sort data= MAR.address_ssl_xref out = address_ssl_xref;
+proc sort data= MAR.address_ssl_xref nodupkey out = address_ssl_xref;
 by ssl;
 run;
 
@@ -79,7 +79,7 @@ run;
 proc sort data=merge_SFCondo_Wards;
 by city refyear;
 run;
-proc summary data=merge_SFCondo_Wards (where=(LargeUnit=1));
+proc summary data=merge_SFCondo_Wards (where=(LargeUnit=1 and owner_occ_sale=0));
 	by city refyear;
 	var total govtown corporations cdcNFP otherind school foreign ownercat_denom renter Owner_occ_sale owner_occ_sale_denom
 		senior BldgAgeGT2000 condo singlefamily;
@@ -89,7 +89,7 @@ run;
 proc sort data=merge_SFCondo_Wards;
 by ward2012 refyear;
 run;
-proc summary data=merge_SFCondo_Wards(where=(LargeUnit=1));
+proc summary data=merge_SFCondo_Wards(where=(LargeUnit=1 and owner_occ_sale=0));
 	by ward2012 refyear;
 	var total govtown corporations cdcNFP otherind school foreign ownercat_denom renter Owner_occ_sale owner_occ_sale_denom 
 		senior BldgAgeGT2000 condo singlefamily;

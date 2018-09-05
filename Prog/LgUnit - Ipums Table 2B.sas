@@ -147,6 +147,16 @@ data vacdata;
 			else if rent > 0 then vac = 1;
 		if vac = 1;
 	%end;
+
+	%else %if &ten. = ALL %then %do;
+		if vacancy in (1,2) then vac = 1;
+			else if rent > 0 or rent > 0 then vac = 1;
+		if vac = 1;
+	%end;
+run;
+
+proc sort data = vacdata; 
+	by serial; 
 run;
 
 data hhwts_pre;
@@ -163,11 +173,11 @@ data hhwts_pre;
 
 
 	%if &ten. = OWN %then %do;
-		if ownershp = 1;
+		if ownershp = 1 or vac = 1;
 	%end;
 
 	%else %if &ten. = RENT %then %do;
-		if ownershp = 2;
+		if ownershp = 2 or vac = 1;
 	%end;
 run;
 
@@ -198,14 +208,16 @@ run;
 
 
 data pretables;
-	set &indata.
+	set &indata. (where=(gq in (1,2)))
 		vacdata;
 
 	 /* Flag large units*/
 
 	%if &largedef. = PERSON %then %do;
-	if numprec >= 4 then largehh = 1;
+	if vac ^= 1 then do;
+		if numprec >= 4 then largehh = 1;
 		else largehh = 0;
+	end;
 	%end;
 
 	%else %if &largedef. = BEDROOMS %then %do;
@@ -240,23 +252,23 @@ data pretables;
 
 	if (numprec = 1 and hhincome <= 16950) or (numprec=2 and hhincome <= 19350) or  (numprec=3 and hhincome <= 21750)
        or (numprec=4 and hhincome <= 24200) or (numprec=5 and hhincome <= 26100) or (numprec=6 and hhincome <= 28050) 
-       or (numprec=7 and hhincome <= 30000) or (numprec=8 and hhincome <= 31900) then hud_inc=1;                                                                               
+       or (numprec=7 and hhincome <= 30000) or (numprec>=8 and hhincome <= 31900) then hud_inc=1;                                                                               
 
 	else if (numprec = 1 and hhincome <= 28200) or (numprec=2 and hhincome <= 32250  ) or  (numprec=3 and hhincome <= 36250)
        or (numprec=4 and hhincome <= 40300) or (numprec=5 and hhincome <= 43500) or (numprec=6 and hhincome <= 46750 ) 
-       or (numprec=7 and hhincome <= 49950) or (numprec=8 and hhincome <= 53200) then hud_inc=2;                                                                               
+       or (numprec=7 and hhincome <= 49950) or (numprec>=8 and hhincome <= 53200) then hud_inc=2;                                                                               
 	    
  	else if (numprec = 1 and hhincome <= 35150) or (numprec=2 and hhincome <= 40150 ) or  (numprec=3 and hhincome <= 45200)
        or (numprec=4 and hhincome <= 50200) or (numprec=5 and hhincome <= 54200) or (numprec=6 and hhincome <= 58250) 
-       or (numprec=7 and hhincome <= 62250) or (numprec=8 and hhincome <= 66250) then hud_inc=3;    
+       or (numprec=7 and hhincome <= 62250) or (numprec>=8 and hhincome <= 66250) then hud_inc=3;    
 
  	else if (numprec = 1 and hhincome <= 53960) or (numprec=2 and hhincome <= 61660 ) or  (numprec=3 and hhincome <= 69420)
        or (numprec=4 and hhincome <= 77080) or (numprec=5 and hhincome <= 83240) or (numprec=6 and hhincome <= 89460) 
-       or (numprec=7 and hhincome <= 95580) or (numprec=8 and hhincome <= 101760) then hud_inc=4;    
+       or (numprec=7 and hhincome <= 95580) or (numprec>=8 and hhincome <= 101760) then hud_inc=4;    
 
 	else if (numprec = 1 and hhincome > 53960) or (numprec=2 and hhincome > 61660 ) or  (numprec=3 and hhincome > 69420)
        or (numprec=4 and hhincome > 77080) or (numprec=5 and hhincome > 83240) or (numprec=6 and hhincome > 89460) 
-       or (numprec=7 and hhincome > 95580) or (numprec=8 and hhincome > 101760) then hud_inc=5;
+       or (numprec=7 and hhincome > 95580) or (numprec>=8 and hhincome > 101760) then hud_inc=5;
 
 	%end;
 
@@ -295,23 +307,23 @@ data pretables;
     /* income category from DC Housing Production Trust Fund */
 	if (numprec = 1 and hhincome_i <= 108600*0.3*0.7) or (numprec=2 and hhincome_i <= 108600*0.3*0.8) or  (numprec=3 and hhincome_i <= 108600*0.3*0.9)
        or (numprec=4 and hhincome_i <= 108600*0.3) or (numprec=5 and hhincome_i <= 108600*0.3*1.1) or (numprec=6 and hhincome_i <= 108600*0.3*1.2 ) 
-       or (numprec=7 and hhincome_i <= 108600*0.3*1.3) or (numprec=8 and hhincome_i <= 108600*0.3*1.4) then dc_inc=1;                                                                               
+       or (numprec=7 and hhincome_i <= 108600*0.3*1.3) or (numprec>=8 and hhincome_i <= 108600*0.3*1.4) then dc_inc=1;                                                                               
 
 	else if (numprec = 1 and hhincome_i <= 108600*0.5*0.7) or (numprec=2 and hhincome_i <= 108600*0.5*0.8) or  (numprec=3 and hhincome_i <= 108600*0.5*0.9)
        or (numprec=4 and hhincome_i <= 108600*0.5) or (numprec=5 and hhincome_i <= 108600*0.5*1.1) or (numprec=6 and hhincome_i <= 108600*0.5*1.2 ) 
-       or (numprec=7 and hhincome_i <= 108600*0.5*1.3) or (numprec=8 and hhincome_i <= 108600*0.5*1.4) then dc_inc=2;                                                                               
+       or (numprec=7 and hhincome_i <= 108600*0.5*1.3) or (numprec>=8 and hhincome_i <= 108600*0.5*1.4) then dc_inc=2;                                                                               
 	    
 	else if (numprec = 1 and hhincome_i <= 108600*0.8*0.7) or (numprec=2 and hhincome_i <= 108600*0.8*0.8) or  (numprec=3 and hhincome_i <= 108600*0.8*0.9)
        or (numprec=4 and hhincome_i <= 108600*0.8) or (numprec=5 and hhincome_i <= 108600*0.8*1.1) or (numprec=6 and hhincome_i <= 108600*0.8*1.2 ) 
-       or (numprec=7 and hhincome_i <= 108600*0.8*1.3) or (numprec=8 and hhincome_i <= 108600*0.8*1.4) then dc_inc=3;       
+       or (numprec=7 and hhincome_i <= 108600*0.8*1.3) or (numprec>=8 and hhincome_i <= 108600*0.8*1.4) then dc_inc=3;       
 
 	else if (numprec = 1 and hhincome_i <= 108600*1.2*0.7) or (numprec=2 and hhincome_i <= 108600*1.2*0.8) or  (numprec=3 and hhincome_i <= 108600*1.2*0.9)
        or (numprec=4 and hhincome_i <= 108600*1.2) or (numprec=5 and hhincome_i <= 108600*1.2*1.1) or (numprec=6 and hhincome_i <= 108600*1.2*1.2 ) 
-       or (numprec=7 and hhincome_i <= 108600*1.2*1.3) or (numprec=8 and hhincome_i <= 108600*1.2*1.4) then dc_inc=4;   
+       or (numprec=7 and hhincome_i <= 108600*1.2*1.3) or (numprec>=8 and hhincome_i <= 108600*1.2*1.4) then dc_inc=4;   
 
 	else if (numprec = 1 and hhincome_i > 108600*1.2*0.7) or (numprec=2 and hhincome_i > 108600*1.2*0.8) or  (numprec=3 and hhincome_i > 108600*1.2*0.9)
        or (numprec=4 and hhincome_i > 108600*1.2) or (numprec=5 and hhincome_i > 108600*1.2*1.1) or (numprec=6 and hhincome_i > 108600*1.2*1.2 ) 
-       or (numprec=7 and hhincome_i > 108600*1.2*1.3) or (numprec=8 and hhincome_i > 108600*1.2*1.4) then dc_inc=5;
+       or (numprec=7 and hhincome_i > 108600*1.2*1.3) or (numprec>=8 and hhincome_i > 108600*1.2*1.4) then dc_inc=5;
 
 	if dc_inc = 1 then dcincome30 =1;
 		else dcincome30 =0;
@@ -337,17 +349,14 @@ data pretables;
 		else if hhincome > 0 then cost_burden = ( 12 * housing_costs ) / hhincome;
 		else cost_burden = 1;
 
-	if cost_burden <= .3 then not_burdened = 1;
+	if cost_burden < .3 then not_burdened = 1;
 		else not_burdened = 0;
 
-	if cost_burden > .3 then cost_burdened = 1; 
+	if cost_burden >= .3 then cost_burdened = 1; 
 	  else if 0 <= cost_burden < .3 then cost_burdened = 0;
 
-	if cost_burden > .5 then severe_burdened = 1;
+	if cost_burden >= .5 then severe_burdened = 1;
 	  else if 0 <= cost_burden < .5 then severe_burdened = 0;
-
-	 /*Keep only HHs*/
-	if gq in (1,2);
 
 	/* All households */
 	allhh = 1;
@@ -368,7 +377,7 @@ data pretables;
 	if school = 2 then isstudent = 1;
 		else isstudent = 0;
 
-	numstudents = isstudent;
+	if isadult=1 then numstudents = isstudent;
 
 	/*adult but not senior*/
 	if 18<=age<65 then nonsenioradult = 1;
@@ -760,7 +769,7 @@ proc sort data = pretables_kidrooms; by serial; run;
 
 
 data pretables_collapse;
-	merge pretables_s  pretables_m pretables_kidrooms hhwts;
+	merge pretables_s  pretables_m pretables_kidrooms vacdata hhwts;
 	by serial;
 	if serial ^= .;
 
@@ -829,25 +838,23 @@ data pretables_collapse;
 	if overunder = 3 then overhoused = 1;
 		else overhoused = 0;
 
+	/* Only calculate large HH for bedroom definition */
+	if vac = 1 then do;
+		%if &largedef. = BEDROOMS %then %do;
+		if bedrooms >= 4 then largehh = 1;
+			else largehh = 0;
+		%end;
+	end;
 
-run;
-
-
-/* Add vacancy data */
-data pretables_withvac;
-	set pretables_collapse 
-		vacdata ;
 	if vacancy ^= . then vacant = 1;
 		else vacant = 0;
 
 	allhh_withvac = 1;
 
-
-
 run;
 
 
-proc summary data = pretables_withvac;
+proc summary data = pretables_collapse;
 	class ward2012 largehh;
 	var &cvars. multigen grouphouse studenthouse righthoused overhoused underhoused 
 		 vacant allhh_withvac;
@@ -1010,6 +1017,9 @@ proc transpose data = table2b_all out = table2b_csv_all;
 	/* Year built */
 	pct_BuiltBefore1940 pct_Built1940to1959 pct_Built1960to1979 pct_Built1980to1999 pct_Built2000After
 
+	/* Vacancy */
+	pct_vacant
+
 	;
 
 	id largehh ward2012;
@@ -1037,3 +1047,7 @@ run;
 %mend output_lg;
 %output_lg (person);
 %output_lg (bedrooms);
+
+
+
+/* End of program */
