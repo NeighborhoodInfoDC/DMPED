@@ -25,6 +25,7 @@ Homeownership Affordability in Urban America: Past and Future;
 %DCData_lib( ACS );
 %DCData_lib( police );
 %DCData_lib( vital );
+%DCData_lib( census ); 
 
 %let _years = 2012_16;
 
@@ -322,6 +323,12 @@ data calculate_pct;
           personspovertydefined_&_years.
 ;
 
+run;
+
+data census2010;
+ 	set census.Census_sf1_2010_dc_ph; 
+		keep = geo2010 areasqmi ;
+		
 run;
 
 data ACScharacteristics;
