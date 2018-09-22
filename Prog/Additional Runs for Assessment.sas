@@ -1,16 +1,16 @@
 /**************************************************************************
- Program:  LgUnit - Ipums Table 2B.sas
+ Program:  Additional Runs for Assessment.sas
  Library:  DMPED
  Project:  Large Units
- Author:   Yipeng and Rob
- Created:  06/14/2018
+ Author:   L.Hendey
+ Created:  9/22/2018
  Version:  SAS 9.4
  Environment:  Local Windows session (desktop)
  
  Description:  Use ipums data to calculate indicators for Large Units 
-			   table 2B. 
+			   to respond to questions from Yari. 
 
- Modifications: 09/22/18 LH Removed ipums_lgunit macro to seperate program.
+ Modifications:
 **************************************************************************/
 
 %include "L:\SAS\Inc\StdLocal.sas";
@@ -74,9 +74,9 @@ proc summary data=Ratio;
 run;
 
 proc sql noprint;
-select Ratio_rentgrs_rent_2012_16
-into :Ratio_rentgrs_rent_2012_16 separated by " "
-from Ratio_rentgrs_2012_16;
+	select Ratio_rentgrs_rent_2012_16
+	into :Ratio_rentgrs_rent_2012_16 separated by " "
+	from Ratio_rentgrs_2012_16;
 quit;
 
 %put &Ratio_rentgrs_rent_2012_16;
@@ -97,9 +97,9 @@ proc summary data=Ratio2000;
 run;
 
 proc sql noprint;
-select Ratio_rentgrs_rent_2000
-into :Ratio_rentgrs_rent_2000 separated by " "
-from Ratio_rentgrs_2000;
+	select Ratio_rentgrs_rent_2000
+	into :Ratio_rentgrs_rent_2000 separated by " "
+	from Ratio_rentgrs_2000;
 quit;
 
 %put &Ratio_rentgrs_rent_2000;
@@ -115,19 +115,90 @@ data Ipums_2000_dc_new;
 	by serial pernum;
 run;
 
-%macro output_lg (define);
-	%ipums_lgunit (all,2000,&define.);
-	%ipums_lgunit (own,2000,&define.);
-	%ipums_lgunit (rent,2000,&define.);
 
-	%ipums_lgunit (all,ACS,&define.);
-	%ipums_lgunit (own,ACS,&define.);
-	%ipums_lgunit (rent,ACS,&define.);
+%ipums_lgunit (all,ACS,person);
 
-%mend output_lg;
-%output_lg (person);
-%output_lg (bedrooms);
+/*Yari Questions in Part 2*/
+	data foryari;
+		set pretables_collapse;
 
+	incomeY=.;
+	if hh_inc ne . then do;
+	if hh_inc < 20000 then incomeY=1;
+	if 20000 <= hh_inc < 30000 then incomeY=2;
+	if 30000 <= hh_inc < 40000 then incomeY=3; 
+	if 40000 <= hh_inc < 60000 then incomeY=4;
+	if hh_inc >= 60000 then incomeY=5; 
+	end; 
 
+	run; 
+	proc freq data=foryari;
+	where largehh=1 and renter = 1;
+	tables incomeY;
+	weight whhwt;
+	run; 
 
-/* End of program */
+/* Yari questions in Part 4*/
+	proc freq data=pretables_collapse;
+	where largehh=1 and renter = 1;
+	tables cost_burdened*dcincome30;
+	weight whhwt;
+	run;
+	proc freq data=pretables_collapse;
+	where largehh=1 and renter = 1;
+	tables cost_burdened*dcincome50;
+	weight whhwt;
+	run;
+	proc sort data=pretables_collapse;
+	by ward2012;
+	proc freq data=pretables_collapse;
+	by ward2012;
+	where largehh=1 and renter = 1 ;
+	tables cost_burdened*dcincome30;
+	weight whhwt;
+	run;
+	proc freq data=pretables_collapse;
+	by ward2012;
+	where largehh=1 and renter = 1 ;
+	tables cost_burdened*dcincome50;
+	weight whhwt;
+	run;
+
+	proc freq data=pretables_collapse;
+	where largehh=1 and renter = 1;
+	tables severe_burdened*dcincome30;
+	weight whhwt;
+	run;
+	proc freq data=pretables_collapse;
+	where largehh=1 and renter = 1;
+	tables severe_burdened*dcincome50;
+	weight whhwt;
+	run;
+	proc freq data=pretables_collapse;
+	where largehh=1 and renter = 1;
+	tables overcrowded*dcincome30;
+	weight whhwt;
+	run;
+	proc freq data=pretables_collapse;
+	where largehh=1 and renter = 1;
+	tables overcrowded*dcincome50;
+	weight whhwt;
+	run;
+	proc freq data=pretables_collapse;
+	where largehh=1 and renter = 1;
+	tables overcrowded*dcincome80;
+	weight whhwt;
+	run;
+
+	proc freq data=pretables_collapse;
+	where largehh=1 and renter = 1;
+	tables overcrowded*dcincome120;
+	weight whhwt;
+	run;
+
+	proc freq data=pretables_collapse;
+	where largehh=1 and renter = 1;
+	tables overcrowded*dcincome120plus;
+	weight whhwt;
+	run;
+
