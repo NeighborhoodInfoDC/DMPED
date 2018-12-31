@@ -1,6 +1,6 @@
 
 /**************************************************************************
- Program:  SFCondo_large_units_annual.sas
+ Program:  SFCondo_large_units_annual_parcelbase.sas
  Library:  DMPED
  Project:  DMPED large units
  Author:   L. Hendey
@@ -12,7 +12,7 @@
  
  Modifications: 
  07/20/18 LH Added school and foreign. 
- 12/31/18 LH Fixed error in start date. 
+ 12/20/18 LH Modified to refer file using parcel_base and use AYB as earliest date.
 
 **************************************************************************/
 
@@ -23,11 +23,11 @@
 %DCData_lib( DMPED )
 
 %let revisions=New file.;
-%let label="DC Sales SF/Condo parcels with CAMA (2018_05) and property owner types";
+%let label="DC Sales SF/Condo parcels with CAMA (2018_05) and property owner types using AYB";
 
 
 data getnext0; 
-	set dmped_r.Sales_who_owns_SF_Condo;
+	set dmped_r.Sales_who_owns_SF_Condo_withbase;
 rename saledate=saledate_orig; 
 
 run;
@@ -60,6 +60,16 @@ data getnext4;
 merge getnext0 (in=a rename=(saledate_orig=saledate)) getnext3 (keep=ssl sale_num next_saledate);
 if a;
 by ssl sale_num;
+
+month=1;
+day=1;
+
+datebuilt=mdy(month,day,AYB);
+format datebuilt mmddyy10.;
+
+if datebuilt=. then do; datebuilt=mdy(month,day,EYB); end;
+
+
 run;
 
 
@@ -69,8 +79,9 @@ run;
 
     set getnext4 (drop=BldgAgeGT2000);
   
-	if not( missing( saledate ) ) then start_dt = saledate; 
-	else if saledate in (.n .u) then start_dt=ownerpt_extractdat_first;
+	if not( missing( datebuilt ) ) then start_dt = datebuilt; 
+	else if not( missing (saledate) ) then then start_dt=saledate; 
+    else if saledate in (.n .u) then start_dt=ownerpt_extractdat_first;
 	
     if not( missing( next_saledate ) ) then end_dt = next_saledate;
 	else end_dt = ownerpt_extractdat_last;
@@ -185,7 +196,7 @@ run;
 
 %mend create_annual;
 
-%create_annual( out_ds=SFCondo_qtr_2017, unit=qtr, rpt_end_dt='31mar2018'd, label="Quarterly SF-Condo Parcels for Large Units Study", revisions=Fixed error in start date.)
+%create_annual( out_ds=SFCondo_qtr_2017_withbase, unit=qtr, rpt_end_dt='31mar2018'd, label="Quarterly SF-Condo Parcels for Large Units Study incorporating Parcel Base", revisions=New file.)
 
-%create_annual( out_ds=SFCondo_year_2017, unit=year, rpt_end_dt='31mar2018'd, label="Annual SF-Condo Parcels for Large Units Study", revisions=Fixed error in start date.)
+%create_annual( out_ds=SFCondo_year_2017_withbase, unit=year, rpt_end_dt='31mar2018'd, label="Annual SF-Condo Parcels for Large Units Study incorporating Parcel Base", revisions=New file.)
 
