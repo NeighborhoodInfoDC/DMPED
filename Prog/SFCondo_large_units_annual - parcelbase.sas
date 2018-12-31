@@ -71,7 +71,7 @@ if datebuilt=. then do; datebuilt=mdy(month,day,EYB); end;
 
 
 run;
-
+option spool;
 
 %macro create_annual( out_ds=, unit=, rpt_start_dt='01jan2000'd, rpt_end_dt=, label= , revisions= );
 
@@ -80,7 +80,7 @@ run;
     set getnext4 (drop=BldgAgeGT2000);
   
 	if not( missing( datebuilt ) ) then start_dt = datebuilt; 
-	else if not( missing (saledate) ) then then start_dt=saledate; 
+	else if not( missing( saledate ) ) then start_dt=saledate; 
     else if saledate in (.n .u) then start_dt=ownerpt_extractdat_first;
 	
     if not( missing( next_saledate ) ) then end_dt = next_saledate;
