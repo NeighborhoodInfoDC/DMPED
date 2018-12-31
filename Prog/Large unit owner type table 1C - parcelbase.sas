@@ -139,13 +139,13 @@ proc sort data=owner_category;
 by refyear;
 run;
 
-proc transpose data=owner_category out=owner_category;
+proc transpose data=owner_category out=owner_category1;
 var Pctgov Pctcorporations PctcdcNFP Pctotherind Pctschool Pctforeign pctownerocc pctrenterocc pctsenior bldgAgeLT2000 BldgAgeGT2000 pctBldgAgeGE2000 
 pctbldgAgeLT2000 Pctcondo PctSinglefamily total condo singlefamily;
 by refyear;
 id ward2012;run;
 	
-proc export data=owner_category
+proc export data=owner_category1
 	outfile="&_dcdata_default_path\DMPED\Prog\sf_condo_owner_category_122018.csv"
 	dbms=csv replace;
 run;
@@ -155,6 +155,8 @@ run;
 data age;
 set merge_SFCondo_Wards;
 if AYB<2000 then before2000 = 1; else before2000=0;
+
+CITY="1";
 
 run;
 proc sort data=age;
@@ -188,7 +190,7 @@ proc sort data=BuildingAge;
 by before2000 refyear;
 run;
 
-proc transpose data=BuildingAge (where=(refyear=2018)) out=BuildingAge_transpose;
+proc transpose data=BuildingAge (where=(refyear=2018 & WARD2012 ~=" ")) out=BuildingAge_transpose;
 var total LargeUnit;
 by before2000 refyear;
 id ward2012;
@@ -206,6 +208,8 @@ set merge_SFCondo_Wards;
 
 if largeunit=1 and condo=1 then largecondo=1;
 if largeunit=1 and singlefamily=1 then largesinglefamily=1; 
+CITY="1";
+
 run;
 
 proc sort data=largeunits;
