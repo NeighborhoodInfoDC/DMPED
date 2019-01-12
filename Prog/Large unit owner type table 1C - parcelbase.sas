@@ -81,6 +81,8 @@ run;
 proc sort data=merge_SFCondo_Wards;
 by city refyear;
 run;
+
+/*renters only*/
 proc summary data=merge_SFCondo_Wards (where=(LargeUnit=1 and owner_occ_sale=0));
 	by city refyear;
 	var total govtown corporations cdcNFP otherind school foreign ownercat_denom renter Owner_occ_sale owner_occ_sale_denom
@@ -99,7 +101,7 @@ proc summary data=merge_SFCondo_Wards(where=(LargeUnit=1 and owner_occ_sale=0));
 	format city $CITY16.;
 run;
 
-data owner_category (label="percent of large units by owner category" drop=_type_ _freq_);
+data owner_category (label="percent of large units by owner category for renters" drop=_type_ _freq_);
 
 	set city_level ward_level; 
 
@@ -146,10 +148,82 @@ by refyear;
 id ward2012;run;
 	
 proc export data=owner_category1
-	outfile="&_dcdata_default_path\DMPED\Prog\sf_condo_owner_category_122018.csv"
+	outfile="&_dcdata_default_path\DMPED\Prog\sf_condo_owner_category_renters_011219.csv"
 	dbms=csv replace;
 run;
 
+/*all*/
+proc sort data=merge_SFCondo_Wards;
+by city refyear;
+run;
+proc summary data=merge_SFCondo_Wards (where=(LargeUnit=1));
+	by city refyear;
+	var total govtown corporations cdcNFP otherind school foreign ownercat_denom renter Owner_occ_sale owner_occ_sale_denom
+		senior BldgAgeGT2000 condo singlefamily;
+	output	out=City_level_all	sum= ;
+	format city $CITY16.;
+run;
+proc sort data=merge_SFCondo_Wards;
+by ward2012 refyear;
+run;
+proc summary data=merge_SFCondo_Wards(where=(LargeUnit=1 ));
+	by ward2012 refyear;
+	var total govtown corporations cdcNFP otherind school foreign ownercat_denom renter Owner_occ_sale owner_occ_sale_denom 
+		senior BldgAgeGT2000 condo singlefamily;
+	output	out=ward_level_all	sum= ;
+	format city $CITY16.;
+run;
+
+data owner_category_all (label="percent of large units by owner category" drop=_type_ _freq_);
+
+	set city_level_all ward_level_all; 
+
+	Pctgov=govtown/ownercat_denom*100; 
+	Pctcorporations=corporations/ownercat_denom*100; 
+    PctcdcNFP=cdcNFP/ownercat_denom*100; 
+	Pctotherind=otherind/ownercat_denom*100; 
+	Pctschool=school/ownercat_denom*100;
+	Pctforeign=foreign/ownercat_denom*100;
+	pctownerocc= Owner_occ_sale/owner_occ_sale_denom*100; 
+	pctrenterocc= renter/owner_occ_sale_denom*100; 
+	pctsenior= senior/Owner_occ_sale*100; 
+	pctBldgAgeGE2000=BldgAgeGT2000 / total*100; 
+	bldgAgeLT2000=total-BldgAgeGT2000;
+	pctbldgAgeLT2000=bldgAgeLT2000/total*100; 
+	Pctcondo=condo/total*100;
+	PctSinglefamily=singlefamily/total*100; 
+
+	if city = "1" then Ward2012 = "0";
+
+	label Pctgov="Pct. of large units owned by government"
+	      Pctcorporations="Pct. of large units owned by taxable corporations"
+          PctcdcNFP="Pct. of large units owned by Church, community, development corporation or other non profit"
+          Pctotherind="Pct. of large units owned Other individual (not owner occupied)"
+          Pctschool="Pct. of large units owned by private university, college or school"
+          Pctforeign="Pct. of large units owned by foreign government"
+		  pctBldgAgeGE2000="Pct. of large units built 2000 or later"
+		  pctsenior="Pct. owner-occupied large units with senior exemption"
+		  condo="Number of large condominiums"
+		  total="Number of large SF & condominiums"
+		  singlefamily="Number of large single family homes"
+		  bldgAgeLT2000="Number of SF & condos built before 2000"
+		  BldgAgeGT2000="Number of SF & condos built 2000 or later"
+			;
+run;
+proc sort data=owner_category_all;
+by refyear;
+run;
+
+proc transpose data=owner_category_all out=owner_category1_all;
+var Pctgov Pctcorporations PctcdcNFP Pctotherind Pctschool Pctforeign pctownerocc pctrenterocc pctsenior bldgAgeLT2000 BldgAgeGT2000 pctBldgAgeGE2000 
+pctbldgAgeLT2000 Pctcondo PctSinglefamily total condo singlefamily;
+by refyear;
+id ward2012;run;
+	
+proc export data=owner_category1_all
+	outfile="&_dcdata_default_path\DMPED\Prog\sf_condo_owner_category_011219.csv"
+	dbms=csv replace;
+run;
 /* percent SF and condo with 3+ bedrooms by age of building 2017*/
 
 data age;
@@ -197,7 +271,7 @@ id ward2012;
 run;
 
 proc export data=BuildingAge
-	outfile="&_dcdata_default_path\DMPED\Prog\sf_condo_BuildingAge_122018.csv"
+	outfile="&_dcdata_default_path\DMPED\Prog\sf_condo_BuildingAge_011219.csv"
 	dbms=csv replace;
 run;
 /* percent of units with 3+ bedrooms by property type*/
@@ -253,7 +327,7 @@ id ward2012;
 run;
 
 proc export data=Pctlarge
-	outfile="&_dcdata_default_path\DMPED\Prog\sf_condo_pctlarge_all_122018.csv"
+	outfile="&_dcdata_default_path\DMPED\Prog\sf_condo_pctlarge_all_011219.csv"
 	dbms=csv replace;
 run;
 
