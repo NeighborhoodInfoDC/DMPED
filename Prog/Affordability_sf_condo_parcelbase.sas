@@ -13,7 +13,6 @@ Homeownership Affordability in Urban America: Past and Future;
  Modifications: 01/12/2019 LH Run with file that includes parcelbase
 **************************************************************************/
 
-
 %include "L:\SAS\Inc\StdLocal.sas";
 
 
