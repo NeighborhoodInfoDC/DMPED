@@ -22,12 +22,13 @@
 %DCData_lib( Realprop )
 %DCData_lib( DMPED )
 
-%let revisions=New file.;
-%let label="DC Sales SF/Condo parcels with CAMA (2018_05) and property owner types using AYB";
+%let revisions=Corrected code to reference ownerpt_extractdat_first.;
+%let label="DC Sales SF/Condo parcels with CAMA (2018_12) and property owner types";
 
 
 data getnext0; 
 	set dmped_r.Sales_who_owns_SF_Condo_withbase;
+	*set Sales_who_owns_SF_Condo1;
 rename saledate=saledate_orig; 
 
 run;
@@ -42,7 +43,7 @@ proc sql;
      quit;
   run;
 
-**sorting to removing additional sales if more than one after foreclosure;
+**sorting to removing additional sales if more than one ;
 proc sort data=getnext1 nodupkey out=getnext2;
 by ssl sale_num;
 run;
@@ -197,7 +198,7 @@ run;
 
 %mend create_annual;
 
-%create_annual( out_ds=SFCondo_qtr_2017_withbase, unit=qtr, rpt_end_dt='31mar2018'd, label="Quarterly SF-Condo Parcels for Large Units Study incorporating Parcel Base", revisions=New file.)
+%create_annual( out_ds=SFCondo_qtr_2017_withbase, unit=qtr, rpt_end_dt='31mar2018'd, label="Quarterly SF-Condo Parcels for Large Units Study incorporating Parcel Base", revisions=&revisions.)
 
-%create_annual( out_ds=SFCondo_year_2017_withbase, unit=year, rpt_end_dt='31mar2018'd, label="Annual SF-Condo Parcels for Large Units Study incorporating Parcel Base", revisions=New file.)
+%create_annual( out_ds=SFCondo_year_2017_withbase, unit=year, rpt_end_dt='31mar2018'd, label="Annual SF-Condo Parcels for Large Units Study incorporating Parcel Base", revisions=&revisions.)
 

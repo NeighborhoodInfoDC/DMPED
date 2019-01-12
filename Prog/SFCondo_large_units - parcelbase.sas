@@ -8,6 +8,8 @@
  Environment:  Local Windows session
  
  Description: Creates base file for SF Homes and Condos by merging sales, cama and who owns code.
+ 
+ Modification	01/2019 LH Added parcel base. 
 
 **************************************************************************/
 
@@ -17,13 +19,14 @@
 %DCData_lib( Realprop )
 %DCData_lib( DMPED )
 
-%let revisions=New file.;
-%let label="DC Sales SF/Condo parcels with CAMA (2018_05) and property owner types (with Parcel base)";
+%let revisions=Updated Cama and sales_master;
+%let label="DC Sales SF/Condo parcels with CAMA (2018_12) and property owner types (with Parcel base)";
 
 data merged;
     
-	merge realpr_r.sales_master (in=a drop= ui_proptype ownerpt_extractdat_first ownerpt_extractdat_last) realprop.cama_parcel (in=b drop=SALEDATE usecode sale_num landarea) 
-		   realpr_r.parcel_base (in=c keep= ui_proptype ssl ownerpt_extractdat_first ownerpt_extractdat_last); 
+	merge realpr_r.sales_master (in=a drop= ui_proptype ownerpt_extractdat_first ownerpt_extractdat_last) 
+		  realpr_r.cama_parcel  (in=b drop=SALEDATE usecode sale_num landarea) 
+		  realpr_r.parcel_base  (in=c keep= ui_proptype ssl ownerpt_extractdat_first ownerpt_extractdat_last); 
 	by ssl;
 
 	length source $15.;
@@ -41,18 +44,20 @@ data SF_Condo;
      set merged;
 	 where ui_proptype="10" or ui_proptype="11";
 run;
-proc freq data=sf_condo;
-tables source;
-run; 
-proc print data=sf_condo (obs=20);
-where source="sales";
-run;
-	*added check that sales not matching to cama file are not recent sales or not in sales master (those could be new?); 
+	proc freq data=sf_condo;
+	tables source;
+	run; 
+/*7779 sf & condo missing in CAMA data*/ 
+*added check that sales not matching to cama file are mostly not recent sales ; 
 	proc freq data=SF_condo;
 	where source="sales & base"; 
 	tables ownerpt_extractdat_last;
 	run;
 
+proc print data=SF_condo (obs=20);
+	where source="sales & base" and ownerpt_extractdat_last > '01jan2018'd;
+
+	run;
 %macro SF_Condo_who_owns( RegExpFile=Owner type codes reg expr.txt);
   %local MaxExp Outlib parcel_base_file_dtmf dtm dtmf;
    %let MaxExp     = 480000;  /** NOTE: This number should be larger than the number of rows in the above spreadsheet **/
@@ -71,11 +76,7 @@ run;
     put OwnerCat_re= RegExp=;
   run;
 
-  ** Add owner-occupied sale flag to Parcel records **;
-
- ** %create_own_occ( inlib=realprop, inds=parcel_base, outds=parcel_base_ownocc );
-
-  ** Match regular expressions against owner data file **;
+ ** Match regular expressions against owner data file **;
 
   data Sales_who_owns_SF_Condo (label="DC real property parcels - property owner types");
 
