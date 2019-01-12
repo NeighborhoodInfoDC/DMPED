@@ -1,5 +1,5 @@
 /**************************************************************************
-Program:  Affordability_sf_condo.sas
+Program:  Affordability_sf_condo_parcelbase.sas
  Library:  DMPED
  Project:  NeighborhoodInfo DC
  Author:   Yipeng Su
@@ -10,7 +10,7 @@ Program:  Affordability_sf_condo.sas
  Description: *Methodology for affordability adapted from Zhong Yi Tong paper 
 http://content.knowledgeplex.org/kp2/cache/documents/22736.pdf
 Homeownership Affordability in Urban America: Past and Future;
- Modifications: 
+ Modifications: 01/12/2019 LH Run with file that includes parcelbase
 **************************************************************************/
 
 
@@ -30,7 +30,8 @@ Homeownership Affordability in Urban America: Past and Future;
 %let _years = 2012_16;
 
 %Sales_pars();
-%Clean_sales( inds=DMPED.Sales_who_owns_SF_Condo, outds=Sales_who_owns_SF_Condo_clean) ;
+
+%Clean_sales( inds=dmped_r.sales_who_owns_sf_condo_withbase, outds=Sales_who_owns_SF_Condo_clean) ;
 
 proc contents data= Sales_who_owns_SF_Condo_clean; run;
 
@@ -274,7 +275,7 @@ proc sort data=sales_afford_SF_Condo_transpose;
 by _name_ saleyear;
 run; 
 proc export data=sales_afford_SF_Condo_transpose
-	outfile="&_dcdata_default_path\DMPED\Prog\sf_condo_tabs_aff.csv"
+	outfile="&_dcdata_default_path\DMPED\Prog\sf_condo_tabs_aff_01122019.csv"
 	dbms=csv replace;
 	run;
 
@@ -306,7 +307,7 @@ run;
 
 data affsfcondo;
 set tractsummary;
-if   PctAffordFirst_80AMI >=53.846154 then affsfcondo=1;
+if   PctAffordFirst_80AMI >=52.63158 then affsfcondo=1; *75th percentile;
 	     else affsfcondo=0;
 run;
 /*ACS data*/
@@ -442,6 +443,6 @@ id affsfcondo;
 run;
 
 proc export data=SFCondo_Concentrate1
-	outfile="&_dcdata_default_path\DMPED\Prog\neighborhood_sfcondo_afford.csv"
+	outfile="&_dcdata_default_path\DMPED\Prog\neighborhood_sfcondo_afford_01122019.csv"
 	dbms=csv replace;
 run;
