@@ -327,7 +327,7 @@ run;
 
 data census2010;
  	set census.Census_sf1_2010_dc_ph; 
-		keep = geo2010 areasqmi ;
+		keep  geo2010 areasqmi ;
 		
 run;
 
