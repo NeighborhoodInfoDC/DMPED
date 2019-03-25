@@ -103,7 +103,6 @@ data pres_large_unit_a;
 	by nlihc_id;
   if in1;
   if program ~= 'PUBHSNG' then pubhous = 0;
-  if inphusz and not pubhous then put nlihc_id= proj_name= (units:)(=);
 run;
 
 proc sort data = pres_large_unit_a;
@@ -111,7 +110,9 @@ proc sort data = pres_large_unit_a;
 run;
 
 data pres_large_unit;
-	merge pres_large_unit_a (in=in1) sec8_2018 (keep = contract_number sec8 br: assisted_units_count units_w_brsize);
+	merge 
+	  pres_large_unit_a (in=in1 rename=(units_w_brsize=units_w_brsize_ph)) 
+	  sec8_2018 (keep = contract_number sec8 br: assisted_units_count units_w_brsize rename=(units_w_brsize=units_w_brsize_s8));
 	by contract_number;
   if in1;
   
@@ -152,7 +153,7 @@ where pubhous = 1 and status = "A";
 class ward2012;
 var units:;
 table 
-  n='Projects' (unitstot units_w_brsize units0b units1b units2b units3b units4b units5b units6b)*sum=' ', 
+  n='Projects' (unitstot units_w_brsize_ph units0b units1b units2b units3b units4b units5b units6b)*sum=' ', 
   all='DC' ward2012 = " ";
 label
   units0b = '\~ No bedrooms'
@@ -163,7 +164,7 @@ label
   units5b = '\~ 5 bedrooms'
   units6b = '\~ 6+ bedrooms'
   unitstot = 'Total units'
-  units_w_brsize = 'Units w/bedroom size';
+  units_w_brsize_ph = 'Units w/bedroom size';
 run;
 
 title2 '** Multifamily Section 8 **';
@@ -171,9 +172,9 @@ title2 '** Multifamily Section 8 **';
 proc tabulate data = pres_large_unit missing format=comma10.0;
 where Sec8 = 1 and status = "A";
 class ward2012 ;
-var br0_count br1_count br2_count br3_count br4_count br5plus_count assisted_units_count units_w_brsize;
+var br0_count br1_count br2_count br3_count br4_count br5plus_count assisted_units_count units_w_brsize_s8;
 table 
-  n='Projects' (assisted_units_count units_w_brsize br0_count br1_count br2_count br3_count br4_count br5plus_count)*sum=' ', 
+  n='Projects' (assisted_units_count units_w_brsize_s8 br0_count br1_count br2_count br3_count br4_count br5plus_count)*sum=' ', 
   all='DC' ward2012 = ' ';
 label
   br0_count = '\~ No bedrooms'
@@ -183,7 +184,7 @@ label
   br4_count = '\~ 4 bedrooms' 
   br5plus_count = '\~ 5+ bedrooms'
   assisted_units_count = 'Total assisted units'
-  units_w_brsize = 'Units w/bedroom size';
+  units_w_brsize_s8 = 'Units w/bedroom size';
 run ;
 
 title2 '** Inclusionary Zoning **';
