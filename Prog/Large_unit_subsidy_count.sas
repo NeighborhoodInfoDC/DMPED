@@ -103,7 +103,7 @@ data pres_large_unit_a;
 	by nlihc_id;
   if in1;
   if program ~= 'PUBHSNG' then pubhous = 0;
-  if inphusz and not pubhous then put nlihc_id= projname= (units:)(=);
+  if inphusz and not pubhous then put nlihc_id= proj_name= (units:)(=);
 run;
 
 proc sort data = pres_large_unit_a;
