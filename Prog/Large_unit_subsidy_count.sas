@@ -95,9 +95,15 @@ proc sort data = lihtc_subsidy nodupkey;
 run;
 
 data pres_large_unit_a;
-	merge prescat (in=in1) ph_unitsize (keep = nlihc_id units: link pubhous) lihtc_subsidy (keep = nlihc_id lihtc);
+	merge 
+	prescat (in=in1) 
+	PresCat.subsidy (where=(program='PUBHSNG' and subsidy_active) keep=nlihc_id program subsidy_active) 
+	ph_unitsize (keep = nlihc_id units: link pubhous in=inphusz) 
+	lihtc_subsidy (keep = nlihc_id lihtc);
 	by nlihc_id;
   if in1;
+  if program ~= 'PUBHSNG' then pubhous = 0;
+  if inphusz and not pubhous then put nlihc_id= projname= (units:)(=);
 run;
 
 proc sort data = pres_large_unit_a;
