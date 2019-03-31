@@ -142,9 +142,15 @@ run;
 );
 
 options orientation=landscape missing='-';
+options nodate nonumber;
+
+%fdate()
 
 ods rtf file="&_dcdata_default_path\DMPED\Prog\Large_unit_subsidy_count.rtf" style=Styles.Rtf_arial_9pt;
 ods listing close;
+
+footnote1 height=9pt "Prepared by Urban-Greater DC (greaterdc.urban.org), &fdate..";
+footnote2 height=9pt j=r '{Page}\~{\field{\*\fldinst{\pard\b\i0\chcbpat8\qc\f1\fs19\cf1{PAGE }\cf0\chcbpat0}}}';
 
 title2 '** Public housing **';
 
@@ -254,7 +260,44 @@ table
   all='DC' ward2012 = ' ';
 run;
 
+title2 '** Subsidy overlap **';
+
+** NOTE: LIHTC large unit counts are not included **;
+
+data large_unit_overlap;
+
+  set pres_large_unit;
+  where status = "A";
+
+  total_all_units = max( unitstot, assisted_units_count );
+  total_units_w_brsize = max( units_w_brsize_ph, units_w_brsize_s8 );
+  total_large_units = 
+    max( sum( units3b, units4b, units5b, units6b ), 
+         sum( br3_count, br4_count, br5plus_count ) );
+
+run;
+
+proc format;
+  value hassubsidy
+    0,. = 'No'
+    1 = 'Yes';
+run;
+
+proc tabulate data = large_unit_overlap missing format=comma10.0;
+class pubhous Sec8 lihtc;
+var total_: ;
+table 
+  pubhous='Public housing' * Sec8='Section 8' * lihtc,
+  n='Projects' 
+  ( total_all_units='Total assisted units' 
+    total_units_w_brsize='Units w/bedroom size' 
+    total_large_units='Large units (3+\~br)' )*sum=' '
+  / box='Subsidies';
+  format pubhous Sec8 lihtc hassubsidy.;
+run;
+
 ods listing;
 ods rtf close;
 
 title2;
+footnote1; 
