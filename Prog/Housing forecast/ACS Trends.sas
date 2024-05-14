@@ -130,7 +130,7 @@ format geo2010;
 run; 
 
 proc export data= pop_hsd_hsg
-	outfile="&_dcdata_default_path.\DMPED\Prog\Housing Forecast\Pop_Hshld_Hsg_2006_10_2015_19..csv"
+	outfile="&_dcdata_default_path.\DMPED\Prog\Housing Forecast\Pop_Hshld_Hsg_2006_10_2015_19.csv"
 	dbms=csv replace;
 	run;
 
@@ -144,7 +144,7 @@ format geo2010;
 run; 
 
 proc export data= race
-	outfile="&_dcdata_default_path.\DMPED\Prog\Housing Forecast\Race_2006_10_2015_19..csv"
+	outfile="&_dcdata_default_path.\DMPED\Prog\Housing Forecast\Race_2006_10_2015_19.csv"
 	dbms=csv replace;
 	run;
 
@@ -159,7 +159,7 @@ format geo2010;
 run; 
 
 proc export data= age
-	outfile="&_dcdata_default_path.\DMPED\Prog\Housing Forecast\Age_2006_10_2015_19..csv"
+	outfile="&_dcdata_default_path.\DMPED\Prog\Housing Forecast\Age_2006_10_2015_19.csv"
 	dbms=csv replace;
 	run;
 data owner;
@@ -172,7 +172,7 @@ format geo2010;
 run; 
 
 proc export data= owner
-	outfile="&_dcdata_default_path.\DMPED\Prog\Housing Forecast\Owner_2006_10_2015_19..csv"
+	outfile="&_dcdata_default_path.\DMPED\Prog\Housing Forecast\Owner_2006_10_2015_19.csv"
 	dbms=csv replace;
 	run;
 
