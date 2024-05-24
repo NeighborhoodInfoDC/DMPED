@@ -1,0 +1,390 @@
+---
+title: "PUMA-TAZ-Mapping"
+output: html_document
+date: "2024-05-09"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+```{r libraries}
+library(tidyverse)
+library (dplyr)
+
+#install.packages("Rcpp")
+#library(Rcpp)
+#install.packages("tigris")
+library(tigris)
+
+#install.packages("tidycensus")
+library(tidycensus)
+
+
+#install.packages("sf")
+library(sf)
+
+library(ggplot2)
+#install.packages("remotes")
+#remotes::install_github("UrbanInstitute/urbnmapr", build_vignettes = TRUE)
+library(urbnmapr)
+library(urbnthemes)
+#remotes::install_github("r-spatial/mapview")
+library(mapview)
+library(units)
+library(leaflet)
+library(stringr)
+library(knitr)
+library(tidyr)
+library(janitor)
+
+# Only need to set once per script
+options(tigris_class = "sf")
+set_urbn_defaults(style = "map")
+
+
+```
+
+
+```{r read in data}
+
+## READ IN DATA
+
+dc_blocks_20 = 
+  blocks(
+    state= "District of Columbia", 
+    year = 2020) %>%
+  # rename the blocks population variables
+  mutate(BLOCK_POP20 = POP20, 
+         BLOCK_HOUSING20 = HOUSING20)
+
+dc_tracts_20 = 
+  tracts(
+    state= "District of Columbia", 
+    year = 2020)
+
+dc_pumas_12 = 
+  pumas(state = "District of Columbia", 
+        cb = FALSE, 
+        year = 2012)
+
+dc_pumas_23 = st_read(
+  dsn = "C:/DCData/Libraries/DMPED/Prog/Housing forecast/DC_PUMAs_2023/tl_2023_11_puma20.shp",
+  quiet = TRUE
+)
+
+  # Pulling in TAZ with pop data
+
+ # unzip(zipfile = "C:/Users/akort/Box/Greater DC/Projects/DMPED Housing Assessment 2024/Task 1 - Households Projections and Housing Demand/Projection Methodology/DC_Forecast_10_0_TAZ.zip", exdir = "C:/DCData/Libraries/DMPED/")
+  
+  dc_taz = st_read(
+      dsn = "C:/DCData/Libraries/DMPED/Prog/Housing forecast/DC Forecast TAZ/DC_Forecast_10_0_TAZ.shp", 
+      quiet = TRUE
+    )
+  
+
+# CRS CONVERSIONS
+# PUMA files = NAD83 and Blocks are NAD83
+
+# st_crs(dc_pumas_12)
+# st_crs(dc_pumas_23)
+# st_crs(dc_blocks_20)
+# st_crs(dc_tracts_20)
+
+# Convert TAZ to NAD83
+st_crs(dc_taz)
+dc_taz = st_transform(dc_taz, crs = "NAD83")
+
+## COMBINE BLOCKS with TAZ and PUMAS
+
+# TAZ-Blocks 
+dc_taz_blocks_20= st_join(dc_blocks_20, dc_taz, join=st_intersects) 
+# write_csv(dc_taz_blocks_20, file="C:/DCData/Libraries/DMPED/Prog/Housing forecast/Taz_Blks20.csv") 
+
+
+# TAZ-Tracts
+dc_taz_tracts_20 = st_join(dc_tracts_20, dc_taz, join=st_intersects)
+# write_csv(dc_taz_tracts_20, file="C:/DCData/Libraries/DMPED/Prog/Housing forecast/Taz_Tracts20.csv")
+
+# PUMA12-Blocks
+dc_puma12_blocks20 = st_join(dc_blocks_20, dc_pumas_12, join=st_intersects)
+# write_csv(dc_puma12_blocks20, file="C:/DCData/Libraries/DMPED/Prog/Housing forecast/Puma12_Blks20.csv")
+
+
+# PUMA23-Blocks
+dc_puma22_blocks20 = st_join(dc_blocks_20, dc_pumas_23, join=st_intersects)
+# write_csv(dc_puma22_blocks20, file="C:/DCData/Libraries/DMPED/Prog/Housing forecast/Puma22_Blks20.csv")
+
+## Reading in geo features to map against TAZ
+dc_water = st_read(
+  dsn = "//sas1/dcdata/Libraries/OCTO/Maps/WaterPly.shp", 
+  quiet = TRUE
+)
+
+dc_local_parks = st_read(
+  dsn = "//sas1/dcdata/Libraries/OCTO/Maps/ParkPly.shp", 
+  quiet = TRUE
+)
+
+dc_nat_parks = st_read(
+  dsn = "//sas1/dcdata/Libraries/OCTO/Maps/National_Parks.shp", 
+  quiet = TRUE
+)
+
+
+```
+
+
+
+
+
+```{r MAP PUMA CHANGES}
+
+# First look
+mapview(dc_pumas_12)
+mapview(dc_pumas_23)
+
+# Rough map of both PUMA designations
+
+#dc_pumas_12_map = 
+  ggplot() + 
+  geom_sf(data = dc_pumas_12, mapping = aes(), 
+          fill = NA, color = palette_urbn_main["black"])+
+  geom_sf_text(data = dc_pumas_12, aes(label = PUMACE10), size = 3, color = "black")
+
+#dc_pumas_22_map = 
+  ggplot() +
+  geom_sf(data = dc_pumas_23, mapping = aes(), fill=NA,
+          color=palette_urbn_main["magenta"], size=1)+
+  geom_sf_text(data = dc_pumas_23, aes(label = PUMACE20), size = 3, color = palette_urbn_main["magenta"])
+
+#dc_pumas_12_22_map = 
+ggplot() + 
+  geom_sf(data = dc_pumas_12, mapping = aes(), 
+          fill = NA, color = palette_urbn_main["black"])+
+  geom_sf(data = dc_pumas_23, mapping = aes(), 
+          fill=NA, color=palette_urbn_main["magenta"], size=1)+
+  geom_sf_text(data = dc_pumas_12, aes(label = PUMACE10), size = 3, color = "black")+
+  geom_sf_text(data = dc_pumas_23, aes(label = PUMACE20), size = 3, color = palette_urbn_main["magenta"])
+
+ggplot()+  
+geom_sf(data = dc_taz, mapping = aes(), 
+          fill = NA, color=palette_urbn_main["magenta"])+
+  geom_sf(data = dc_blocks_20, mapping = aes(), 
+          fill=NA, color = palette_urbn_main["gray"])
+
+```
+
+```{r Checking TRACTS vs PUMA and TAZ}
+
+# TRACTS AND PUMAS
+# Confirmed with geocore crosswalk -> TR10 aligns with PUMA12, TR20 with PUMA22. 
+ggplot()+  
+geom_sf(data = dc_pumas_23, mapping = aes(), 
+          fill = NA, color=palette_urbn_main["magenta"])+
+  geom_sf(data = dc_tracts_20, mapping = aes(), 
+          fill=NA, color = palette_urbn_main["black"], size=1)+
+  geom_sf_text(data = dc_pumas_23, aes(label = PUMACE20), size = 3, color = palette_urbn_main["magenta"])
+
+# TAZ AND BLOCKS
+ggplot()+  
+geom_sf(data = dc_taz, mapping = aes(), 
+          fill = NA, color=palette_urbn_main["magenta"])
+ggplot()+
+geom_sf(data = dc_blocks_20, mapping = aes(), 
+          fill=NA, color = palette_urbn_main["gray"])
+
+ggplot()+  
+geom_sf(data = dc_taz, mapping = aes(), 
+          fill = NA, color=palette_urbn_main["magenta"])+
+  geom_sf(data = dc_blocks_20, mapping = aes(), 
+          fill=NA, color = palette_urbn_main["gray"])
+
+
+# TAZ AND TRACTS
+ggplot()+  
+geom_sf(data = dc_taz, mapping = aes(), 
+          fill = NA, color=palette_urbn_main["magenta"])
+ggplot()+
+geom_sf(data = dc_tracts_20, mapping = aes(), 
+          fill=NA, color = palette_urbn_main["gray"])
+
+ggplot()+  
+geom_sf(data = dc_taz, mapping = aes(), 
+          fill = NA, color=palette_urbn_main["magenta"])+
+  geom_sf(data = dc_tracts_20, mapping = aes(), 
+          fill=NA, color = palette_urbn_main["gray"])
+
+
+# mapview(test %>% filter(POP20 == 0))
+
+  mapview(dc_taz)+
+    mapview(dc_blocks_20 %>% select(GEOID20) %>% filter(GEOID20 %in% dc_blocks_split_across_taz$GEOID20))+
+    mapview(dc_local_parks)
+  
+   mapview(get_dupes(dc_taz_blocks_20, GEOID20))+
+     mapview(dc_water)+
+  mapview(dc_parks)
+   
+ 
+
+ ggplot()+  
+geom_sf(data = dc_taz, mapping = aes(), 
+          fill = NA, color=palette_urbn_main["magenta"])+
+  geom_sf(data = dc_blocks_20, mapping = aes(), 
+          fill=NA, color = palette_urbn_main["gray"])+
+   geom_sf(data = dc_water, mapping = aes(), 
+          fill=NA, color = palette_urbn_main["cyan"])+
+   geom_sf(data = dc_local_parks, mapping = aes(), 
+          fill=NA, color = palette_urbn_main["green"])+
+      geom_sf(data = dc_nat_parks, mapping = aes(), 
+          fill=NA, color = palette_urbn_main["green"])
+  
+```
+
+
+
+
+
+```{r TAZ to block crosswalk}
+# Spot mapping PUMAS and TAZ
+# mapview(dc_pumas_23)+mapview(dc_taz)
+
+
+# ggplot()+  
+# geom_sf(data = dc_pumas_23, mapping = aes(), 
+#          fill = NA, color=palette_urbn_main["magenta"])+
+#  geom_sf(data = dc_taz, mapping = aes(), 
+#          fill=NA, color = palette_urbn_main["gray"])
+ 
+
+
+## Calculating proportion of area of blocks in each TAZ, so we can keep the one with the most area
+
+    # Calculate area of each block
+    
+    dc_blocks_taz_area = dc_blocks_20 %>%
+      mutate(area_blocks = st_area(.)) %>%
+      st_intersection(dc_taz) %>%
+      mutate(
+        area_block_taz = st_area(.), 
+        prop_area_taz = area_block_taz / area_blocks
+      )
+    
+    dc_blocks_taz_area_nodupes = 
+      dc_blocks_taz_area %>%
+      group_by(GEOID20) %>%
+      slice_max(prop_area_taz) %>%
+      ungroup()
+      
+  # Create weights 
+  # Proportion of TAZ population in each BLOCK20
+
+dc_blocks_taz_area_nodupes = 
+  dc_blocks_taz_area_nodupes %>%
+  group_by(TAZ) %>%
+  mutate(block_taz_wt = BLOCK_POP20/POP2020)
+
+
+
+
+```
+
+```{r PUMA to Block crosswalk}
+# Check overlap
+# mapview(dc_pumas_23)+ mapview(dc_blocks_20)
+
+## Same procedure as block assignments to TAZ (above chunk)
+
+  ## Calculating proportion of area of blocks in each TAZ, so we can keep the one with the most area
+
+ dc_blocks_puma22_area = dc_blocks_20 %>%
+      mutate(area_blocks = st_area(.)) %>%
+      st_intersection(dc_pumas_23) %>%
+      mutate(
+        area_block_puma22 = st_area(.), 
+        prop_area_puma22 = area_block_puma22 / area_blocks
+      )
+    
+    dc_blocks_puma22_area_nodupes = 
+      dc_blocks_puma22_area %>%
+      group_by(GEOID20) %>%
+      slice_max(prop_area_puma22) %>%
+      ungroup()
+    
+```
+
+
+```{r Sum TAZ Forecast within PUMAs}
+
+## TASK: Validate PUMA-level estimates by summing OP forecast for population/households by years
+  # Population and HH
+
+# Step 1: 
+  # Pull in PUMA22 assignments to block-TAZ dataset
+
+  dc_block20_taz_puma22 = left_join(
+    dc_blocks_taz_area_nodupes, 
+    st_drop_geometry(dc_blocks_puma22_area_nodupes) %>% select(GEOID20, PUMACE20), 
+    by = "GEOID20"
+  ) %>%
+  select(-POP20)
+
+
+# Step 2: 
+  # Use block weight to calculate the forecasted population in each block for each 5 year increment
+
+dc_block20_taz_puma22 = 
+  dc_block20_taz_puma22 %>%
+  mutate(across(.cols = matches("POP2|HHPOP|HH2") & !matches("2020|POP20$|HH20$"), 
+               .fns = ~case_when(
+                 is.na(block_taz_wt) ~ 0, 
+                 is.finite(block_taz_wt) ~ block_taz_wt * .x,
+                 is.infinite(block_taz_wt) ~ 0,
+                 T ~ NA_real_),
+                .names = "BLOCK_{.col}"))
+
+
+  # Save this dataset
+ # write_csv(dc_block20_taz_puma22, "C:/Users/akort/Box/Greater DC/Projects/DMPED Housing Assessment 2024/Task 1 - Households Projections and Housing Demand/Projection Methodology/DC_Block20_TAZ_PUMA22_Crosswalk_PopProj.csv")
+
+
+# Step 3: 
+  # Sum these calculations within the PUMA22s
+
+  puma22_sum_taz_forecast = st_drop_geometry(dc_block20_taz_puma22) %>%
+  group_by(PUMACE20)%>%
+  summarize( PUMA_POP2025 = sum(BLOCK_POP2025, na.rm = T),
+             PUMA_HHPOP2025 = sum(BLOCK_HHPOP2025, na.rm = T),
+             PUMA_HH2025 = sum(BLOCK_HH2025, na.rm = T),
+             PUMA_POP2030 = sum(BLOCK_POP2030, na.rm = T),
+             PUMA_HHPOP2030 = sum(BLOCK_HHPOP2030, na.rm = T),
+             PUMA_HH2030 = sum(BLOCK_HH2030, na.rm = T),
+             PUMA_POP2035 = sum(BLOCK_POP2035, na.rm = T),
+             PUMA_HHPOP2035 = sum(BLOCK_HHPOP2035, na.rm = T),
+             PUMA_HH2035 = sum(BLOCK_HH2035, na.rm = T),
+             PUMA_POP2040 = sum(BLOCK_POP2040, na.rm = T),
+             PUMA_HHPOP2040 = sum(BLOCK_HHPOP2040, na.rm = T),
+             PUMA_HH2040 = sum(BLOCK_HHPOP2040, na.rm = T),
+             PUMA_POP2045 = sum(BLOCK_POP2045, na.rm = T),
+             PUMA_HHPOP2045 = sum(BLOCK_HHPOP2045, na.rm = T),
+             PUMA_HH2045 = sum(BLOCK_HHPOP2045, na.rm = T),
+             PUMA_POP2050 = sum(BLOCK_POP2050, na.rm = T),
+             PUMA_HHPOP2050 = sum(BLOCK_HHPOP2050, na.rm = T),
+             PUMA_HH2050 = sum(BLOCK_HH2050, na.rm = T)
+             )
+  
+   # Save this summary dataset
+
+
+    
+# write_csv(dc_blocks_taz_area_nodupes, "H:/DC_test.csv" )
+
+# mapview(dc_blocks_taz_area_nodupes %>% filter(GEOID20 %in% c(110010058023000,110010102023000,110010105004011,110019800001028))) 
+# 8, 15, 13, 1
+
+ 
+```
+
