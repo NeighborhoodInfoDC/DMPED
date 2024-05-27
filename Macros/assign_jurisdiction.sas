@@ -19,7 +19,8 @@
   9="Prince William, Manassas and Manassas Park"
   10="Alexandria"
 
- Modifications: Original macro was based on 2010 PUMAs. This script updates to 2022 PUMAs to reflect the change in DC.
+ Modifications: Original macro was based on 2010 PUMAs. This script updates to 2022 PUMAs to reflect the change for DC only. 
+Need to confirm 2022 PUMAs for other jurisdictions. 
 **************************************************************************/
 
 %macro assign_jurisdiction;
