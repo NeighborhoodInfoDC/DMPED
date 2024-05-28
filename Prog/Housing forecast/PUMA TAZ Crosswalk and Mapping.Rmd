@@ -85,7 +85,7 @@ dc_pumas_12 =
 
 # 2020/22 PUMAs in DC
 dc_pumas_23 = st_read(
-  dsn = "C:/DCData/Libraries/DMPED/Prog/Housing forecast/DC_PUMAs_2023/tl_2023_11_puma20.shp",
+  dsn = "//sas1/dcdata/Libraries/DMPED/Maps/DC_PUMAs_2023/tl_2023_11_puma20.shp",
   quiet = TRUE
 )
 
