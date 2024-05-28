@@ -2,6 +2,14 @@
 title: "PUMA-TAZ-Mapping"
 output: html_document
 date: "2024-05-09"
+
+author: Alexa Kort
+Project: DMPED Housing Forecast
+Purpose: 
+- Identify alignment of census tracts and blocks with both TAZ and PUMAs in DC
+- Create crosswalk for census geographies to TAZ
+- Create population weights for census - TAZ geo crosswalk
+
 ---
 
 ```{r setup, include=FALSE}
@@ -11,6 +19,8 @@ knitr::opts_chunk$set(echo = TRUE)
 ## R Markdown
 
 ```{r libraries}
+# RUN LIBRARIES
+
 library(tidyverse)
 library (dplyr)
 
@@ -52,6 +62,7 @@ set_urbn_defaults(style = "map")
 
 ## READ IN DATA
 
+# 2020 Census Blocks
 dc_blocks_20 = 
   blocks(
     state= "District of Columbia", 
@@ -60,16 +71,19 @@ dc_blocks_20 =
   mutate(BLOCK_POP20 = POP20, 
          BLOCK_HOUSING20 = HOUSING20)
 
+# 2020 Census Tracts
 dc_tracts_20 = 
   tracts(
     state= "District of Columbia", 
     year = 2020)
 
+# 2010/12 PUMAs in DC
 dc_pumas_12 = 
   pumas(state = "District of Columbia", 
         cb = FALSE, 
         year = 2012)
 
+# 2020/22 PUMAs in DC
 dc_pumas_23 = st_read(
   dsn = "C:/DCData/Libraries/DMPED/Prog/Housing forecast/DC_PUMAs_2023/tl_2023_11_puma20.shp",
   quiet = TRUE
@@ -85,7 +99,7 @@ dc_pumas_23 = st_read(
     )
   
 
-# CRS CONVERSIONS
+# ALIGNING CRS OF ABOVE FILES WITH CONVERSIONS
 # PUMA files = NAD83 and Blocks are NAD83
 
 # st_crs(dc_pumas_12)
@@ -117,17 +131,21 @@ dc_puma12_blocks20 = st_join(dc_blocks_20, dc_pumas_12, join=st_intersects)
 dc_puma22_blocks20 = st_join(dc_blocks_20, dc_pumas_23, join=st_intersects)
 # write_csv(dc_puma22_blocks20, file="C:/DCData/Libraries/DMPED/Prog/Housing forecast/Puma22_Blks20.csv")
 
-## Reading in geo features to map against TAZ
+## Reading in geo features to map against TAZ 
+
+# Water Features
 dc_water = st_read(
   dsn = "//sas1/dcdata/Libraries/OCTO/Maps/WaterPly.shp", 
   quiet = TRUE
 )
 
+# Local DC Parks
 dc_local_parks = st_read(
   dsn = "//sas1/dcdata/Libraries/OCTO/Maps/ParkPly.shp", 
   quiet = TRUE
 )
 
+# National Parks in DC
 dc_nat_parks = st_read(
   dsn = "//sas1/dcdata/Libraries/OCTO/Maps/National_Parks.shp", 
   quiet = TRUE
@@ -143,8 +161,8 @@ dc_nat_parks = st_read(
 ```{r MAP PUMA CHANGES}
 
 # First look
-mapview(dc_pumas_12)
-mapview(dc_pumas_23)
+# mapview(dc_pumas_12)
+# mapview(dc_pumas_23)
 
 # Rough map of both PUMA designations
 
@@ -159,7 +177,8 @@ mapview(dc_pumas_23)
   geom_sf(data = dc_pumas_23, mapping = aes(), fill=NA,
           color=palette_urbn_main["magenta"], size=1)+
   geom_sf_text(data = dc_pumas_23, aes(label = PUMACE20), size = 3, color = palette_urbn_main["magenta"])
-
+  
+# Mapping overlap of PUMAs 2012 and 2022
 #dc_pumas_12_22_map = 
 ggplot() + 
   geom_sf(data = dc_pumas_12, mapping = aes(), 
@@ -169,6 +188,8 @@ ggplot() +
   geom_sf_text(data = dc_pumas_12, aes(label = PUMACE10), size = 3, color = "black")+
   geom_sf_text(data = dc_pumas_23, aes(label = PUMACE20), size = 3, color = palette_urbn_main["magenta"])
 
+
+# Mapping DC TAZ against 2020 Blocks
 ggplot()+  
 geom_sf(data = dc_taz, mapping = aes(), 
           fill = NA, color=palette_urbn_main["magenta"])+
@@ -180,7 +201,9 @@ geom_sf(data = dc_taz, mapping = aes(),
 ```{r Checking TRACTS vs PUMA and TAZ}
 
 # TRACTS AND PUMAS
-# Confirmed with geocore crosswalk -> TR10 aligns with PUMA12, TR20 with PUMA22. 
+# Confirmed with geocore crosswalk -> TR10 aligns with PUMA12, TR20 with PUMA22.
+
+# PUMAs 2022 and tract 20 overlap
 ggplot()+  
 geom_sf(data = dc_pumas_23, mapping = aes(), 
           fill = NA, color=palette_urbn_main["magenta"])+
@@ -188,14 +211,18 @@ geom_sf(data = dc_pumas_23, mapping = aes(),
           fill=NA, color = palette_urbn_main["black"], size=1)+
   geom_sf_text(data = dc_pumas_23, aes(label = PUMACE20), size = 3, color = palette_urbn_main["magenta"])
 
-# TAZ AND BLOCKS
+## TAZ AND BLOCKS
+# Just TAZ
 ggplot()+  
 geom_sf(data = dc_taz, mapping = aes(), 
           fill = NA, color=palette_urbn_main["magenta"])
+
+# Just 2020 blocks
 ggplot()+
 geom_sf(data = dc_blocks_20, mapping = aes(), 
           fill=NA, color = palette_urbn_main["gray"])
 
+# Overlap of TAZ and 2020 blocks
 ggplot()+  
 geom_sf(data = dc_taz, mapping = aes(), 
           fill = NA, color=palette_urbn_main["magenta"])+
@@ -203,14 +230,19 @@ geom_sf(data = dc_taz, mapping = aes(),
           fill=NA, color = palette_urbn_main["gray"])
 
 
-# TAZ AND TRACTS
+## TAZ AND TRACTS
+
+# Just TAZ
 ggplot()+  
 geom_sf(data = dc_taz, mapping = aes(), 
           fill = NA, color=palette_urbn_main["magenta"])
+
+# Just Blocks 2020
 ggplot()+
 geom_sf(data = dc_tracts_20, mapping = aes(), 
           fill=NA, color = palette_urbn_main["gray"])
 
+# Overlap of TAZ and Blocks 2020
 ggplot()+  
 geom_sf(data = dc_taz, mapping = aes(), 
           fill = NA, color=palette_urbn_main["magenta"])+
@@ -220,6 +252,11 @@ geom_sf(data = dc_taz, mapping = aes(),
 
 # mapview(test %>% filter(POP20 == 0))
 
+dc_blocks_split_across_taz = 
+  dc_taz_blocks_20 %>% 
+  get_dupes(GEOID20) 
+
+# Exploration in mapview to account for lack of overlap with blocks and tracts
   mapview(dc_taz)+
     mapview(dc_blocks_20 %>% select(GEOID20) %>% filter(GEOID20 %in% dc_blocks_split_across_taz$GEOID20))+
     mapview(dc_local_parks)
@@ -228,8 +265,9 @@ geom_sf(data = dc_taz, mapping = aes(),
      mapview(dc_water)+
   mapview(dc_parks)
    
- 
-
+# Conclusion: Blocks align well except along borders/geo features
+   
+# Overview of TAZ with 2020 blocks and geo features
  ggplot()+  
 geom_sf(data = dc_taz, mapping = aes(), 
           fill = NA, color=palette_urbn_main["magenta"])+
