@@ -94,7 +94,7 @@ dc_pumas_23 = st_read(
  # unzip(zipfile = "C:/Users/akort/Box/Greater DC/Projects/DMPED Housing Assessment 2024/Task 1 - Households Projections and Housing Demand/Projection Methodology/DC_Forecast_10_0_TAZ.zip", exdir = "C:/DCData/Libraries/DMPED/")
   
   dc_taz = st_read(
-      dsn = "C:/DCData/Libraries/DMPED/Prog/Housing forecast/DC Forecast TAZ/DC_Forecast_10_0_TAZ.shp", 
+      dsn = "//sas1/dcdata/Libraries/DMPED/Maps/DC Forecast TAZ/DC_Forecast_10_0_TAZ.shp", 
       quiet = TRUE
     )
   
