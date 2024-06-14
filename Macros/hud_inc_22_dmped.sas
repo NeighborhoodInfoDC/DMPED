@@ -24,7 +24,7 @@
 
 /** Macro Hud_inc_<year> - Start Definition **/
 
-%macro Hud_inc_2022_dmped( hhinc=hhincome, hhsize=numprec );
+%macro Hud_inc_22_dmped( hhinc=, hhsize= );
 
   ** HUD income categories (<year>) **;
 
