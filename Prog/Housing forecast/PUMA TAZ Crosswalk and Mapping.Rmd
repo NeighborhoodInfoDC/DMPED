@@ -408,7 +408,7 @@ dc_block20_taz_puma22 =
              PUMA_HH2040 = sum(BLOCK_HH2040, na.rm = T),
              PUMA_POP2045 = sum(BLOCK_POP2045, na.rm = T),
              PUMA_HHPOP2045 = sum(BLOCK_HHPOP2045, na.rm = T),
-             PUMA_HH2045 = sum(BLOCK_HHPOP2045, na.rm = T),
+             PUMA_HH2045 = sum(BLOCK_HHP2045, na.rm = T),
              PUMA_POP2050 = sum(BLOCK_POP2050, na.rm = T),
              PUMA_HHPOP2050 = sum(BLOCK_HHPOP2050, na.rm = T),
              PUMA_HH2050 = sum(BLOCK_HH2050, na.rm = T)
