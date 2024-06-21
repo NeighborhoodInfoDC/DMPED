@@ -34,7 +34,7 @@ data maxunits;
 
 %macro getdata;
 
-	%do i=6 %to 22; 
+	%do i=1 %to 22; 
 
 	%let r=%scan(&real.,&i.," "); 
 	%let y=%scan(&year.,&i.," ");
@@ -51,14 +51,24 @@ data maxunits;
 
 	%create_own_occ(inds=ownerpt_&y.,outds=ownerpt_&y.a );
 	
+	proc freq data=ownerpt_&y.a;
+	tables owner_occ_sale*ui_proptype/missprint;
+	where ui_proptype in("10" "11");
+	title "owner-occupied sales for single family and condo &y."; 
+	run;
 
 		data all_&y.;
 			set except_&y. (in=a) ownerpt_&y.a;
 			if a then owner_occ_sale=0; 
 
+			*assuming that owner_occ_sale unknown are not owner occupants for our purposes;
+			if owner_occ_sale=.u then owner_occ_sale=0; 
+
 			run; 
+
 		proc sort data=all_&y.;
 		by ui_proptype owner_occ_sale;
+
 		proc summary data= all_&y.;
 		where ui_proptype in("10" "11" );
 		by ui_proptype owner_occ_sale;
@@ -86,10 +96,12 @@ data maxunits;
 			No=0;
 			 
 			run; 
+
 		proc summary data=coop_&y.;
 		var yes no; 
 		output out=coop_sum_&y. sum= ;
 		run; 
+
 		data sum_all_&y.;
 			set sum_&y._res (drop=_name_) coop_sum_&y. (in=a keep= yes no);
 
@@ -101,10 +113,30 @@ data maxunits;
 
 			run;
 
+			%if &y.=2002 %then %do; 
+				data allyears ;
+					set sum_all_&y. ;
+					
+					run;
+
+				%end; 
+
+			%else %do;
+
+					data allyears ;
+					set allyears sum_all_&y. ;
+
+					
+					run;
+			%end; 
+			/*
+			proc datasets nolist library=work memtype=(data);
+  			delete _ownerpt_2003 _sales_owner_dc _premise_geo _owneraddress_geo;
+  			quit;*/
+
+
 		%end; 
 
 %mend;
 
 %getdata;
-
-
