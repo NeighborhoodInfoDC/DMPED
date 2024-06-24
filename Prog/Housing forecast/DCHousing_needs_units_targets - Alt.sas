@@ -108,7 +108,7 @@ proc format;
   0= 'not natural affordable'; */
 run;
 
-
+/* We are really just interested in the 2022 file (filtered by MULTYEAR), which has the new PUMA designations. */
 %macro single_year(year);
 
 	DATA DCvacant_&year. ;
@@ -129,7 +129,7 @@ run;
 		BY upuma;
 	RUN;
 
-/** NOTE: This is where we'll merge in PUMA crosswalk once we resolve that**/
+/** NOTE: This is where we'd merge in PUMA crosswalk, but we are not going to bc we are just using 2022 with the new PUMAS.**/
 
  %**create ratio for rent to rentgrs to adjust rents on vacant units**;
 	DATA Ratio_&year.;
@@ -146,101 +146,99 @@ run;
 		  output out=Ratio_&year (keep=Ratio_rentgrs_rent_&year.) mean=;
 		run;
 
-data Housing_needs_baseline_&year._1;
+/* data Housing_needs_baseline_&year._1;*/
 
+  data Housing_needs_baseline_&year._1;
   set DCarea_&year.
-        (keep=year serial pernum MET2013 hhwt hhincome numprec UNITSSTR BUILTYR2 bedrooms gq ownershp owncost ownershpd rentgrs valueh
+        (keep=year upuma serial pernum MET2013 hhwt hhincome numprec UNITSSTR BUILTYR2 bedrooms gq ownershp owncost ownershpd rentgrs valueh
          where=(pernum=1 and gq in (1,2) and ownershpd in ( 12,13,21,22 )));
 
 
-	  *adjust all incomes to 2022 $ to match use of 2022 family of 4 income limit in projections (originally based on use of most recent 5-year IPUMS; 
+	 /* NOT NEEDED FOR SINGLE YEAR - adjust all incomes to 2022 $ to match use of 2022 family of 4 income limit in projections (originally based on use of most recent 5-year IPUMS; 
 		
 	  if hhincome ~=.n or hhincome ~=9999999 then do; 
-		 %dollar_convert( hhincome, hhincome_a, &year., 2022, series=CUUR0000SA0 )
-	   end; 
+		 %dollar_convert( hhincome, hhincome_a, &year., 2022, series=CUUR0000SA0L2 )
+	   end;  */
 
 	*create HUD_inc - uses 2022 limits but has categories for 120-200% and 200%+ AMI; 
-	 %Hud_inc_2022_dmped( hhinc=hhincome, hhsize=numprec ); 
-	 
+	%macro Hud_inc_22_dmped( hhinc=, hhsize= );
 
-  ** HUD income categories (<year>) **;
-/* NOTE Commenting out code from macro, used to run test, until macro added to sas1, using the code here instead. Remove later
-	  
-  if (hhincome) in ( 9999999, .n ) then hud_inc = .n;
+  ** HUD income categories (<year>) IN PLACE OF MACRO FOR NOW**;
+  if (&hhinc.) in ( 9999999, .n ) then hud_inc = .n;
   else do;
 
-      select ( numprec );
+           select ( numprec );
       when ( 1 )
         do;
-          if hhincome <= 29900 then hud_inc = 1;
-          else if 29900 < hhincome <= 49850 then hud_inc = 2;
-          else if 49850 < hhincome <= 63000 then hud_inc = 3;
-          else if 63000 < hhincome <= 119640 then hud_inc = 4;
-          else if 119640 < hhincome <= 2*(49850/0.5)then hud_inc = 5;
-		  else if 2*(49850/0.5) < hhincome then hud_inc = 6;
+          if &hhinc. <= 29900 then hud_inc = 1;
+          else if 29900 < &hhinc. <= 49850 then hud_inc = 2;
+          else if 49850 < &hhinc. <= 63000 then hud_inc = 3;
+          else if 63000 < &hhinc. <= 119640 then hud_inc = 4;
+          else if 119640 < &hhinc. <= 2*(49850/0.5)then hud_inc = 5;
+		  else if 2*(49850/0.5) < &hhinc. then hud_inc = 6;/*200% plus*/
         end;
       when ( 2 )
         do;
-          if hhincome <= 34200 then hud_inc = 1;
-          else if 34200 < hhincome <= 56950 then hud_inc = 2;
-          else if 56950 < hhincome <= 72000 then hud_inc = 3;
-          else if 72000 < hhincome <= 136680 then hud_inc = 4;
-          else if 136680 < hhincome <= 2*(56950/0.5) then hud_inc = 5;
-		  else if 2*(56950/0.5) < hhincome then hud_inc = 6;
+          if &hhinc. <= 34200 then hud_inc = 1;
+          else if 34200 < &hhinc. <= 56950 then hud_inc = 2;
+          else if 56950 < &hhinc. <= 72000 then hud_inc = 3;
+          else if 72000 < &hhinc. <= 136680 then hud_inc = 4;
+          else if 136680 < &hhinc. <= 2*(56950/0.5) then hud_inc = 5;
+		  else if 2*(56950/0.5) < &hhinc. then hud_inc = 6;/*200% plus*/
         end;
       when ( 3 )
         do;
-          if hhincome <= 38450 then hud_inc = 1;
-          else if 38450 < hhincome <= 64050 then hud_inc = 2;
-          else if 64050 < hhincome <= 81000 then hud_inc = 3;
-          else if 81000 < hhincome <= 153720 then hud_inc = 4;
-          else if 153720 < hhincome <= 2*(64050/0.5) then hud_inc = 5;
-		  else if 2*(64050/0.5) < hhincome then hud_inc = 6;
+          if &hhinc. <= 38450 then hud_inc = 1;
+          else if 38450 < &hhinc. <= 64050 then hud_inc = 2;
+          else if 64050 < &hhinc. <= 81000 then hud_inc = 3;
+          else if 81000 < &hhinc. <= 153720 then hud_inc = 4;
+          else if 153720 < &hhinc. <= 2*(64050/0.5) then hud_inc = 5;
+		  else if 2*(64050/0.5) < &hhinc. then hud_inc = 6;/*200% plus*/
         end;
       when ( 4 )
         do;
-          if hhincome <= 42700 then hud_inc = 1;
-          else if 42700 < hhincome <= 71150 then hud_inc = 2;
-          else if 71150 < hhincome <= 90000 then hud_inc = 3;
-          else if 90000 < hhincome <= 170760 then hud_inc = 4;
-          else if 170760 < hhincome <= 2*(71150/0.5) then hud_inc = 5;
-		  else if 2*(71150/0.5) < hhincome then hud_inc = 6;
+          if &hhinc. <= 42700 then hud_inc = 1;
+          else if 42700 < &hhinc. <= 71150 then hud_inc = 2;
+          else if 71150 < &hhinc. <= 90000 then hud_inc = 3;
+          else if 90000 < &hhinc. <= 170760 then hud_inc = 4;
+          else if 170760 < &hhinc. <= 2*(71150/0.5) then hud_inc = 5;
+		  else if 2*(71150/0.5) < &hhinc. then hud_inc = 6;/*200% plus*/
         end;
       when ( 5 )
         do;
-          if hhincome <= 46150 then hud_inc = 1;
-          else if 46150 < hhincome <= 76850 then hud_inc = 2;
-          else if 76850 < hhincome <= 97200 then hud_inc = 3;
-          else if 97200 < hhincome <= 184440 then hud_inc = 4;
-          else if 184440 < hhincome <= 2*(76850/0.5) then hud_inc = 5;
-		  else if 2*(76850/0.5) < hhincome then hud_inc = 6;
+          if &hhinc. <= 46150 then hud_inc = 1;
+          else if 46150 < &hhinc. <= 76850 then hud_inc = 2;
+          else if 76850 < &hhinc. <= 97200 then hud_inc = 3;
+          else if 97200 < &hhinc. <= 184440 then hud_inc = 4;
+          else if 184440 < &hhinc. <= 2*(76850/0.5) then hud_inc = 5;
+		  else if 2*(76850/0.5) < &hhinc. then hud_inc = 6;/*200% plus*/
         end;
       when ( 6 )
         do;
-          if hhincome <= 49550 then hud_inc = 1;
-          else if 49550 < hhincome <= 82550 then hud_inc = 2;
-          else if 82550 < hhincome <= 104400 then hud_inc = 3;
-          else if 104400 < hhincome <= 198120 then hud_inc = 4;
-          else if 198120 < hhincome <= 2*(82550/0.5) then hud_inc = 5;
-		  else if 2*(82550/0.5) < hhincome then hud_inc = 6;
+          if &hhinc. <= 49550 then hud_inc = 1;
+          else if 49550 < &hhinc. <= 82550 then hud_inc = 2;
+          else if 82550 < &hhinc. <= 104400 then hud_inc = 3;
+          else if 104400 < &hhinc. <= 198120 then hud_inc = 4;
+          else if 198120 < &hhinc. <= 2*(82550/0.5) then hud_inc = 5;
+		  else if 2*(82550/0.5) < &hhinc. then hud_inc = 6;/*200% plus*/
         end;
       when ( 7 )
         do;
-          if hhincome <= 52950 then hud_inc = 1;
-          else if 52950 < hhincome <= 88250 then hud_inc = 2;
-          else if 88250 < hhincome <= 111600 then hud_inc = 3;
-          else if 111600 < hhincome <= 211800 then hud_inc = 4;
-          else if 211800 < hhincome <= 2*(88250/0.5) then hud_inc = 5;
-		  else if 2*(88250/0.5) < hhincome then hud_inc = 6; 
+          if &hhinc. <= 52950 then hud_inc = 1;
+          else if 52950 < &hhinc. <= 88250 then hud_inc = 2;
+          else if 88250 < &hhinc. <= 111600 then hud_inc = 3;
+          else if 111600 < &hhinc. <= 211800 then hud_inc = 4;
+          else if 211800 < &hhinc. <= 2*(88250/0.5) then hud_inc = 5;
+		  else if 2*(88250/0.5) < &hhinc. then hud_inc = 6; /*200% plus*/
         end;
       otherwise
         do;
-          if hhincome <= 56400 then hud_inc = 1;
-          else if 56400 < hhincome <= 93950 then hud_inc = 2;
-          else if 93950 < hhincome <= 118800 then hud_inc = 3;
-          else if 118800 < hhincome <= 225480 then hud_inc = 4;
-          else if 225480 < hhincome <= 2*(93950/0.5) then hud_inc = 5;
-		  else if 2*(93950/0.5) < hhincome then hud_inc = 6; 
+          if &hhinc. <= 56400 then hud_inc = 1;
+          else if 56400 < &hhinc. <= 93950 then hud_inc = 2;
+          else if 93950 < &hhinc. <= 118800 then hud_inc = 3;
+          else if 118800 < &hhinc. <= 225480 then hud_inc = 4;
+          else if 225480 < &hhinc. <= 2*(93950/0.5) then hud_inc = 5;
+		  else if 2*(93950/0.5) < hhincome then hud_inc = 6; /*200% plus*/
         end;
     end;
 
@@ -248,13 +246,14 @@ data Housing_needs_baseline_&year._1;
 
   label Hud_inc = "HUD income categories";
  
-*/
-label hud_inc = 'HUD Income Limits category for household (2022)';
+
+%mend Hud_inc_22_dmped;
+%Hud_inc_22_dmped(hhinc=hhincome, hhsize = numprec);
 
 run; 
 
-data Housing_needs_baseline_2022_2;
-  set Housing_needs_baseline_2022_1;
+data Housing_needs_baseline_&year.;
+  set Housing_needs_baseline_&year._1;
 
 	 *adjust housing costs for inflation; 
 
@@ -286,33 +285,7 @@ data Housing_needs_baseline_2022_2;
 
 		tothh = 1;
  	
-*run;  
 
-/** for test run
-%mend single_year; 
-
-%single_year(2022);
-
-
- PROC MEANS Data= Housing_needs_baseline_2022_2;
-	VAR costratio;
-	CLASS hud_inc;
-	RUN;
-
-
-PROC UNIVARIATE Data= Housing_needs_baseline_2022_2;
-	WHERE ownershpd in (21,22);
-	VAR rentgrs_a;
-	RUN;  
-
-PROC MEANS Data= Housing_needs_baseline_2022_2 MEAN MIN Q1 MEDIAN Q3 MAX;
-	WHERE ownershpd in (21,22);
-	VAR rentgrs_a ;
-	CLASS hud_inc costburden;
-	RUN;
-
-**/
-		
     ****** Rental units ******;
     
    if ownershpd in (21, 22) then do;
@@ -320,7 +293,6 @@ PROC MEANS Data= Housing_needs_baseline_2022_2 MEAN MIN Q1 MEDIAN Q3 MAX;
     Tenure = 1;
 
 	 *create maximum desired or affordable rent based on HUD_Inc categories*; 
-		*NOTE: where do the decimals come from (other than 30)? do we develop these? NEED to update?;
 	
 	  if hud_inc in(1 2 3) then max_rent=HHINCOME_a/12*.3; *under 80% of AMI then pay 30% threshold; 
 	  if hud_inc =4 then max_rent=HHINCOME_a/12*.261; *avg for all HH hud_inc=4 in DC 2022; 
@@ -414,7 +386,6 @@ PROC MEANS Data= Housing_needs_baseline_2022_2 MEAN MIN Q1 MEDIAN Q3 MAX;
 
 		*create maximum desired or affordable owner costs based on HUD_Inc categories*; 
 
-		/*NOTE: NEED to update these*/
 		if hud_inc in(1 2 3) then max_ocost=HHINCOME_a/12*.3; *under 80% of AMI then pay 30% threshold; 
 		if hud_inc =4 then max_ocost=HHINCOME_a/12*.261; *avg for all HH hud_inc=4in DC;
 		if costratio <=.157 and hud_inc = 5 then max_ocost=HHINCOME_a/12*.157; *avg for all HH HUD_inc=5; 
@@ -691,113 +662,43 @@ data Housing_needs_vacant_&year. Other_vacant_&year. ;
 
 %mend single_year; 
 
-%single_year(2018);
-%single_year(2019);
-%single_year(2020); 
-%single_year(2021);
 %single_year(2022);
 
 
-/* We are really just interested in the 2022 file (filtered by MULTYEAR), which has the new PUMA designations. 
+/* We are really just interested in the 2022 file (filtered by MULTYEAR), which has the new PUMA designations. */
+/* City level AND PUMA level*/
 
+PROC CONTENTS data= Housing_needs_baseline_2022;
+run;
 
-
-
-
-/* pulling in Steven's files for HH projections */
+/* pulling in Steven's files for HH projections 
 data projectedHH;
 set DMPED.projection_for_calibration;
 upuma= puma;
 run;
+*/
 
-data fiveyeartotal1;
-set Housing_needs_baseline_2013_3 Housing_needs_baseline_2014_3 Housing_needs_baseline_2015_3 Housing_needs_baseline_2016_3 Housing_needs_baseline_2017_3;
-totalpop=0.2;
-merge=1;
-
-geoid=.;
-if county2_char= "0100" then geoid=1;
-else if  county2_char= "0200" then geoid=2;
-else if  county2_char= "0300" then geoid=3;
-else if  county2_char= "0400" then geoid=4;
-else if  county2_char= "0500 or 0600" then geoid=5;
-else if  county2_char= "0700" then geoid=6;
-else if  county2_char= "0800" then geoid=7;
-else if  county2_char= "0900" then geoid=8;
-else if  county2_char= "1000" then geoid=9;
-else if  county2_char= "1100" then geoid=10;
-else if  county2_char= "1201 to 1208" then geoid=11;
-else if  county2_char= "1301 to 1302" then geoid=12;
-else if  county2_char= "1400" then geoid=13;
-else if  county2_char= "1500" then geoid=14;
-else if  county2_char= "1600" then geoid=15;
-else if  county2_char= "1701 to 1704" then geoid=16;
-else if  county2_char= "1801 to 1803" then geoid=17;
-else if  county2_char= "1900 or 2900" then geoid=18;
-else if  county2_char= "2000" then geoid=19;
-else if  county2_char= "2100" then geoid=20;
-else if  county2_char= "2201 to 2202" then geoid=21;
-else if  county2_char= "2300 or 2400" then geoid=22;
-else if  county2_char= "2500" then geoid=23;
-else if  county2_char= "2600 or 2700" then geoid=24;
-else if  county2_char= "2800" then geoid=25;
-else if  county2_char= "3001 to 3003" then geoid=26;
-else if  county2_char= "3101 to 3108" then geoid=27;
-else if  county2_char= "3200 or 3300" then geoid=28;
-else if  county2_char= "3400" then geoid=29;
-else if  county2_char= "3500" then geoid=30;
-else if  county2_char= "3600" then geoid=31;
-else if  county2_char= "3700" then geoid=32;
-else if  county2_char= "3800" then geoid=33;
-else if  county2_char= "3900" then geoid=34;
-else if  county2_char= "4000" then geoid=35;
-else if  county2_char= "4100 or 4500" then geoid=36;
-else if  county2_char= "4200" then geoid=37;
-else if  county2_char= "4300" then geoid=38;
-else if  county2_char= "4400" then geoid=39;
-else if  county2_char= "4600 or 4700" then geoid=40;
-else if  county2_char= "4800" then geoid=41;
-else if  county2_char= "4900 or 5100" then geoid=42;
-else if  county2_char= "5001 to 5003" then geoid=43;
-else if  county2_char= "5200" then geoid=44;
-else if  county2_char= "5300 or 5400" then geoid=45;
-
-if hhincome_a in ( 9999999, .n ) then inc = .n;
-  else do;
- /*hard code income categories to match the projections, since the calibrated distributino might be slightly different than the original one*/
-		if hhincome_a < 20728.563641 then inc=1;
-		if 20728.563641  =< hhincome_a < 39142.262306 then inc=2;
-		if 39142.262306  =< hhincome_a < 62051.245269 then inc=3;
-		if 62051.245269  =< hhincome_a < 100000 then inc=4;
-		if 100000  =< hhincome_a =< 1570000 then inc=5;
-  end;
-
-    label /*hud_inc = 'HUD Income Limits category for household (2016)'*/
-	    inc='Income quintiles statewide not account for HH size';
-		format inc inc_cat.; 
-
-run;
 
 /*calculate average cost ratio for each hud_inc group that is used for maximum desired or affordable rent/owncost*/
-proc sort data= fiveyeartotal1;
+proc sort data= Housing_needs_baseline_2022;
 by hud_inc /*tenure*/;
 run;
 
-proc summary data= fiveyeartotal1;
+proc summary data= Housing_needs_baseline_2022;
 by hud_inc /*tenure*/;
 var costratio HHincome_a;
 weight hhwt; 
 output out= costratio_hudinc mean=;
 run;
 
-proc summary data= fiveyeartotal1;
+proc summary data= Housing_needs_baseline_2022;
 by hud_inc /*tenure*/;
 var HHincome_a owncost_a rentgrs_a;
 weight hhwt; 
 output out= incomecategories mean=;
 run;
 
-/*calibrate ipums to 2015 population projection*/ 
+/*calibrate ipums to 2015 population projection 
 proc sort data= fiveyeartotal1;
 by geoid;
 run;
@@ -832,253 +733,74 @@ label hhwt_geo="Household Weight Calibrated to Steven Estimates for Households"
 	  hhwt_ori="Original Household Weight";
 
 run; 
+*/
 
-/*merge on county/puma categories*/
-data categories;
-	set NCHsg.Puma_categories_121;
-run;
-
-data fiveyeartotal;
-	set fiveyeartotal_c (drop= County) ;
-	by county2_char;
-	retain group 0;
-	if first.county2_char then group=group+1;
-run;
-data fiveyeartotal_cat;
-	merge fiveyeartotal(in=a) categories;
-	if a;
-	by group ;
-
-	label category="County/PUMA Group Designation";
-run;
 
 /*export dataset*/
- data NCHsg.fiveyeartotal_alt(label= "NC households 13-17 pooled alternative file"); 
-   set fiveyeartotal_cat;
+ data DMPED.DC_2022_housing_needs_alt(label= "DC households 2022 alternative file"); 
+   set Housing_needs_baseline_2022;
+   hhwt_ori= hhwt*0.2; /*NOTE REVISIT THIS WHEN STEVEN GIVES US GUIDANCE ON WEIGHTS*/
  run;
 
- proc contents data= NCHsg.fiveyeartotal_alt;
+ proc contents data= DMPED.DC_2022_housing_needs_alt;
  run;
 
-proc tabulate data=NCHsg.fiveyeartotal_alt format=comma12. noseps missing;
-  class county2_char;
-  var hhwt_ori hhwt_geo;
+proc tabulate data=DMPED.DC_2022_housing_needs_alt format=comma12. noseps missing;
+  class upuma;
+  var hhwt_ori;
   table
-    all='Total' county2_char=' ',
-    sum='Sum of HHWTs' * ( hhwt_geo='Adjusted to 2015 estimates' hhwt_ori= 'Original 5-year'  )
+    all='Total' upuma=' ',
+    sum='Sum of HHWTs' * ( hhwt_ori= 'Original 5-year'  )
   / box='Occupied housing units';
-  *format county2_char county2_char.;
 run;
 
-data fiveyeartotal_vacant;
-	set Housing_needs_vacant_2013 Housing_needs_vacant_2014 Housing_needs_vacant_2015 Housing_needs_vacant_2016 Housing_needs_vacant_2017;
-totalpop=0.2;
-merge=1;
- 
-geoid=.;
-if county2_char= "0100" then geoid=1;
-else if  county2_char= "0200" then geoid=2;
-else if  county2_char= "0300" then geoid=3;
-else if  county2_char= "0400" then geoid=4;
-else if  county2_char= "0500 or 0600" then geoid=5;
-else if  county2_char= "0700" then geoid=6;
-else if  county2_char= "0800" then geoid=7;
-else if  county2_char= "0900" then geoid=8;
-else if  county2_char= "1000" then geoid=9;
-else if  county2_char= "1100" then geoid=10;
-else if  county2_char= "1201 to 1208" then geoid=11;
-else if  county2_char= "1301 to 1302" then geoid=12;
-else if  county2_char= "1400" then geoid=13;
-else if  county2_char= "1500" then geoid=14;
-else if  county2_char= "1600" then geoid=15;
-else if  county2_char= "1701 to 1704" then geoid=16;
-else if  county2_char= "1801 to 1803" then geoid=17;
-else if  county2_char= "1900 or 2900" then geoid=18;
-else if  county2_char= "2000" then geoid=19;
-else if  county2_char= "2100" then geoid=20;
-else if  county2_char= "2201 to 2202" then geoid=21;
-else if  county2_char= "2300 or 2400" then geoid=22;
-else if  county2_char= "2500" then geoid=23;
-else if  county2_char= "2600 or 2700" then geoid=24;
-else if  county2_char= "2800" then geoid=25;
-else if  county2_char= "3001 to 3003" then geoid=26;
-else if  county2_char= "3101 to 3108" then geoid=27;
-else if  county2_char= "3200 or 3300" then geoid=28;
-else if  county2_char= "3400" then geoid=29;
-else if  county2_char= "3500" then geoid=30;
-else if  county2_char= "3600" then geoid=31;
-else if  county2_char= "3700" then geoid=32;
-else if  county2_char= "3800" then geoid=33;
-else if  county2_char= "3900" then geoid=34;
-else if  county2_char= "4000" then geoid=35;
-else if  county2_char= "4100 or 4500" then geoid=36;
-else if  county2_char= "4200" then geoid=37;
-else if  county2_char= "4300" then geoid=38;
-else if  county2_char= "4400" then geoid=39;
-else if  county2_char= "4600 or 4700" then geoid=40;
-else if  county2_char= "4800" then geoid=41;
-else if  county2_char= "4900 or 5100" then geoid=42;
-else if  county2_char= "5001 to 5003" then geoid=43;
-else if  county2_char= "5200" then geoid=44;
-else if  county2_char= "5300 or 5400" then geoid=45;
-run;
 
-proc sort data=fiveyeartotal_vacant;
-by geoid;
-run;
 
-data fiveyeartotal_vacant_c;
-merge fiveyeartotal_vacant calculate_calibration;
-by geoid;
 
-hhwt_geo=.; 
-
-hhwt_geo=hhwt*calibration*0.2; 
-hhwt_ori= hhwt*0.2;
-label hhwt_geo="Household Weight Calibrated to Steven Estimates for Households"
-	  calibration="Ratio of Steven 2015 estimate to ACS 2013-17 for 45 geographic units"
-	  	  hhwt_ori="Original Household Weight";
-
-run; 
-
- data fiveyeartotal_vacant_C2; 
-   set fiveyeartotal_vacant_c;
-	by county2_char;
-	retain group 0;
-	if first.county2_char then group=group+1;
- run;
-data fiveyeartotal_vacant_cat;
-	merge fiveyeartotal_vacant_C2 (in=a) categories;
-	if a;
-	by group ;
-
-	label category="County/PUMA Group Designation";
-run;
 /*export dataset*/
- data NCHsg.fiveyeartotal_vacant_alt(label= "NC vacant units 13-17 pooled alternative file"); 
-   set fiveyeartotal_vacant_cat;
+ data DMPED.DC_2022_vacant_alt(label= "NC vacant units 13-17 pooled alternative file"); 
+   set Housing_needs_vacant_2022;
+   hhwt_ori= hhwt*0.2; /*NOTE REVISIT THIS WHEN STEVEN GIVES US GUIDANCE ON WEIGHTS*/
  run;
 
- proc contents data= NCHsg.fiveyeartotal_vacant_alt; run;
+ proc contents data= DMPED.DC_2022_vacant_alt; run;
 
-proc tabulate data=NCHsg.fiveyeartotal_vacant_alt format=comma12. noseps missing;
+proc tabulate data=DMPED.DC_2022_vacant_alt format=comma12. noseps missing;
   class county2_char;
-  var hhwt_geo hhwt_ori;
+  var hhwt_ori;
   table
-    all='Total' county2_char=' ',
-    sum='Sum of HHWTs' * ( hhwt_geo='Adjusted to 2015 estimates' hhwt_ori= 'Original 5-year')
+    all='Total' upuma=' ',
+    sum='Sum of HHWTs' * ( hhwt_ori= 'Original 5-year')
   / box='Vacant (nonseasonal) housing units';
   *format county2_char county2_char.;
 run;
 
 /*need to account for other vacant units in baseline and future targets for the region to complete picture of the total housing stock*/
 
-data fiveyeartotal_othervacant;
-   set other_vacant_2013 other_vacant_2014 other_vacant_2015 other_vacant_2016 other_vacant_2017;
-totalpop=0.2;
-merge=1;
 
-geoid=.;
-if county2_char= "0100" then geoid=1;
-else if  county2_char= "0200" then geoid=2;
-else if  county2_char= "0300" then geoid=3;
-else if  county2_char= "0400" then geoid=4;
-else if  county2_char= "0500 or 0600" then geoid=5;
-else if  county2_char= "0700" then geoid=6;
-else if  county2_char= "0800" then geoid=7;
-else if  county2_char= "0900" then geoid=8;
-else if  county2_char= "1000" then geoid=9;
-else if  county2_char= "1100" then geoid=10;
-else if  county2_char= "1201 to 1208" then geoid=11;
-else if  county2_char= "1301 to 1302" then geoid=12;
-else if  county2_char= "1400" then geoid=13;
-else if  county2_char= "1500" then geoid=14;
-else if  county2_char= "1600" then geoid=15;
-else if  county2_char= "1701 to 1704" then geoid=16;
-else if  county2_char= "1801 to 1803" then geoid=17;
-else if  county2_char= "1900 or 2900" then geoid=18;
-else if  county2_char= "2000" then geoid=19;
-else if  county2_char= "2100" then geoid=20;
-else if  county2_char= "2201 to 2202" then geoid=21;
-else if  county2_char= "2300 or 2400" then geoid=22;
-else if  county2_char= "2500" then geoid=23;
-else if  county2_char= "2600 or 2700" then geoid=24;
-else if  county2_char= "2800" then geoid=25;
-else if  county2_char= "3001 to 3003" then geoid=26;
-else if  county2_char= "3101 to 3108" then geoid=27;
-else if  county2_char= "3200 or 3300" then geoid=28;
-else if  county2_char= "3400" then geoid=29;
-else if  county2_char= "3500" then geoid=30;
-else if  county2_char= "3600" then geoid=31;
-else if  county2_char= "3700" then geoid=32;
-else if  county2_char= "3800" then geoid=33;
-else if  county2_char= "3900" then geoid=34;
-else if  county2_char= "4000" then geoid=35;
-else if  county2_char= "4100 or 4500" then geoid=36;
-else if  county2_char= "4200" then geoid=37;
-else if  county2_char= "4300" then geoid=38;
-else if  county2_char= "4400" then geoid=39;
-else if  county2_char= "4600 or 4700" then geoid=40;
-else if  county2_char= "4800" then geoid=41;
-else if  county2_char= "4900 or 5100" then geoid=42;
-else if  county2_char= "5001 to 5003" then geoid=43;
-else if  county2_char= "5200" then geoid=44;
-else if  county2_char= "5300 or 5400" then geoid=45;
 
-run;
-
-proc sort data= fiveyeartotal_othervacant;
-by geoid;
-run;
-
-data fiveyeartotal_othervacant_c;
-merge fiveyeartotal_othervacant calculate_calibration;
-by geoid;
-
-hhwt_geo=.; 
-
-hhwt_geo=hhwt*calibration*0.2; 
-hhwt_ori= hhwt*0.2;
-label hhwt_geo="Household Weight Calibrated to Steven Estimates for Households"
-	  calibration="Ratio of Steven 2015 estimate to ACS 2013-17 for 45 geographic units"	
-		hhwt_ori="Original Household Weight";
-run; 
-
- data fiveyeartotal_othervacant_c2; 
-   set fiveyeartotal_othervacant_c;
-	by county2_char;
-	retain group 0;
-	if first.county2_char then group=group+1;
- run;
-data fiveyeartotal_othervacant_cat;
-	merge fiveyeartotal_othervacant_c2 (in=a) categories;
-	if a;
-	by group ;
-
-	label category="County/PUMA Group Designation";
-run;
 /*export dataset*/
- data NCHsg.fiveyeartotal_othervacant_alt(label= "NC other vacant units 13-17 pooled alternative file"); 
-   set fiveyeartotal_othervacant_cat;
+ data DMPED.other_2022_vacant_alt (label= "DC other vacant units 2022 alternative file"); 
+   set other_vacant_2022;
+	hhwt_ori= hhwt*0.2;
  run;
 
- proc contents data= NCHsg.fiveyeartotal_othervacant_alt; run;
+ proc contents data= DMPED.other_2022_vacant_alt; run;
 
-proc tabulate data=NCHsg.fiveyeartotal_othervacant_altformat=comma12. noseps missing;
-  class county2_char;
-  var hhwt_geo hhwt_ori;
+proc tabulate data=DMPED.other_2022_vacant_alt format=comma12. noseps missing;
+  class upuma;
+  var hhwt_ori;
   table
-    all='Total' county2_char=' ',
-    sum='Sum of HHWTs' * (hhwt_geo='Adjusted to 2015 estimates' hhwt_ori= 'Original 5-year')
+    all='Total' upuma=' ',
+    sum='Sum of HHWTs' * (hhwt_ori= 'Original 5-year')
   / box='Seasonal vacant housing units';
   *format county2_char county2_char.;
 run;
 
-proc freq data=NCHsg.fiveyeartotal_othervacant_alt;
-by county2_char;
+proc freq data=DMPED.other_2022_vacant_alt;
+by upuma;
 tables vacancy /nopercent norow nocol out=other_vacant;
-weight hhwt_geo;
-*format county2_char county2_char.;
+weight hhwt_ori;
 run; 
 
 
