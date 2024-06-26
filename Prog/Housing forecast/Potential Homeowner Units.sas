@@ -22,12 +22,12 @@ option spool;
 data maxunits;
 	set realpr_r.num_units_city;
 
-	keep city units_owner: ;
+	keep city units_owner: units_coop:;
 
 	run;
 
 *look at owner point files going back in time. */;
-%let real=2002_05 2003_07 2004_07 2005_06 2006_07 2007_05 2008_06 2009_06 2010_07 2011_06 2012_06 2013_03 2014_09 2016_04 
+%let real=2002_05 2003_07 2004_07 2005_06 2006_07 2007_05 2008_06 2009_06 2010_07 2011_06 2012_06 2013_03 2014_01 2016_04 
 		  2017_02 2018_05 2019_09 2020_05 2021_01 2022_06 2023_05 2024_05;
 
 %let year=2002 2003 2004 2005 2006 2007 2008 2009 2010 2011 2012 2013 2014 2016 2017 2018 2019 2020 2021 2022 2023 2024;
@@ -44,7 +44,7 @@ data maxunits;
 		year=&y.;
 		count=1; 
 
-		if ssl="0131    2127" and address2="STATE DEPARTMENT" then output except_&y.;
+		if ((ssl="0131    2127" and address2="STATE DEPARTMENT")| PREMISEADD= "WATKINS ALLEY SE WASHINGTON DC 00000") then output except_&y.;
 		else output ownerpt_&y.; 
 
 	run;
@@ -91,9 +91,8 @@ data maxunits;
 			where ui_proptype="12";
 
 
-			*assuming all owner occupied; 
-			Yes=no_units;
-			No=0;
+			Yes=NO_OWNOCCT;
+			No=(NO_units - NO_OWNOCCT);
 			 
 			run; 
 
@@ -140,3 +139,27 @@ data maxunits;
 %mend;
 
 %getdata;
+*fix number of units for 2021 coops (only zeros reported in 2021, replacing with 2022 values);
+proc sort data=coop_2021;
+by ssl;
+proc sort data=coop_2022;
+by ssl;
+data fixcoop2021;
+merge coop_2021 (in=a drop=yes no no_units NO_OWNOCCT) coop_2022 (keep=ssl  no_units NO_OWNOCCT);
+by Ssl;
+if a;
+	Yes=NO_OWNOCCT;
+	No=(NO_units - NO_OWNOCCT);
+
+run;
+proc summary data=fixcoop2021;
+		var yes no; 
+		output out=coop_sum_2021f sum= ;
+		run; 
+proc contents data=ownerpt_2002;
+run;
+proc print data=coop_2020;
+var ssl premiseadd NO_OWNOCCT no_units;run;
+proc freq data=coop_2021;
+tables no_units;
+run;
