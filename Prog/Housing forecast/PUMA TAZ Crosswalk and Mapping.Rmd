@@ -23,6 +23,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 library(tidyverse)
 library (dplyr)
+library(here)
 
 #install.packages("Rcpp")
 #library(Rcpp)
@@ -376,7 +377,10 @@ dc_blocks_taz_area_nodupes =
 
 dc_block20_taz_puma22 = 
   dc_block20_taz_puma22 %>%
-  mutate(across(.cols = matches("POP2|HHPOP|HH2") & !matches("2020|POP20$|HH20$"), 
+  mutate(across(.cols = matches("POP2|HHPOP|HH2") 
+      # Edit: Want to keep 2020 pop figures in output
+      # & !matches("2020|POP20$|HH20$")
+      , 
                .fns = ~case_when(
                  is.na(block_taz_wt) ~ 0, 
                  is.finite(block_taz_wt) ~ block_taz_wt * .x,
@@ -394,7 +398,9 @@ dc_block20_taz_puma22 =
 
   puma22_sum_taz_forecast = st_drop_geometry(dc_block20_taz_puma22) %>%
   group_by(PUMACE20)%>%
-  summarize( PUMA_POP2025 = sum(BLOCK_POP2025, na.rm = T),
+  summarize( PUMA_POP2020 = sum(BLOCK_POP2020, na.rm = T),
+             PUMA_HHPOP2020 = sum(BLOCK_HHPOP2020, na.rm = T),
+             PUMA_POP2025 = sum(BLOCK_POP2025, na.rm = T),
              PUMA_HHPOP2025 = sum(BLOCK_HHPOP2025, na.rm = T),
              PUMA_HH2025 = sum(BLOCK_HH2025, na.rm = T),
              PUMA_POP2030 = sum(BLOCK_POP2030, na.rm = T),
@@ -415,7 +421,7 @@ dc_block20_taz_puma22 =
              )
   
    # Save this summary dataset
-
+  write_csv(puma22_sum_taz_forecast, here("Prog", "Housing forecast", "PUMA22_Proj_Summed_Taz.csv"))
 
     
 # write_csv(dc_blocks_taz_area_nodupes, "H:/DC_test.csv" )
