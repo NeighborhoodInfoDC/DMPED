@@ -15,6 +15,7 @@
 %include "\\sas1\DCdata\SAS\Inc\StdLocal.sas";
 
 ** Define libraries **;
+%DCData_lib( DMPED )
 %DCData_lib( PresCat, local=n )
 %DCData_lib( RealProp, local=n )
 
@@ -24,11 +25,11 @@
 
   proc tabulate data=PresCat.Project_assisted_units format=comma10. noseps missing;
     where ProgCat in &ProgCatValues;
-    class ward2012;
+    class ward2022;
     var mid_asst_units;
     table 
       /** Rows **/
-      all='\b Total' Ward2012=' ',
+      all='\b Total' ward2022=' ',
       /** Columns **/
       n='Projects'
       sum='Assisted units' * ( mid_asst_units=' ' )
@@ -50,7 +51,7 @@
 %macro Expiration_tbl( Portfolio=, Title=, Date=poa_end );
 
   proc tabulate data=Subsidy_project_owner format=comma10. noseps missing;
-    where Subsidy_active and Portfolio = &Portfolio and year( &date ) >= 2015;
+    where Subsidy_active and Portfolio = &Portfolio and year( &date ) >= 2024;
     class &Date;
     var units_assist;
     table 
@@ -159,7 +160,7 @@ proc format;
     20, 30 = 'Other subsidies/combinations';
 run;
 
-ods rtf file="D:\DCData\Libraries\PresCat\Prog\Strikeforce_tbls.rtf" style=Styles.Rtf_arial_9pt;
+ods rtf file="&_dcdata_default_path\DMPED\Prog\Housing Forecast\DMPED_tbls.rtf" style=Styles.Rtf_arial_9pt;
 
 %Ward_tbl( ProgCatValues=( 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 20, 30 ), Title="All projects" )
 
@@ -184,7 +185,7 @@ ods rtf file="D:\DCData\Libraries\PresCat\Prog\Strikeforce_tbls.rtf" style=Style
 ods rtf close;
 
 
-ods rtf file="D:\DCData\Libraries\PresCat\Prog\Strikeforce_tbls_handout.rtf" style=Styles.Rtf_arial_9pt;
+ods rtf file="&_dcdata_default_path\DMPED\Prog\Housing Forecast\DMPED_tbls_handout.rtf" style=Styles.Rtf_arial_9pt;
 
 options nodate nonumber missing='-';
 
@@ -197,16 +198,16 @@ proc tabulate data=PresCat.Project_assisted_units format=comma10. noseps missing
     /** Rows **/
     all='\b Total' ProgCat=' ',
     /** Columns **/
-    n='Projects' * ( all='Total' ward2012=' ' )
+    n='Projects' * ( all='Total' ward2022=' ' )
     ;
   table 
     /** Rows **/
     all='\b Total' ProgCat=' ',
     /** Columns **/
-    sum='Assisted units' * ( all='Total' ward2012=' ' ) * mid_asst_units=' '
+    sum='Assisted units' * ( all='Total' ward2022=' ' ) * mid_asst_units=' '
     ;
   format ProgCat ProgCat.;
-  title1 "Prepared for District of Columbia Housing Preservation Strike Force";
+  title1 "Prepared for District of Columbia Deputy Mayor for Planning and Economic Development";
   title2 " ";
   title3 "Project and assisted unit counts";
 run;
