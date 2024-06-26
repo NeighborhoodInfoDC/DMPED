@@ -400,6 +400,7 @@ dc_block20_taz_puma22 =
   group_by(PUMACE20)%>%
   summarize( PUMA_POP2020 = sum(BLOCK_POP2020, na.rm = T),
              PUMA_HHPOP2020 = sum(BLOCK_HHPOP2020, na.rm = T),
+             PUMA_HH2020 = sum(BLOCK_HH2020, na.rm = T),
              PUMA_POP2025 = sum(BLOCK_POP2025, na.rm = T),
              PUMA_HHPOP2025 = sum(BLOCK_HHPOP2025, na.rm = T),
              PUMA_HH2025 = sum(BLOCK_HH2025, na.rm = T),
