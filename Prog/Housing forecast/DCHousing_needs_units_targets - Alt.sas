@@ -43,7 +43,7 @@
 %DCData_lib( DMPED )
 %DCData_lib( Ipums )
 
-%let date=05312024Alt; 
+%let date=06272024Alt; 
 
 proc format;
 
@@ -58,30 +58,30 @@ proc format;
 	;
 
   value rcost
-	  1= "$0 to $349"
-	  2= "$350 to $699"
-	  3= "$700 to $999"
-	  4= "$1,000 to $1,499"
-	  5= "$1,500 to $2,499"
-	  6= "More than $2,500"
+	  1= "$0 to $899"
+	  2= "$900 to $1,499"
+	  3= "$1,500 to $1,899"
+	  4= "$1,900 to $2,399"
+	  5= "$2,400 to $2,799"
+	  6= "More than $2,800"
   ;
 
   value ocost
-	  1= "$0 to $349"
-	  2= "$350 to $699"
-	  3= "$700 to $999"
-	  4= "$1,000 to $1,499"
-	  5= "$1,500 to $2,499"
-	  6= "More than $2,500"
+	  1= "$0 to $1,499"
+	  2= "$1,500 to $2,199"
+	  3= "$2,200 to $2,799"
+	  4= "$2,800 to $3,499"
+	  5= "$3,500 to $4,499"
+	  6= "More than $4,500"
   ;
 
   value acost
-	  1= "$0 to $349"
-	  2= "$350 to $699"
-	  3= "$700 to $999"
-	  4= "$1,000 to $1,499"
-	  5= "$1,500 to $2,499"
-	  6= "More than $2,500"
+	  1= "$0 to $899"
+	  2= "$900 to $1,499"
+	  3= "$1,500 to $1,899"
+	  4= "$1,900 to $2,799"
+	  5= "$2,800 to $3,599"
+	  6= "More than $3,600"
    ;
 
   value inc_cat
@@ -101,64 +101,71 @@ proc format;
 	4= 'Mobile or other'
 	5= 'NA'
 	;
-  	  
+
+	value tenure
+	1 = 'Rent'
+	2 = 'Own'
+	; 
+  	 value paycategory
+  1 = 'Cannot pay more'
+  2 = 'Pays right amount' 
+  3 = 'Could pay more'
+  4 = 'Vacant';
+
 	 /* value afford
 
  1= 'natural affordable (rent < $750)'
   0= 'not natural affordable'; */
 run;
 
-/* We are really just interested in the 2022 file (filtered by MULTYEAR), which has the new PUMA designations. */
-%macro single_year(year);
+/* Because we downloaded 5-year data, no longer need the single year macro NCHsg and RegHsg used */
 
-	DATA DCvacant_&year. ;
-		SET Ipums.Acs_2018_22_vacant_DC ;
-		WHERE MULTYEAR = &year.;
-	RUN;
 
-	DATA DCarea_&year.;
-		SET Ipums.Acs_2018_22_dc;
-		WHERE MULTYEAR = &year.;
-	RUN;
+DATA DCvacant_2018_22 ;
+	SET Ipums.Acs_2018_22_vacant_DC ;
+RUN;
 
-	PROC SORT DATA = DCvacant_&year.;
-		BY upuma;
-	RUN;
+DATA DCarea_2018_22;
+	SET Ipums.Acs_2018_22_dc;
+RUN;
 
-	PROC SORT DATA = DCarea_&year.;
-		BY upuma;
-	RUN;
+/* Also, are now using just DC overall as opposed to by pumas
+PROC SORT DATA = DCvacant_2018_22;
+	BY upuma;
+RUN;
 
-/** NOTE: This is where we'd merge in PUMA crosswalk, but we are not going to bc we are just using 2022 with the new PUMAS.**/
+PROC SORT DATA = DCarea_2018_22;
+	BY upuma;
+RUN;
+*/
 
- %**create ratio for rent to rentgrs to adjust rents on vacant units**;
-	DATA Ratio_&year.;
+ **create ratio for rent to rentgrs to adjust rents on vacant units**;
+	DATA Ratio_2018_22;
 
-		  SET DCarea_&year.
+		  SET DCarea_2018_22
 		    (keep= rent rentgrs pernum gq ownershpd upuma
 		     where=(pernum=1 and gq in (1,2) and ownershpd in ( 22 )));
 		     
-		  Ratio_rentgrs_rent_&year. = rentgrs / rent;
+		  Ratio_rentgrs_rent_2018_22 = rentgrs / rent;
 	run;
 
-		proc means data=Ratio_&year.;
-		  var  Ratio_rentgrs_rent_&year. rentgrs rent;
-		  output out=Ratio_&year (keep=Ratio_rentgrs_rent_&year.) mean=;
+		proc means data=Ratio_2018_22;
+		  var  Ratio_rentgrs_rent_2018_22 rentgrs rent;
+		  output out=Ratio_2018_22 (keep=Ratio_rentgrs_rent_2018_22) mean=;
 		run;
 
-/* data Housing_needs_baseline_&year._1;*/
-
-  data Housing_needs_baseline_&year._1;
-  set DCarea_&year.
+  data Housing_needs_baseline_2018_22_1;
+  set DCarea_2018_22
         (keep=year upuma serial pernum MET2013 hhwt hhincome numprec UNITSSTR BUILTYR2 bedrooms gq ownershp owncost ownershpd rentgrs valueh
          where=(pernum=1 and gq in (1,2) and ownershpd in ( 12,13,21,22 )));
 
 
-	 /* NOT NEEDED FOR SINGLE YEAR - adjust all incomes to 2022 $ to match use of 2022 family of 4 income limit in projections (originally based on use of most recent 5-year IPUMS; 
+	 /*  adjustment of income data is NOT needed for multiyear data, which is already adjusted to 2022 in this case
 		
-	  if hhincome ~=.n or hhincome ~=9999999 then do; 
-		 %dollar_convert( hhincome, hhincome_a, &year., 2022, series=CUUR0000SA0L2 )
-	   end;  */
+		if hhincome ~=.n or hhincome ~=9999999 then do; 
+		 %dollar_convert( hhincome, hhincome_a, MULTYEAR, 2022, series=CUUR0000SA0L2 )
+	   end; */ 
+
 
 	*create HUD_inc - uses 2022 limits but has categories for 120-200% and 200%+ AMI; 
 	%macro Hud_inc_22_dmped( hhinc=, hhsize= );
@@ -248,40 +255,39 @@ run;
  
 
 %mend Hud_inc_22_dmped;
-%Hud_inc_22_dmped(hhinc=hhincome, hhsize = numprec);
-
+%Hud_inc_22_dmped(hhinc=hhincome, hhsize = numprec); 
 run; 
 
-data Housing_needs_baseline_&year.;
-  set Housing_needs_baseline_&year._1;
+data Housing_needs_baseline_2018_22;
+  set Housing_needs_baseline_2018_22_1;
 
-	 *adjust housing costs for inflation; 
+	/* adjust housing costs for inflation IS NOT NEEDED FOR MULTI-YEAR DATA; 
 
 	  %dollar_convert( rentgrs, rentgrs_a, 2022, 2022, series=CUUR0000SA0L2 )
 	  %dollar_convert( owncost, owncost_a, 2022, 2022, series=CUUR0000SA0L2 )
-	  %dollar_convert( valueh, valueh_a, 2022, 2022, series=CUUR0000SA0L2 )
+	  %dollar_convert( valueh, valueh_a, 2022, 2022, series=CUUR0000SA0L2 ) */
 
   	** Cost-burden flag & create cost ratio **;
 	    if ownershpd in (21, 22)  then do;
 
-			if hhincome_a > 0 then Costratio= (rentgrs_a*12)/hhincome_a;
-			  else if hhincome_a = 0 and rentgrs_a > 0 then costratio=1;
-			  else if hhincome_a =0 and rentgrs_a = 0 then costratio=0; 
-			  else if hhincome_a < 0 and rentgrs_a >= 0 then costratio=1; 
+			if hhincome > 0 then Costratio= (rentgrs*12)/hhincome;
+			  else if hhincome = 0 and rentgrs > 0 then costratio=1;
+			  else if hhincome =0 and rentgrs = 0 then costratio=0; 
+			  else if hhincome < 0 and rentgrs >= 0 then costratio=1; 
 			  			  
 		end;
 
 	    else if ownershpd in ( 12,13 ) then do;
-			if hhincome_a > 0 then Costratio= (owncost_a*12)/hhincome_a;
-			  else if hhincome_a = 0 and owncost_a > 0 then costratio=1;
-			  else if hhincome_a =0 and owncost_a = 0 then costratio=0; 
-			  else if hhincome_a < 0 and owncost_a >= 0 then costratio=1; 
+			if hhincome > 0 then Costratio= (owncost*12)/hhincome;
+			  else if hhincome = 0 and owncost > 0 then costratio=1;
+			  else if hhincome =0 and owncost = 0 then costratio=0; 
+			  else if hhincome < 0 and owncost >= 0 then costratio=1; 
 		end;
 	    
 			if Costratio >= 0.3 then costburden=1;
-		    else if HHIncome_a~=. then costburden=0;
+		    else if HHIncome~=. then costburden=0;
 			if costratio >= 0.5 then severeburden=1;
-			else if HHIncome_a~=. then severeburden=0; 
+			else if HHIncome~=. then severeburden=0; 
 
 		tothh = 1;
  	
@@ -294,31 +300,31 @@ data Housing_needs_baseline_&year.;
 
 	 *create maximum desired or affordable rent based on HUD_Inc categories*; 
 	
-	  if hud_inc in(1 2 3) then max_rent=HHINCOME_a/12*.3; *under 80% of AMI then pay 30% threshold; 
-	  if hud_inc =4 then max_rent=HHINCOME_a/12*.261; *avg for all HH hud_inc=4 in DC 2022; 
-	  if costratio <=.157 and hud_inc = 5 then max_rent=HHINCOME_a/12*.157; *avg for all HH hud_inc=5 in DC; 	
-		else if hud_inc = 5 then max_rent=HHINCOME_a/12*costratio; *allow 120-200% above average to spend more; 
-	  if costratio <=.121 and hud_inc = 6 then max_rent=HHINCOME_a/12*.121; *avg for all HH hud_inc=6 in NC; 
-	  	else if hud_inc=6 then max_rent=HHINCOME_a/12*costratio; *allow 200%+ above average to spend more;  
+	  if hud_inc in(1 2 3) then max_rent=HHINCOME/12*.3; *under 80% of AMI then pay 30% threshold; 
+	  if hud_inc =4 then max_rent=HHINCOME/12*.261; *avg for all HH hud_inc=4 in DC 2022; 
+	  if costratio <=.157 and hud_inc = 5 then max_rent=HHINCOME/12*.157; *avg for all HH hud_inc=5 in DC; 	
+		else if hud_inc = 5 then max_rent=HHINCOME/12*costratio; *allow 120-200% above average to spend more; 
+	  if costratio <=.121 and hud_inc = 6 then max_rent=HHINCOME/12*.121; *avg for all HH hud_inc=6 in NC; 
+	  	else if hud_inc=6 then max_rent=HHINCOME/12*costratio; *allow 200%+ above average to spend more;  
      
 	 *create flag for household could "afford" to pay more; 
 		couldpaymore=.;
 
 		if max_rent ~= . then do; 
-			if max_rent > rentgrs_a*1.1 then couldpaymore=1; 
-			else if max_rent <= rentgrs_a*1.1 then couldpaymore=0; 
+			if max_rent > rentgrs*1.1 then couldpaymore=1; 
+			else if max_rent <= rentgrs*1.1 then couldpaymore=0; 
 		end; 
 
 		/* NOTE: Updated using DC 2022 HUD incomes for families, between 2 -3 HH size. 
 		Avg HH size in DC = 2.47*/
     	*rent cost categories that make more sense for rents - no longer used in targets;
 			rentlevel=.;
-			if 0 <=rentgrs_a<900 then rentlevel=1; *900 is between 30% monthly income for HH2 (855) and HH3 (961) extremely low income;
-            if 900 <=rentgrs_a<1500 then rentlevel=2; *1500 is between 30% monthly income for HH2 (1424) and HH3 (1600) with very low income; 
-            if 1500 <=rentgrs_a<1900 then rentlevel=3; *1900 is between 30% monthly income HH2 (1800) and HH3 (2025)with low incomes;
-            if 1900 <=rentgrs_a<2400 then rentlevel=4;
-            if 2400 <=rentgrs_a<2800 then rentlevel=5;
-            if rentgrs_a >= 2800 then rentlevel=6;
+			if 0 <=rentgrs<900 then rentlevel=1; *900 is between 30% monthly income for HH2 (855) and HH3 (961) extremely low income;
+            if 900 <=rentgrs<1500 then rentlevel=2; *1500 is between 30% monthly income for HH2 (1424) and HH3 (1600) with very low income; 
+            if 1500 <=rentgrs<1900 then rentlevel=3; *1900 is between 30% monthly income HH2 (1800) and HH3 (2025)with low incomes;
+            if 1900 <=rentgrs<2400 then rentlevel=4;
+            if 2400 <=rentgrs<2800 then rentlevel=5;
+            if rentgrs >= 2800 then rentlevel=6;
 
 
 			mrentlevel=.;
@@ -332,12 +338,12 @@ data Housing_needs_baseline_&year.;
 		 *rent cost categories now used in targets that provide a set of categories useable for renters and owners combined; 
 			
 			allcostlevel=.;
-			if rentgrs_a<900 then allcostlevel=1;
-            if 900 <=rentgrs_a<1500 then allcostlevel=2;
-            if 1500 <=rentgrs_a<1900 then allcostlevel=3;
-            if 1900 <=rentgrs_a<2800 then allcostlevel=4;
-            if 2800 <=rentgrs_a<3600 then allcostlevel=5;
-            if rentgrs_a >= 3600 then allcostlevel=6;
+			if rentgrs<900 then allcostlevel=1;
+            if 900 <=rentgrs<1500 then allcostlevel=2;
+            if 1500 <=rentgrs<1900 then allcostlevel=3;
+            if 1900 <=rentgrs<2800 then allcostlevel=4;
+            if 2800 <=rentgrs<3600 then allcostlevel=5;
+            if rentgrs >= 3600 then allcostlevel=6;
 
 
 			mallcostlevel=.;
@@ -360,12 +366,12 @@ data Housing_needs_baseline_&year.;
 
 			else if costburden=0 then do;
 
-				if rentgrs_a<900 then mallcostlevel=1;
-                if 900 <=rentgrs_a<1500 then mallcostlevel=2;
-                if 1500 <=rentgrs_a<1900 then mallcostlevel=3;
-                if 1900 <=rentgrs_a<2800 then mallcostlevel=4;
-                if 2800 <=rentgrs_a<3600 then mallcostlevel=5;
-                if rentgrs_a >= 3600 then mallcostlevel=6;
+				if rentgrs<900 then mallcostlevel=1;
+                if 900 <=rentgrs<1500 then mallcostlevel=2;
+                if 1500 <=rentgrs<1900 then mallcostlevel=3;
+                if 1900 <=rentgrs<2800 then mallcostlevel=4;
+                if 2800 <=rentgrs<3600 then mallcostlevel=5;
+                if rentgrs >= 3600 then mallcostlevel=6;
 
 
 			end; 
@@ -386,19 +392,19 @@ data Housing_needs_baseline_&year.;
 
 		*create maximum desired or affordable owner costs based on HUD_Inc categories*; 
 
-		if hud_inc in(1 2 3) then max_ocost=HHINCOME_a/12*.3; *under 80% of AMI then pay 30% threshold; 
-		if hud_inc =4 then max_ocost=HHINCOME_a/12*.261; *avg for all HH hud_inc=4in DC;
-		if costratio <=.157 and hud_inc = 5 then max_ocost=HHINCOME_a/12*.157; *avg for all HH HUD_inc=5; 
-			else if hud_inc = 5 then max_ocost=HHINCOME_a/12*costratio; *allow 120-200% above average to pay more; 
-		if costratio <=.121 and hud_inc=6 then max_ocost=HHINCOME_a/12*.121; *avg for all HH HUD_inc=6;
-			else if hud_inc = 6 then max_ocost=HHINCOME_a/12*costratio; *allow 120-200% above average to pay more; 
+		if hud_inc in(1 2 3) then max_ocost=HHINCOME/12*.3; *under 80% of AMI then pay 30% threshold; 
+		if hud_inc =4 then max_ocost=HHINCOME/12*.261; *avg for all HH hud_inc=4in DC;
+		if costratio <=.157 and hud_inc = 5 then max_ocost=HHINCOME/12*.157; *avg for all HH HUD_inc=5; 
+			else if hud_inc = 5 then max_ocost=HHINCOME/12*costratio; *allow 120-200% above average to pay more; 
+		if costratio <=.121 and hud_inc=6 then max_ocost=HHINCOME/12*.121; *avg for all HH HUD_inc=6;
+			else if hud_inc = 6 then max_ocost=HHINCOME/12*costratio; *allow 120-200% above average to pay more; 
 		
 		*create flag for household could "afford" to pay more; 
 		couldpaymore=.;
 
 		if max_ocost ~= . then do; 
-			if max_ocost > owncost_a*1.1 then couldpaymore=1; 
-			else if max_ocost <= owncost_a*1.1 then couldpaymore=0; 
+			if max_ocost > owncost*1.1 then couldpaymore=1; 
+			else if max_ocost <= owncost*1.1 then couldpaymore=0; 
 		end; 
 
 	    **** 
@@ -407,7 +413,7 @@ data Housing_needs_baseline_&year.;
 	    calculate monthly P & I payment using monthly mortgage rate and compounded interest calculation
 	    ******; 
 	    
-	    loan = .9 * valueh_a;
+	    loan = .9 * valueh;
 	    month_mortgage= (5.5 / 12) / 100; 
 	    monthly_PI = loan * month_mortgage * ((1+month_mortgage)**360)/(((1+month_mortgage)**360)-1);
 
@@ -422,7 +428,7 @@ data Housing_needs_baseline_&year.;
 		
 	
 		*owner cost categories that make more sense for owner costs - no longer used in targets;
-       /*NOTE: need to update for DC 2022*/
+		*ownlevel based on first-time homebuyers;
 			ownlevel=.;
 			if 0 <=total_month<1500 then ownlevel=1;
             if 1500 <=total_month<2200 then ownlevel=2;
@@ -433,23 +439,31 @@ data Housing_needs_baseline_&year.;
 
 
 		mownlevel=.;
-			if 0 <=max_ocost<1500 then ownlevel=1;
-            if 1500 <=max_ocost<2200 then ownlevel=2;
-            if 2200 <=max_ocost<2800 then ownlevel=3;
-            if 2800 <=max_ocost<3500 then ownlevel=4;
-            if 3500 <=max_ocost<4500 then ownlevel=5;
-            if max_ocost >= 4500 then ownlevel=6;
+			if 0 <=max_ocost<1500 then mownlevel=1;
+            if 1500 <=max_ocost<2200 then mownlevel=2;
+            if 2200 <=max_ocost<2800 then mownlevel=3;
+            if 2800 <=max_ocost<3500 then mownlevel=4;
+            if 3500 <=max_ocost<4500 then mownlevel=5;
+            if max_ocost >= 4500 then mownlevel=6;
 
+			*curownlevel based on owners current owner costs;
+			curownlevel=.;
+			if 0 <=owncost<1500 then curownlevel=1;
+            if 1500 <=owncost<2200 then curownlevel=2;
+            if 2200 <=owncost<2800 then curownlevel=3;
+            if 2800 <=owncost<3500 then curownlevel=4;
+            if 3500 <=owncost<4500 then curownlevel=5;
+            if owncost >= 4500 then curownlevel=6;
 
 
 		 *owner cost categories now used in targets that provide a set of categories useable for renters and owners combined; 
 			allcostlevel=.;
-			if owncost_a<900 then allcostlevel=1;
-			if 900 <=owncost_a<1500 then allcostlevel=2;
-			if 1500 <=owncost_a<1900 then allcostlevel=3;
-			if 1900 <=owncost_a<2800 then allcostlevel=4;
-			if 2800 <=owncost_a<3600 then allcostlevel=5;
-			if owncost_a >= 3600 then allcostlevel=6; 
+			if owncost<900 then allcostlevel=1;
+			if 900 <=owncost<1500 then allcostlevel=2;
+			if 1500 <=owncost<1900 then allcostlevel=3;
+			if 1900 <=owncost<2800 then allcostlevel=4;
+			if 2800 <=owncost<3600 then allcostlevel=5;
+			if owncost >= 3600 then allcostlevel=6; 
 
 
 	
@@ -469,12 +483,12 @@ data Housing_needs_baseline_&year.;
 
 			else if costburden=0 then do; 
 
-				if owncost_a<900 then mallcostlevel=1;
-				if 900 <=owncost_a<1500 then mallcostlevel=2;
-				if 1500 <=owncost_a<1900 then mallcostlevel=3;
-				if 1900 <=owncost_a<2800 then mallcostlevel=4;
-				if 2800 <=owncost_a<3600 then mallcostlevel=5;
-				if owncost_a >= 3600 then mallcostlevel=6;
+				if owncost<900 then mallcostlevel=1;
+				if 900 <=owncost<1500 then mallcostlevel=2;
+				if 1500 <=owncost<1900 then mallcostlevel=3;
+				if 1900 <=owncost<2800 then mallcostlevel=4;
+				if 2800 <=owncost<3600 then mallcostlevel=5;
+				if owncost >= 3600 then mallcostlevel=6;
 
 			end; 
   end;
@@ -519,6 +533,7 @@ data Housing_needs_baseline_&year.;
 				  mallcostlevel='Housing Cost Categories (tenure combined) based on Max affordable-desired Rent-Owner Cost'
 				  ownlevel = 'Owner Cost Categories based on First-Time HomeBuyer Costs'
 				  mownlevel = 'Owner Cost Categories based on Max affordable-desired First-Time HomeBuyer Costs'
+				  curownlevel = 'Owner Cost Categories based on Current Owner Costs'
 				  couldpaymore = "Occupant Could Afford to Pay More - Costs+10% are > Max affordable cost"
 				  paycategory = "Whether Occupant pays too much, the right amount or too little" 
                   structure = 'Housing structure type'
@@ -526,14 +541,15 @@ data Housing_needs_baseline_&year.;
 				;
 
 	
-format mownlevel ownlevel ocost. rentlevel mrentlevel rcost. allcostlevel mallcostlevel acost. hud_inc hud_inc. structure structure.; 
+format mownlevel ownlevel curownlevel ocost. rentlevel mrentlevel rcost. allcostlevel mallcostlevel acost. hud_inc hud_inc. structure structure. tenure tenure. paycategory paycategory.; 
 run;
 
-data Housing_needs_vacant_&year. Other_vacant_&year. ;
 
-  set DCvacant_&year.(keep=year serial hhwt bedrooms gq vacancy rent valueh upuma BUILTYR2 UNITSSTR);
+data Housing_needs_vacant_2018_22 Other_vacant_2018_22 ;
 
-  	if _n_ = 1 then set Ratio_&year.;
+  set DCvacant_2018_22(keep=year serial hhwt owncost bedrooms gq vacancy rent valueh upuma BUILTYR2 UNITSSTR);
+
+  	if _n_ = 1 then set Ratio_2018_22;
 
  	retain Total 1;
 
@@ -547,9 +563,9 @@ data Housing_needs_vacant_&year. Other_vacant_&year. ;
 	    Tenure = 1;
 	    
 	    	** Impute gross rent for vacant units **;
-	  		rentgrs = rent*Ratio_rentgrs_rent_&year.;
+	  		rentgrs = rent*Ratio_rentgrs_rent_2018_22;
 
-			  %dollar_convert( rentgrs, rentgrs_a, &year., 2022, series=CUUR0000SA0L2 )
+			 /* Don't need inflation adjustment for multiyear data %dollar_convert( rentgrs, rentgrs_a, &year., 2022, series=CUUR0000SA0L2 )*/
 
 		/* if rent in ( 9999999, .n , . ) then affordable_vacant=.;
 		else do; 
@@ -563,22 +579,22 @@ data Housing_needs_vacant_&year. Other_vacant_&year. ;
 		/*create rent level categories*/ 
 			
 		rentlevel=.;
-		if 0 <=rentgrs_a<900 then rentlevel=1; *900 is between 30% monthly income for HH2 (855) and HH3 (961) extremely low income;
-         if 900 <=rentgrs_a<1500 then rentlevel=2; *1500 is between 30% monthly income for HH2 (1424) and HH3 (1600) with very low income; 
-         if 1500 <=rentgrs_a<1900 then rentlevel=3; *1900 is between 30% monthly income HH2 (1800) and HH3 (2025)with low incomes;
-         if 1900 <=rentgrs_a<2400 then rentlevel=4;
-         if 2400 <=rentgrs_a<2800 then rentlevel=5;
-         if rentgrs_a >= 2800 then rentlevel=6;
+		if 0 <=rentgrs<900 then rentlevel=1; *900 is between 30% monthly income for HH2 (855) and HH3 (961) extremely low income;
+         if 900 <=rentgrs<1500 then rentlevel=2; *1500 is between 30% monthly income for HH2 (1424) and HH3 (1600) with very low income; 
+         if 1500 <=rentgrs<1900 then rentlevel=3; *1900 is between 30% monthly income HH2 (1800) and HH3 (2025)with low incomes;
+         if 1900 <=rentgrs<2400 then rentlevel=4;
+         if 2400 <=rentgrs<2800 then rentlevel=5;
+         if rentgrs >= 2800 then rentlevel=6;
 
 
 		/*create  categories now used in targets for renter/owner costs combined*/ 
 				allcostlevel=.;
-				if rentgrs_a<900 then allcostlevel=1;
-	            if 900 <=rentgrs_a<1500 then allcostlevel=2;
-	            if 1500 <=rentgrs_a<1900 then allcostlevel=3;
-	            if 1900 <=rentgrs_a<2800 then allcostlevel=4;
-	            if 2800 <=rentgrs_a<3600 then allcostlevel=5;
-	            if rentgrs_a >= 3600 then allcostlevel=6;
+				if rentgrs<900 then allcostlevel=1;
+	            if 900 <=rentgrs<1500 then allcostlevel=2;
+	            if 1500 <=rentgrs<1900 then allcostlevel=3;
+	            if 1900 <=rentgrs<2800 then allcostlevel=4;
+	            if 2800 <=rentgrs<3600 then allcostlevel=5;
+	            if rentgrs >= 3600 then allcostlevel=6;
 	;
 	  end;
 
@@ -594,8 +610,10 @@ data Housing_needs_vacant_&year. Other_vacant_&year. ;
 	    Using 5.5% as the effective mortgage rate for DC in 2022, 
 	    calculate monthly P & I payment using monthly mortgage rate and compounded interest calculation
 	    ******; 
-	    %dollar_convert( valueh, valueh_a, &year., 2022, series=CUUR0000SA0L2 )
-	    loan = .9 * valueh_a;
+	    /* Don't need inflation conversion of housing/income values for multiyear ACS
+		%dollar_convert( valueh, valueh_a, &year., 2022, series=CUUR0000SA0L2 )*/
+
+	    loan = .9 * valueh;
 	    month_mortgage= (5.5 / 12) / 100; 
 	    monthly_PI = loan * month_mortgage * ((1+month_mortgage)**360)/(((1+month_mortgage)**360)-1);
 
@@ -607,7 +625,7 @@ data Housing_needs_vacant_&year. Other_vacant_&year. ;
 	    tax_ins = .25 * monthly_PI; **taxes assumed to be 25% of monthly PI; 
 	    total_month = monthly_PI + PMI + tax_ins; **Sum of monthly payment components;
 		
-			/*create owner cost level categories*/ 
+			/*create owner cost level categories (first-time homebuyer)*/ 
 			ownlevel=.;
 				if 0 <=total_month<1500 then ownlevel=1;
 	            if 1500 <=total_month<2200 then ownlevel=2;
@@ -616,6 +634,14 @@ data Housing_needs_vacant_&year. Other_vacant_&year. ;
 	            if 3500 <=total_month<4500 then ownlevel=5;
 	            if total_month >= 4500 then ownlevel=6;
 
+			*curownlevel based on owners current owner costs;
+			curownlevel=.;
+			if 0 <=owncost<1500 then curownlevel=1;
+            if 1500 <=owncost<2200 then curownlevel=2;
+            if 2200 <=owncost<2800 then curownlevel=3;
+            if 2800 <=owncost<3500 then curownlevel=4;
+            if 3500 <=owncost<4500 then curownlevel=5;
+            if owncost >= 4500 then curownlevel=6;
 			
 			/*create  categories now used in targets for renter/owner costs combined*/ 
 				allcostlevel=.;
@@ -649,159 +675,221 @@ data Housing_needs_vacant_&year. Other_vacant_&year. ;
 		label rentlevel = 'Rent Level Categories based on Current Gross Rent'
 		 		  allcostlevel='Housing Cost Categories (tenure combined) based on Current Rent or First-time Buyer Mtg'
 				  ownlevel = 'Owner Cost Categories based on First-Time HomeBuyer Costs'
+				  curownlevel = 'Owner Cost Categories based on Current Owner Costs'
 				  paycategory = "Whether Occupant pays too much, the right amount or too little" 
 				  structureyear = 'Age of structure'
 				  structure = 'Housing structure type'
 				;
-	format ownlevel ocost. rentlevel rcost. vacancy_r VACANCY_F. allcostlevel acost. ; 
+	format ownlevel curownlevel ocost. rentlevel rcost. vacancy_r VACANCY_F. allcostlevel acost. paycategory paycategory.; ; 
 
 	*output other vacant - seasonal separately ;
-	if vacancy in (1, 2, 3) then output Housing_needs_vacant_&year.;
-	else if vacancy in (4, 7, 9) then output other_vacant_&year.; 
+	if vacancy in (1, 2, 3) then output Housing_needs_vacant_2018_22;
+	else if vacancy in (4, 7, 9) then output other_vacant_2018_22; 
 	run;
 
-%mend single_year; 
-
-%single_year(2022);
 
 
-/* We are really just interested in the 2022 file (filtered by MULTYEAR), which has the new PUMA designations. */
-/* City level AND PUMA level*/
-
-PROC CONTENTS data= Housing_needs_baseline_2022;
+PROC CONTENTS data= Housing_needs_baseline_2018_22;
 run;
 
-/* pulling in Steven's files for HH projections 
-data projectedHH;
-set DMPED.projection_for_calibration;
-upuma= puma;
-run;
-*/
-
-
-/*calculate average cost ratio for each hud_inc group that is used for maximum desired or affordable rent/owncost*/
-proc sort data= Housing_needs_baseline_2022;
-by hud_inc /*tenure*/;
-run;
-
-proc summary data= Housing_needs_baseline_2022;
-by hud_inc /*tenure*/;
-var costratio HHincome_a;
-weight hhwt; 
-output out= costratio_hudinc mean=;
-run;
-
-proc summary data= Housing_needs_baseline_2022;
-by hud_inc /*tenure*/;
-var HHincome_a owncost_a rentgrs_a;
-weight hhwt; 
-output out= incomecategories mean=;
-run;
-
-/*calibrate ipums to 2015 population projection 
-proc sort data= fiveyeartotal1;
-by geoid;
-run;
-proc summary data=fiveyeartotal1;
-by geoid;
-var totalpop;
-weight hhwt;
-output out=geo_sum sum=ACS_13_17;
-run; 
-proc sort data= projectedHH;
-by geoid;
-run;
-
-data calculate_calibration;
-merge geo_sum(in=a) projectedHH;
-by geoid;
-if a;
-calibration=(hh2015/ACS_13_17);
-run;
-
-data fiveyeartotal_c;
-merge fiveyeartotal1 calculate_calibration;
-by geoid;
-
-hhwt_geo=.; 
-
-hhwt_geo=hhwt*calibration*0.2; 
-hhwt_ori= hhwt*0.2;
-
-label hhwt_geo="Household Weight Calibrated to Steven Estimates for Households"
-	  calibration="Ratio of Steven 2015 estimate to ACS 2013-17 for 45 geographic units"
-	  hhwt_ori="Original Household Weight";
-
-run; 
-*/
-
-
-/*export dataset*/
- data DMPED.DC_2022_housing_needs_alt(label= "DC households 2022 alternative file"); 
-   set Housing_needs_baseline_2022;
-   hhwt_ori= hhwt*0.2; /*NOTE REVISIT THIS WHEN STEVEN GIVES US GUIDANCE ON WEIGHTS*/
+/*export datasets*/
+ data DMPED.DC_2018_22_housing_needs_alt(label= "DC households 2018-2022 alternative file"); 
+   set Housing_needs_baseline_2018_22;
+   /* hhwt_ori= hhwt*0.2; NOTE REVISIT THIS WHEN STEVEN GIVES US GUIDANCE ON WEIGHTS - any adjustment to hhwt needed?*/
  run;
 
- proc contents data= DMPED.DC_2022_housing_needs_alt;
+ proc contents data= DMPED.DC_2018_22_housing_needs_alt;
  run;
 
-proc tabulate data=DMPED.DC_2022_housing_needs_alt format=comma12. noseps missing;
-  class upuma;
-  var hhwt_ori;
-  table
-    all='Total' upuma=' ',
-    sum='Sum of HHWTs' * ( hhwt_ori= 'Original 5-year'  )
-  / box='Occupied housing units';
-run;
-
-
-
-
-/*export dataset*/
- data DMPED.DC_2022_vacant_alt(label= "NC vacant units 13-17 pooled alternative file"); 
-   set Housing_needs_vacant_2022;
-   hhwt_ori= hhwt*0.2; /*NOTE REVISIT THIS WHEN STEVEN GIVES US GUIDANCE ON WEIGHTS*/
+ data DMPED.DC_2018_22_vacant_alt(label= "DC vacant units 18-22 pooled alternative file"); 
+   set Housing_needs_vacant_2018_22;
+    /* hhwt_ori= hhwt*0.2; NOTE REVISIT THIS WHEN STEVEN GIVES US GUIDANCE ON WEIGHTS - any adjustment to hhwt needed?*/
  run;
 
  proc contents data= DMPED.DC_2022_vacant_alt; run;
 
-proc tabulate data=DMPED.DC_2022_vacant_alt format=comma12. noseps missing;
-  class county2_char;
-  var hhwt_ori;
-  table
-    all='Total' upuma=' ',
-    sum='Sum of HHWTs' * ( hhwt_ori= 'Original 5-year')
-  / box='Vacant (nonseasonal) housing units';
-  *format county2_char county2_char.;
-run;
-
-/*need to account for other vacant units in baseline and future targets for the region to complete picture of the total housing stock*/
-
-
-
-/*export dataset*/
- data DMPED.other_2022_vacant_alt (label= "DC other vacant units 2022 alternative file"); 
-   set other_vacant_2022;
+ data DMPED.other_2018_22_vacant_alt (label= "DC other vacant units 2022 alternative file"); 
+   set other_vacant_2018_22;
 	hhwt_ori= hhwt*0.2;
  run;
 
- proc contents data= DMPED.other_2022_vacant_alt; run;
 
-proc tabulate data=DMPED.other_2022_vacant_alt format=comma12. noseps missing;
-  class upuma;
-  var hhwt_ori;
-  table
-    all='Total' upuma=' ',
-    sum='Sum of HHWTs' * (hhwt_ori= 'Original 5-year')
-  / box='Seasonal vacant housing units';
-  *format county2_char county2_char.;
-run;
+ /*Make combined dataset of occupied/vacant */
 
-proc freq data=DMPED.other_2022_vacant_alt;
-by upuma;
-tables vacancy /nopercent norow nocol out=other_vacant;
-weight hhwt_ori;
+data all(label= "DC all regular housing units 2018-22");;
+	set Housing_needs_baseline_2018_22 Housing_needs_vacant_2018_22 (in=a);
+	/* if a then inc=6; NOTE: We don't use inc in this script - anything we want to do instead here?
+format inc inc_cat.;*/
 run; 
 
 
+/* Desired tables 
+• Household Tenure (e.g. Number/Share of Households: Renter, Owner, Total)
+• Household Income (HUD AMI Categories)
+• Housing Tenure by Household Income (HUD AMI categories)
+• Housing Cost-burden by Income/Tenure
+• Housing Unit costs renters
+• Housing unit costs owners (current payment)
+• Housing unit costs owners (for first time homebuyer)
+• By Tenure: Households by “affordable/desired” housing cost band vs. supply at that level
+• Cost mismatch/competition for lower cost units: Figure 20 in 2019 report by Housing Cost by Ability to Pay by Tenure
+*/
 
+
+/* HOUSING TENURE */
+
+proc freq data=Housing_needs_baseline_2018_22;
+tables tenure /  out=tenure_totals;
+weight hhwt;
+run; 
+
+proc export data=tenure_totals
+ 	outfile="C:\DCData\Libraries\DMPED\Prog\Housing Forecast\Tenure_totals_occupied_&date..csv"
+   dbms=csv
+   replace;
+   run;
+
+/* HOUSING INCOME */
+
+proc freq data=Housing_needs_baseline_2018_22;
+tables hud_inc /  out=hud_inc_cat;
+weight hhwt;
+run; 
+
+proc export data=hud_inc_cat
+ 	outfile="C:\DCData\Libraries\DMPED\Prog\Housing Forecast\hud_inc_cat_&date..csv"
+   dbms=csv
+   replace;
+   run;
+
+/* Housing Tenure by Household Income (HUD AMI categories)*/
+proc freq data=Housing_needs_baseline_2018_22;
+tables hud_inc*tenure /nopercent norow  out=tenure_hud_inc_cat OUTPCT;
+weight hhwt;
+run; 
+
+
+proc export data=tenure_hud_inc_cat
+ 	outfile="C:\DCData\Libraries\DMPED\Prog\Housing Forecast\tenure_hud_inc_cat_&date..csv"
+   dbms=csv
+   replace;
+   run;
+
+/*HOUSING COST BURDEN BY INCOME/TENURE */
+proc freq data=Housing_needs_baseline_2018_22;
+tables tenure*costburden*hud_inc /  out=burden_tenure_hud_inc OUTPCT;
+weight hhwt;
+run;
+
+proc export data=burden_tenure_hud_inc
+ 	outfile="C:\DCData\Libraries\DMPED\Prog\Housing Forecast\burden_tenure_hud_inc_&date..csv"
+   dbms=csv
+   replace;
+   run;
+
+/*HOUSING UNIT COST - RENT*/
+*Including occupied and vacant units;
+proc freq data=all;
+where tenure = 1;
+tables rentlevel/  out=renter_costs_cat_all_units;
+weight hhwt;
+run;
+
+proc export data=renter_costs_cat_all_units
+ 	outfile="C:\DCData\Libraries\DMPED\Prog\Housing Forecast\renter_costs_cat_all_units_&date..csv"
+   dbms=csv
+   replace;
+   run;
+
+*NOTE FREQ in output is not a weighted count. Is the mean being successfully weighted?;
+proc summary data= all (where = (tenure = 1));
+var rentgrs;
+weight hhwt; 
+output out= rent_all_units mean=;
+run;
+
+/*Not exporting for now*/
+
+
+/*HOUSING COSTS OWNERS (CURRENT PAYMENT)*/
+*Including occupied and vacant units;
+proc freq data=all;
+where tenure = 2;
+tables curownlevel /  out=own_costs_cat_all_units;
+weight hhwt;
+run;
+
+proc export data=own_costs_cat_all_units
+ 	outfile="C:\DCData\Libraries\DMPED\Prog\Housing Forecast\own_costs_cat_all_units_&date..csv"
+   dbms=csv
+   replace;
+   run;
+
+/* HOUSING COSTS FOR FIRST-TIME OWNERS */
+*Including occupied and vacant units;
+proc freq data=all;
+where tenure = 2;
+tables ownlevel /  out=first_own_costs_cat_all_units;
+weight hhwt;
+run;
+
+proc export data=first_own_costs_cat_all_units
+ 	outfile="C:\DCData\Libraries\DMPED\Prog\Housing Forecast\first_own_costs_cat_all_units_&date..csv"
+   dbms=csv
+   replace;
+   run;
+
+/* BY TENURE: HOUSEHOLDS "AFFORDABLE/DESIRED" HOUSING COST BAND VS SUPPLY AT THAT LEVEL */
+
+*all tenures, occupied units;
+PROC FREQ DATA = Housing_needs_baseline_2018_22; 
+tables tenure*mallcostlevel /nocol nopercent  out=afford_hous_cost_tenure OUTPCT;
+weight hhwt;
+run;
+
+proc export data=afford_hous_cost_tenure
+ 	outfile="C:\DCData\Libraries\DMPED\Prog\Housing Forecast\afford_hous_cost_tenure_&date..csv"
+   dbms=csv
+   replace;
+   run;
+
+*renters, occupied units;
+PROC FREQ DATA = Housing_needs_baseline_2018_22; 
+where tenure = 1;
+tables mrentlevel /  out=afford_rent_cost ;
+weight hhwt;
+run;
+
+proc export data=afford_rent_cost
+ 	outfile="C:\DCData\Libraries\DMPED\Prog\Housing Forecast\afford_rent_cost_&date..csv"
+   dbms=csv
+   replace;
+   run;
+
+*owners, occupied units;
+PROC FREQ DATA = Housing_needs_baseline_2018_22; 
+where tenure = 2;
+tables mownlevel /  out=afford_own_cost ;
+weight hhwt;
+run; 
+
+
+proc export data=afford_own_cost
+ 	outfile="C:\DCData\Libraries\DMPED\Prog\Housing Forecast\afford_own_cost_&date..csv"
+   dbms=csv
+   replace;
+   run;
+
+/*Cost mismatch/competition for lower cost units: Figure 20 in 2019 report by Housing Cost by Ability to Pay by Tenure*/
+
+*all units;
+PROC FREQ DATA = all; 
+tables tenure*paycategory*allcostlevel /  out=abil_pay_tenure_cost_all_units OUTPCT;
+weight hhwt;
+run;
+
+proc export data=abil_pay_tenure_cost_all_units
+ 	outfile="C:\DCData\Libraries\DMPED\Prog\Housing Forecast\abil_pay_tenure_cost_all_units_&date..csv"
+   dbms=csv
+   replace;
+   run;
