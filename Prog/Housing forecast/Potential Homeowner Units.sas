@@ -39,13 +39,19 @@ data maxunits;
 	%let r=%scan(&real.,&i.," "); 
 	%let y=%scan(&year.,&i.," ");
 
+
 	data ownerpt_&y. except_&y.;
 	set RealPr_r.ownerpt_&r. (where=(ui_proptype in ('10','11','12')));
 		year=&y.;
 		count=1; 
 
-		if ((ssl="0131    2127" and address2="STATE DEPARTMENT")| PREMISEADD= "WATKINS ALLEY SE WASHINGTON DC 00000") then output except_&y.;
+		%if &y.=2016 %then %do; 
+			rename CITYSTZIP=address3;
+		%end; 
+
+		if ((ssl="0131    2127" and address2="STATE DEPARTMENT")| (PREMISEADD= "WATKINS ALLEY SE WASHINGTON DC 00000")) then output except_&y.;
 		else output ownerpt_&y.; 
+
 
 	run;
 
@@ -139,7 +145,9 @@ data maxunits;
 %mend;
 
 %getdata;
-*fix number of units for 2021 coops (only zeros reported in 2021, replacing with 2022 values);
+/*fix number of units for 2021 coops (only zeros reported in 2021, replacing with 2022 values);
+not using this - too in the weeds for time available 
+ -on ownerpt files in 2019, 2020 the NO_OWNOCCT var doesn't look like it was read in correctly. ; 
 proc sort data=coop_2021;
 by ssl;
 proc sort data=coop_2022;
@@ -162,4 +170,25 @@ proc print data=coop_2020;
 var ssl premiseadd NO_OWNOCCT no_units;run;
 proc freq data=coop_2021;
 tables no_units;
+run;*/
+proc sort data=allyears;
+by ui_proptype;
+proc export data=allyears 
+outfile="&_dcdata_default_path\DMPED\Prog\Housing Forecast\owneroccupied_properties.csv"
+dbms=csv
+replace;
+run;
+
+
+data maxunits;
+	set realpr_r.num_units_city;
+
+	keep city units_owner: units_coop: units_sf: units_condo:;
+
+	run;
+
+proc export data=maxunits 
+outfile="&_dcdata_default_path\DMPED\Prog\Housing Forecast\maxunits.csv"
+dbms=csv
+replace;
 run;
