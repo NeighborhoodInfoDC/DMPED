@@ -701,7 +701,7 @@ run;
     /* hhwt_ori= hhwt*0.2; NOTE REVISIT THIS WHEN STEVEN GIVES US GUIDANCE ON WEIGHTS - any adjustment to hhwt needed?*/
  run;
 
- proc contents data= DMPED.DC_2022_vacant_alt; run;
+ proc contents data= DMPED.DC_2018_22_vacant_alt; run;
 
  data DMPED.other_2018_22_vacant_alt (label= "DC other vacant units 2022 alternative file"); 
    set other_vacant_2018_22;
