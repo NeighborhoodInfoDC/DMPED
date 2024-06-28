@@ -528,7 +528,7 @@ data Housing_needs_baseline_2018_22;
 				  allcostlevel='Housing Cost Categories (tenure combined) based on Current Rent or Current Owner Costs'
 				  mallcostlevel='Housing Cost Categories (tenure combined) based on Max affordable-desired Rent-Owner Cost'
 				  ownlevel = 'Owner Cost Categories based on First-Time HomeBuyer Costs'
-				  mownlevel = 'Owner Cost Categories based on Max affordable-desired First-Time HomeBuyer Costs'
+				  mownlevel = 'Owner Cost Categories based on Max affordable-desired Owner Costs'
 				  curownlevel = 'Owner Cost Categories based on Current Owner Costs'
 				  couldpaymore = "Occupant Could Afford to Pay More - Costs+10% are > Max affordable cost"
 				  paycategory = "Whether Occupant pays too much, the right amount or too little" 
