@@ -128,6 +128,7 @@ RUN;
 
 DATA DCarea_2018_22;
 	SET Ipums.Acs_2018_22_dc;
+	WHERE MULTYEAR NE .; /*QUICK FIX, REMOVE ONCE SINGLE YEAR DATA REMOVED FROM MULTIYEAR DATASET*/
 RUN;
 
 /* Also, are now using just DC overall as opposed to by pumas
