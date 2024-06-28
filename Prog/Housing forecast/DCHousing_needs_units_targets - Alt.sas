@@ -55,6 +55,7 @@ proc format;
     4 = '81-120%'
     5 = '120-200%'
     6 = 'More than 200%'
+	7 = 'Vacant'
 	;
 
   value rcost
@@ -154,20 +155,7 @@ RUN;
 		  output out=Ratio_2018_22 (keep=Ratio_rentgrs_rent_2018_22) mean=;
 		run;
 
-  data Housing_needs_baseline_2018_22_1;
-  set DCarea_2018_22
-        (keep=year upuma serial pernum MET2013 hhwt hhincome numprec UNITSSTR BUILTYR2 bedrooms gq ownershp owncost ownershpd rentgrs valueh
-         where=(pernum=1 and gq in (1,2) and ownershpd in ( 12,13,21,22 )));
-
-
-	 /*  adjustment of income data is NOT needed for multiyear data, which is already adjusted to 2022 in this case
-		
-		if hhincome ~=.n or hhincome ~=9999999 then do; 
-		 %dollar_convert( hhincome, hhincome_a, MULTYEAR, 2022, series=CUUR0000SA0L2 )
-	   end; */ 
-
-
-	*create HUD_inc - uses 2022 limits but has categories for 120-200% and 200%+ AMI; 
+*create HUD_inc - uses 2022 limits but has categories for 120-200% and 200%+ AMI; 
 	%macro Hud_inc_22_dmped( hhinc=, hhsize= );
 
   ** HUD income categories (<year>) IN PLACE OF MACRO FOR NOW**;
@@ -255,6 +243,20 @@ RUN;
  
 
 %mend Hud_inc_22_dmped;
+
+  data Housing_needs_baseline_2018_22_1;
+  set DCarea_2018_22
+        (keep=year upuma serial pernum MET2013 hhwt hhincome numprec UNITSSTR BUILTYR2 bedrooms gq ownershp owncost ownershpd rentgrs valueh
+         where=(pernum=1 and gq in (1,2) and ownershpd in ( 12,13,21,22 )));
+
+
+	 /*  adjustment of income data is NOT needed for multiyear data, which is already adjusted to 2022 in this case
+		
+		if hhincome ~=.n or hhincome ~=9999999 then do; 
+		 %dollar_convert( hhincome, hhincome_a, MULTYEAR, 2022, series=CUUR0000SA0L2 )
+	   end; */ 
+
+
 %Hud_inc_22_dmped(hhinc=hhincome, hhsize = numprec); 
 run; 
 
@@ -294,7 +296,7 @@ data Housing_needs_baseline_2018_22;
 
     ****** Rental units ******;
     
-   if ownershpd in (21, 22) then do;
+ if ownershpd in (21, 22) then do;
         
     Tenure = 1;
 
@@ -304,7 +306,7 @@ data Housing_needs_baseline_2018_22;
 	  if hud_inc =4 then max_rent=HHINCOME/12*.261; *avg for all HH hud_inc=4 in DC 2022; 
 	  if costratio <=.157 and hud_inc = 5 then max_rent=HHINCOME/12*.157; *avg for all HH hud_inc=5 in DC; 	
 		else if hud_inc = 5 then max_rent=HHINCOME/12*costratio; *allow 120-200% above average to spend more; 
-	  if costratio <=.121 and hud_inc = 6 then max_rent=HHINCOME/12*.121; *avg for all HH hud_inc=6 in NC; 
+	  if costratio <=.121 and hud_inc = 6 then max_rent=HHINCOME/12*.121; *avg for all HH hud_inc=6 in DC; 
 	  	else if hud_inc=6 then max_rent=HHINCOME/12*costratio; *allow 200%+ above average to spend more;  
      
 	 *create flag for household could "afford" to pay more; 
@@ -317,7 +319,7 @@ data Housing_needs_baseline_2018_22;
 
 		/* NOTE: Updated using DC 2022 HUD incomes for families, between 2 -3 HH size. 
 		Avg HH size in DC = 2.47*/
-    	*rent cost categories that make more sense for rents - no longer used in targets;
+    	*rent cost categories that make more sense for rents;
 			rentlevel=.;
 			if 0 <=rentgrs<900 then rentlevel=1; *900 is between 30% monthly income for HH2 (855) and HH3 (961) extremely low income;
             if 900 <=rentgrs<1500 then rentlevel=2; *1500 is between 30% monthly income for HH2 (1424) and HH3 (1600) with very low income; 
@@ -353,14 +355,12 @@ data Housing_needs_baseline_2018_22;
 
 			if costburden=1 then do; 
 
-			if max_rent<900 then mallcostlevel=1;
-            if 900 <=max_rent<1500 then mallcostlevel=2;
-            if 1500 <=max_rent<1900 then mallcostlevel=3;
-            if 1900 <=max_rent<2800 then mallcostlevel=4;
-            if 2800 <=max_rent<3600 then mallcostlevel=5;
-            if max_rent >= 3600 then mallcostlevel=6;
-
-
+				if max_rent<900 then mallcostlevel=1;
+	            if 900 <=max_rent<1500 then mallcostlevel=2;
+	            if 1500 <=max_rent<1900 then mallcostlevel=3;
+	            if 1900 <=max_rent<2800 then mallcostlevel=4;
+	            if 2800 <=max_rent<3600 then mallcostlevel=5;
+	            if max_rent >= 3600 then mallcostlevel=6;
 
 			end; 
 
@@ -376,12 +376,7 @@ data Housing_needs_baseline_2018_22;
 
 			end; 
 
-
-
-
 	end;
-
-	
 	  		
 		
   	else if ownershpd in ( 12,13 ) then do;
@@ -409,12 +404,12 @@ data Housing_needs_baseline_2018_22;
 
 	    **** 
 	    Calculate monthly payment for first-time homebuyers. 
-	    Using 5.5% as the effective mortgage rate for DC in 2022 (pulled from overall US Freddie Mac), 
+	    Using 5.48% as the effective mortgage rate for DC in 2022 (pulled from overall US Freddie Mac) https://urbanorg.app.box.com/file/933065867963, 
 	    calculate monthly P & I payment using monthly mortgage rate and compounded interest calculation
 	    ******; 
 	    
 	    loan = .9 * valueh;
-	    month_mortgage= (5.5 / 12) / 100; 
+	    month_mortgage= (5.48 / 12) / 100; 
 	    monthly_PI = loan * month_mortgage * ((1+month_mortgage)**360)/(((1+month_mortgage)**360)-1);
 
 	    ****
@@ -427,7 +422,7 @@ data Housing_needs_baseline_2018_22;
 
 		
 	
-		*owner cost categories that make more sense for owner costs - no longer used in targets;
+		*owner cost categories that make more sense for owner costs;
 		*ownlevel based on first-time homebuyers;
 			ownlevel=.;
 			if 0 <=total_month<1500 then ownlevel=1;
@@ -607,14 +602,14 @@ data Housing_needs_vacant_2018_22 Other_vacant_2018_22 ;
 
 	    **** 
 	    Calculate  monthly payment for first-time homebuyers. 
-	    Using 5.5% as the effective mortgage rate for DC in 2022, 
+	    Using 5.48% as the effective mortgage rate for DC in 2022, https://urbanorg.app.box.com/file/933065867963
 	    calculate monthly P & I payment using monthly mortgage rate and compounded interest calculation
 	    ******; 
 	    /* Don't need inflation conversion of housing/income values for multiyear ACS
 		%dollar_convert( valueh, valueh_a, &year., 2022, series=CUUR0000SA0L2 )*/
 
 	    loan = .9 * valueh;
-	    month_mortgage= (5.5 / 12) / 100; 
+	    month_mortgage= (5.48 / 12) / 100; 
 	    monthly_PI = loan * month_mortgage * ((1+month_mortgage)**360)/(((1+month_mortgage)**360)-1);
 
 	    ****
@@ -710,7 +705,7 @@ run;
 
  data DMPED.other_2018_22_vacant_alt (label= "DC other vacant units 2022 alternative file"); 
    set other_vacant_2018_22;
-	hhwt_ori= hhwt*0.2;
+	/*hhwt_ori= hhwt*0.2;*/
  run;
 
 
@@ -718,8 +713,7 @@ run;
 
 data all(label= "DC all regular housing units 2018-22");;
 	set Housing_needs_baseline_2018_22 Housing_needs_vacant_2018_22 (in=a);
-	/* if a then inc=6; NOTE: We don't use inc in this script - anything we want to do instead here?
-format inc inc_cat.;*/
+	if a then hud_inc=7; 
 run; 
 
 
