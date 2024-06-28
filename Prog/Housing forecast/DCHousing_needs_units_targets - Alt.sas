@@ -67,14 +67,24 @@ proc format;
 	  6= "More than $2,800"
   ;
 
-  value ocost
+/*  value ocost
 	  1= "$0 to $1,499"
 	  2= "$1,500 to $2,199"
 	  3= "$2,200 to $2,799"
 	  4= "$2,800 to $3,499"
 	  5= "$3,500 to $4,499"
 	  6= "More than $4,500"
+  ; */
+
+    value ocost
+	  1= "$0 to $1,499"
+	  2= "$1,500 to $1,899"
+	  3= "$1,899 to $2,499"
+	  4= "$2,500 to $3,199"
+	  5= "$3,200 to $4,199"
+	  6= "More than $4,200"
   ;
+
 
   value acost
 	  1= "$0 to $899"
@@ -423,33 +433,58 @@ data Housing_needs_baseline_2018_22;
 
 		
 	
-		*owner cost categories that make more sense for owner costs;
-		*ownlevel based on first-time homebuyers;
+			/*create owner cost level categories (first-time homebuyer)*/ 
+			/* ownlevel=.;
+				if 0 <=total_month<1500 then ownlevel=1;
+	            if 1500 <=total_month<2200 then ownlevel=2;
+	            if 2200 <=total_month<2800 then ownlevel=3;
+	            if 2800 <=total_month<3500 then ownlevel=4;
+	            if 3500 <=total_month<4500 then ownlevel=5;
+	            if total_month >= 4500 then ownlevel=6;*/
+
 			ownlevel=.;
-			if 0 <=total_month<1500 then ownlevel=1;
-            if 1500 <=total_month<2200 then ownlevel=2;
-            if 2200 <=total_month<2800 then ownlevel=3;
-            if 2800 <=total_month<3500 then ownlevel=4;
-            if 3500 <=total_month<4500 then ownlevel=5;
-            if total_month >= 4500 then ownlevel=6;
+				if 0 <=total_month<1500 then ownlevel=1;
+	           if 1500 <=total_month<1900 then ownlevel=2;
+	           if 1900 <=total_month<2500 then ownlevel=3;
+	           if 2500 <=total_month<3200 then ownlevel=4;
+	           if 3200 <=total_month<4200 then ownlevel=5;
+	           if total_month >= 4200 then ownlevel=6;
 
 
 		mownlevel=.;
-			if 0 <=max_ocost<1500 then mownlevel=1;
+			/* if max_ocost<1500 then mownlevel=1; *removed zero on one end to capture 2 HHs with negative HHINCOME and max_ocost;
             if 1500 <=max_ocost<2200 then mownlevel=2;
             if 2200 <=max_ocost<2800 then mownlevel=3;
             if 2800 <=max_ocost<3500 then mownlevel=4;
             if 3500 <=max_ocost<4500 then mownlevel=5;
-            if max_ocost >= 4500 then mownlevel=6;
+            if max_ocost >= 4500 then mownlevel=6; */
+
+			if max_ocost<1500 then mownlevel=1; *removed zero on one end to capture 2 HHs with negative HHINCOME and max_ocost;
+            if 1500 <=max_ocost<1900 then mownlevel=2;
+            if 1900 <=max_ocost<2500 then mownlevel=3;
+            if 2500 <=max_ocost<3200 then mownlevel=4;
+            if 3200 <=max_ocost<4200 then mownlevel=5;
+            if max_ocost >= 4200 then mownlevel=6;
+
+
 
 			*curownlevel based on owners current owner costs;
-			curownlevel=.;
+		/*	curownlevel=.;
 			if 0 <=owncost<1500 then curownlevel=1;
             if 1500 <=owncost<2200 then curownlevel=2;
             if 2200 <=owncost<2800 then curownlevel=3;
             if 2800 <=owncost<3500 then curownlevel=4;
             if 3500 <=owncost<4500 then curownlevel=5;
-            if owncost >= 4500 then curownlevel=6;
+            if owncost >= 4500 then curownlevel=6;*/
+
+			curownlevel=.;
+				if 0 <=owncost<1500 then curownlevel=1;
+	           if 1500 <=owncost<1900 then curownlevel=2;
+	           if 1900 <=owncost<2500 then curownlevel=3;
+	           if 2500 <=owncost<3200 then curownlevel=4;
+	           if 3200 <=owncost<4200 then curownlevel=5;
+	           if owncost >= 4200 then curownlevel=6;
+
 
 
 		 *owner cost categories now used in targets that provide a set of categories useable for renters and owners combined; 
@@ -528,7 +563,7 @@ data Housing_needs_baseline_2018_22;
 				  allcostlevel='Housing Cost Categories (tenure combined) based on Current Rent or Current Owner Costs'
 				  mallcostlevel='Housing Cost Categories (tenure combined) based on Max affordable-desired Rent-Owner Cost'
 				  ownlevel = 'Owner Cost Categories based on First-Time HomeBuyer Costs'
-				  mownlevel = 'Owner Cost Categories based on Max affordable-desired Owner Costs'
+				  mownlevel = 'Owner Cost Categories based on Max affordable-desired First-Time HomeBuyer Costs'
 				  curownlevel = 'Owner Cost Categories based on Current Owner Costs'
 				  couldpaymore = "Occupant Could Afford to Pay More - Costs+10% are > Max affordable cost"
 				  paycategory = "Whether Occupant pays too much, the right amount or too little" 
@@ -622,22 +657,38 @@ data Housing_needs_vacant_2018_22 Other_vacant_2018_22 ;
 	    total_month = monthly_PI + PMI + tax_ins; **Sum of monthly payment components;
 		
 			/*create owner cost level categories (first-time homebuyer)*/ 
-			ownlevel=.;
+			/* ownlevel=.;
 				if 0 <=total_month<1500 then ownlevel=1;
 	            if 1500 <=total_month<2200 then ownlevel=2;
 	            if 2200 <=total_month<2800 then ownlevel=3;
 	            if 2800 <=total_month<3500 then ownlevel=4;
 	            if 3500 <=total_month<4500 then ownlevel=5;
-	            if total_month >= 4500 then ownlevel=6;
+	            if total_month >= 4500 then ownlevel=6;*/
+
+			ownlevel=.;
+				if 0 <=total_month<1500 then ownlevel=1;
+	           if 1500 <=total_month<1900 then ownlevel=2;
+	           if 1900 <=total_month<2500 then ownlevel=3;
+	           if 2500 <=total_month<3200 then ownlevel=4;
+	           if 3200 <=total_month<4200 then ownlevel=5;
+	           if total_month >= 4200 then ownlevel=6;
 
 			*curownlevel based on owners current owner costs;
-			curownlevel=.;
+		/*	curownlevel=.;
 			if 0 <=owncost<1500 then curownlevel=1;
             if 1500 <=owncost<2200 then curownlevel=2;
             if 2200 <=owncost<2800 then curownlevel=3;
             if 2800 <=owncost<3500 then curownlevel=4;
             if 3500 <=owncost<4500 then curownlevel=5;
-            if owncost >= 4500 then curownlevel=6;
+            if owncost >= 4500 then curownlevel=6;*/
+			curownlevel=.;
+				if 0 <=owncost<1500 then curownlevel=1;
+	           if 1500 <=owncost<1900 then curownlevel=2;
+	           if 1900 <=owncost<2500 then curownlevel=3;
+	           if 2500 <=owncost<3200 then curownlevel=4;
+	           if 3200 <=owncost<4200 then curownlevel=5;
+	           if owncost >= 4200 then curownlevel=6;
+
 			
 			/*create  categories now used in targets for renter/owner costs combined*/ 
 				allcostlevel=.;
@@ -691,22 +742,19 @@ run;
 /*export datasets*/
  data DMPED.DC_2018_22_housing_needs_alt(label= "DC households 2018-2022 alternative file"); 
    set Housing_needs_baseline_2018_22;
-   /* hhwt_ori= hhwt*0.2; NOTE REVISIT THIS WHEN STEVEN GIVES US GUIDANCE ON WEIGHTS - any adjustment to hhwt needed?*/
- run;
+  run;
 
  proc contents data= DMPED.DC_2018_22_housing_needs_alt;
  run;
 
  data DMPED.DC_2018_22_vacant_alt(label= "DC vacant units 18-22 pooled alternative file"); 
    set Housing_needs_vacant_2018_22;
-    /* hhwt_ori= hhwt*0.2; NOTE REVISIT THIS WHEN STEVEN GIVES US GUIDANCE ON WEIGHTS - any adjustment to hhwt needed?*/
- run;
+   run;
 
  proc contents data= DMPED.DC_2018_22_vacant_alt; run;
 
  data DMPED.other_2018_22_vacant_alt (label= "DC other vacant units 2022 alternative file"); 
    set other_vacant_2018_22;
-	/*hhwt_ori= hhwt*0.2;*/
  run;
 
 
@@ -877,14 +925,42 @@ proc export data=afford_own_cost
 
 /*Cost mismatch/competition for lower cost units: Figure 20 in 2019 report by Housing Cost by Ability to Pay by Tenure*/
 
-*all units;
+*all units split out by tenure;
+*rent;
 PROC FREQ DATA = all; 
-tables tenure*paycategory*allcostlevel /  out=abil_pay_tenure_cost_all_units OUTPCT;
+where tenure = 1;
+tables paycategory*rentlevel /  out=abil_pay_rent_all_units OUTPCT;
 weight hhwt;
 run;
 
-proc export data=abil_pay_tenure_cost_all_units
- 	outfile="C:\DCData\Libraries\DMPED\Prog\Housing Forecast\abil_pay_tenure_cost_all_units_&date..csv"
+proc export data=abil_pay_rent_all_units
+ 	outfile="C:\DCData\Libraries\DMPED\Prog\Housing Forecast\abil_pay_rent_all_units_&date..csv"
+   dbms=csv
+   replace;
+   run;
+
+ *own based on current payment; 
+PROC FREQ DATA = all; 
+where tenure = 2;
+tables paycategory*curownlevel /  out=abil_pay_own_cur_all_units OUTPCT;
+weight hhwt;
+run;
+
+proc export data=abil_pay_own_cur_all_units
+ 	outfile="C:\DCData\Libraries\DMPED\Prog\Housing Forecast\abil_pay_own_cur_all_units_&date..csv"
+   dbms=csv
+   replace;
+   run;
+
+*own based on current payment; 
+PROC FREQ DATA = all; 
+where tenure = 2;
+tables paycategory*ownlevel /  out=abil_pay_own_first_all_units OUTPCT;
+weight hhwt;
+run;
+
+proc export data=abil_pay_own_first_all_units
+ 	outfile="C:\DCData\Libraries\DMPED\Prog\Housing Forecast\abil_pay_own_first_all_units_&date..csv"
    dbms=csv
    replace;
    run;
