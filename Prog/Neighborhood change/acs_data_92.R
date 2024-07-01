@@ -20,18 +20,28 @@ dc_median_home_value_12 <-
           year = 2012,
           state = "DC",
           geometry = FALSE)
+
+
+dc_median_rent_2000 <-
+  get_decennial(geography = "tract",
+                variable = "H063001",
+                year = 2000,
+                state = "DC",
+                geometry = FALSE)
 dc_median_rent_22 <- 
   get_acs(geography = "tract",
           variable = "B25113_001",
           year = 2022,
           state = "DC",
           geometry = FALSE)
-dc_median_rent_22 <- 
+dc_median_rent_2012 <- 
   get_acs(geography = "tract",
           variable = "B25113_001",
           year = 2012,
           state = "DC",
           geometry = FALSE)
+
+dc
 
 
 B25113_001
