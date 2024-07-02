@@ -81,3 +81,35 @@ total_unit_test_3 <-
 sum(total_unit_test_3$estimate)
 
 ##weight identified, B25042_001
+#double checked below with sim, var same number comes out
+
+total_unit_test_4 <- 
+  get_acs(geography = "tract",
+          variable = "B25038_001",
+          year = 2022,
+          state = "DC",
+          geometry = TRUE)
+sum(total_unit_test_4$estimate)
+
+
+###now weighting vars
+
+total_units_2022 <- 
+  get_acs(geography = "tract",
+          variable = "B25042_001",
+          year = 2022,
+          state = "DC",
+          geometry = TRUE)
+total_units_2012 <-
+  get_acs(geography = "tract",
+           variable = "B25042_001",
+           year = 2012,
+           state = "DC",
+           geometry = TRUE)
+total_units_2000 <-
+  get_decennial(geography = "tract",
+                variable = "H001001",
+                year = 2000,
+                state = "DC",
+                geometry = TRUE)
+  
