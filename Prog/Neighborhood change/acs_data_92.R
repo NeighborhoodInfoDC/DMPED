@@ -12,43 +12,72 @@ get_acs(geography = "tract",
         variable = "B25107_001",
         year = 2022,
         state = "DC",
-        geometry = FALSE)
+        geometry = TRUE)
 
 dc_median_home_value_12 <- 
   get_acs(geography = "tract",
           variable = "B25107_001",
           year = 2012,
           state = "DC",
-          geometry = FALSE)
+          geometry = TRUE)
 dc_median_home_value_2000 <- 
   get_decennial(geography = "tract",
           variable = "H076001",
           year = 2000,
           state = "DC",
-          geometry = FALSE)
+          geometry = TRUE)
+
+#median rents 2000 - 2022
 
 dc_median_rent_2000 <-
   get_decennial(geography = "tract",
                 variable = "H063001",
                 year = 2000,
                 state = "DC",
-                geometry = FALSE)
+                geometry = TRUE)
 dc_median_rent_22 <- 
   get_acs(geography = "tract",
           variable = "B25113_001",
           year = 2022,
           state = "DC",
-          geometry = FALSE)
+          geometry = TRUE)
 dc_median_rent_2012 <- 
   get_acs(geography = "tract",
           variable = "B25113_001",
           year = 2012,
           state = "DC",
-          geometry = FALSE)
+          geometry = TRUE)
+#now going to cross walk the data
 
-dc
-
-
-B25113_001
+#need to get weights 
 
 
+B25087_001
+#130,865
+total_unit_test <- 
+  get_acs(geography = "tract",
+          variable = "B25087_001",
+          year = 2022,
+          state = "DC",
+          geometry = TRUE)
+sum(total_unit_test$estimate)
+B25081_001
+#130,865
+total_unit_test_2 <- 
+  get_acs(geography = "tract",
+          variable = "B25081_001",
+          year = 2022,
+          state = "DC",
+          geometry = TRUE)
+sum(total_unit_test_2$estimate)
+B25042_001
+#315,785 <- this is the right var
+total_unit_test_3 <- 
+  get_acs(geography = "tract",
+          variable = "B25042_001",
+          year = 2022,
+          state = "DC",
+          geometry = TRUE)
+sum(total_unit_test_3$estimate)
+
+##weight identified, B25042_001
