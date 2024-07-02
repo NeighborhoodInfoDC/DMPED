@@ -766,6 +766,24 @@ data all(label= "DC all regular housing units 2018-22");;
 run; 
 
 
+/*Export datasets for future projections*/
+PROC EXPORT DATA = Housing_needs_baseline_2018_22
+	outfile="C:\DCData\Libraries\DMPED\Prog\Housing Forecast\Housing_needs_baseline_2018_22.csv"
+   dbms=csv
+   replace;
+   run; 
+
+PROC EXPORT DATA = Housing_needs_vacant_2018_22
+	outfile="C:\DCData\Libraries\DMPED\Prog\Housing Forecast\Housing_needs_vacant_2018_22.csv"
+   dbms=csv
+   replace;
+   run; 
+
+PROC EXPORT DATA = other_vacant_2018_22
+	outfile="C:\DCData\Libraries\DMPED\Prog\Housing Forecast\other_vacant_2018_22.csv"
+   dbms=csv
+   replace;
+   run; 
 /* Desired tables 
 • Household Tenure (e.g. Number/Share of Households: Renter, Owner, Total)
 • Household Income (HUD AMI Categories)
