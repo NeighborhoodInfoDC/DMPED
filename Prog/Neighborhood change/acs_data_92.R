@@ -117,6 +117,12 @@ total_units_2000 <-
 
 #but first gonna import NHGIS weights
 #they come from this link: https://www.nhgis.org/geographic-crosswalks
-Crosswalk_2000_to_2010<- read_csv("C:/Users/slieberman/Downloads/nhgis_tr2000_tr2010_11/nhgis_tr2000_tr2010_11.csv")
-View(nhgis_tr2000_tr2010_11)
+Crosswalk_2000_to_2010 <- read_csv("C:/Users/slieberman/Downloads/nhgis_tr2000_tr2010_11/nhgis_tr2000_tr2010_11.csv")
+Crosswalk_2020_to_2010 <- read_csv<- read_csv("C:/Users/slieberman/Downloads/nhgis_tr2020_tr2010_11/nhgis_tr2020_tr2010_11.csv")
+
+#crosswalking 2000 data to 2010
+Crosswalk_2000_to_2010 <- Crosswalk_2000_to_2010 %>% mutate(GEOID = as.character(tr2000ge))
+
+left_join(dc_median_home_value_2000, Crosswalk_2000_to_2010, by = "GEOID" )
+home_value_2000_weights <- left_join(dc_median_home_value_2000, Crosswalk_2000_to_2010, by = "GEOID" )
   
