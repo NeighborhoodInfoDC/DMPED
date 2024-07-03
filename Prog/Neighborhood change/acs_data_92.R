@@ -52,7 +52,7 @@ dc_median_rent_2012 <-
 #need to get weights 
 
 
-B25087_001
+#B25087_001
 #130,865
 total_unit_test <- 
   get_acs(geography = "tract",
@@ -61,7 +61,7 @@ total_unit_test <-
           state = "DC",
           geometry = TRUE)
 sum(total_unit_test$estimate)
-B25081_001
+#B25081_001
 #130,865
 total_unit_test_2 <- 
   get_acs(geography = "tract",
@@ -70,7 +70,7 @@ total_unit_test_2 <-
           state = "DC",
           geometry = TRUE)
 sum(total_unit_test_2$estimate)
-B25042_001
+#B25042_001
 #315,785 <- this is the right var
 total_unit_test_3 <- 
   get_acs(geography = "tract",
@@ -118,7 +118,8 @@ total_units_2000 <-
 #but first gonna import NHGIS weights
 #they come from this link: https://www.nhgis.org/geographic-crosswalks
 Crosswalk_2000_to_2010 <- read_csv("C:/Users/slieberman/Downloads/nhgis_tr2000_tr2010_11/nhgis_tr2000_tr2010_11.csv")
-Crosswalk_2020_to_2010 <- read_csv<- read_csv("C:/Users/slieberman/Downloads/nhgis_tr2020_tr2010_11/nhgis_tr2020_tr2010_11.csv")
+Crosswalk_2020_to_2010 <- read_csv("C:/Users/slieberman/Downloads/nhgis_tr2020_tr2010_11/nhgis_tr2020_tr2010_11.csv")
+
 
 #crosswalking 2000 data to 2010
 Crosswalk_2000_to_2010 <- Crosswalk_2000_to_2010 %>% mutate(GEOID = as.character(tr2000ge))
@@ -127,5 +128,5 @@ Crosswalk_2000_to_2010 <- Crosswalk_2000_to_2010 %>% mutate(GEOID = as.character
 left_join(dc_median_home_value_2000, Crosswalk_2000_to_2010, by = "GEOID" )
 home_value_2000_weights <- left_join(dc_median_home_value_2000, Crosswalk_2000_to_2010, by = "GEOID" )
 
-home_value_2000_weights <- mutate(val)
+home_value_2000_weights <- home_value_2000_weights %>% mutate(estimate = value * wt_ownhu)
   
