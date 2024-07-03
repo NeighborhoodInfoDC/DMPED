@@ -129,4 +129,9 @@ left_join(dc_median_home_value_2000, Crosswalk_2000_to_2010, by = "GEOID" )
 home_value_2000_weights <- left_join(dc_median_home_value_2000, Crosswalk_2000_to_2010, by = "GEOID" )
 
 home_value_2000_weights <- home_value_2000_weights %>% mutate(estimate = value * wt_ownhu)
+home_value_2000_weights %>% filter(estimate > 0)#178 rows
+test_dc_median_home_value_12_test <- dc_median_home_value_12%>% filter(estimate >0 )#175 rows
+
+df_home_2012 <- st_drop_geometry(dc_median_home_value_12)
+value_2000_2012 <- left_join(home_value_2000_weights, df_home_2012, join_by = "GEOID")
   
