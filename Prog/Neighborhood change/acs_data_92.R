@@ -9,20 +9,21 @@ readRenviron("~/.Renviron")
 
 dc_median_home_value_22 <- 
 get_acs(geography = "tract",
-        variable = "B25107_001",
+        variables = c("B25038_001", "B25107_001"),
         year = 2022,
         state = "DC",
         geometry = TRUE)
 
 dc_median_home_value_12 <- 
   get_acs(geography = "tract",
-          variable = "B25107_001",
+          variable = c("B25038_001","B25107_001"),
           year = 2012,
           state = "DC",
           geometry = TRUE)
+#pull in total home counts dc
 dc_median_home_value_2000 <- 
   get_decennial(geography = "tract",
-          variable = "H076001",
+          variables = c("H001001", "H076001"),
           year = 2000,
           state = "DC",
           geometry = TRUE)
@@ -93,13 +94,20 @@ sum(total_unit_test_4$estimate)
 
 
 ###now weighting vars
-
+total_units_2022_alt <-
+  get_acs(geography = "tract",
+         variable = "B25038_001",
+         year = 2022,
+         state = "DC",
+         geometry = TRUE)
+sum(total_units_2022_alt$estimate)
 total_units_2022 <- 
   get_acs(geography = "tract",
           variable = "B25042_001",
           year = 2022,
           state = "DC",
           geometry = TRUE)
+sum(total_units_2022$estimate)
 total_units_2012 <-
   get_acs(geography = "tract",
            variable = "B25042_001",
@@ -125,10 +133,16 @@ Crosswalk_2020_to_2010 <- read_csv("C:/Users/slieberman/Downloads/nhgis_tr2020_t
 Crosswalk_2000_to_2010 <- Crosswalk_2000_to_2010 %>% mutate(GEOID = as.character(tr2000ge))
 
 
+
 left_join(dc_median_home_value_2000, Crosswalk_2000_to_2010, by = "GEOID" )
 home_value_2000_weights <- left_join(dc_median_home_value_2000, Crosswalk_2000_to_2010, by = "GEOID") #put in keep argument
 
+#(multiply median by count to get back to count, then multiple by the weight), 
+#then divide by the count I used before grouping targets
 home_value_2000_weights <- home_value_2000_weights %>% mutate(estimate = value * wt_ownhu)
+
+#put in checks back there 
+
 home_value_2000_weights %>% filter(estimate > 0)#178 rows
 
 dc_median_home_value_2000 %>% filter(value > 0)
