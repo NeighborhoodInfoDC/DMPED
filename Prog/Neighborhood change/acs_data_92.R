@@ -122,16 +122,22 @@ Crosswalk_2020_to_2010 <- read_csv("C:/Users/slieberman/Downloads/nhgis_tr2020_t
 
 
 #crosswalking 2000 data to 2010
-Crosswalk_2000_to_2010 <- Crosswalk_2000_to_2010 %>% mutate(GEOID = as.character(tr2000ge))
+Crosswalk_2000_to_2010 <- Crosswalk_2000_to_2010 %>% mutate(GEOID = as.character(tr2010ge))
 
 
 left_join(dc_median_home_value_2000, Crosswalk_2000_to_2010, by = "GEOID" )
 home_value_2000_weights <- left_join(dc_median_home_value_2000, Crosswalk_2000_to_2010, by = "GEOID" )
 
 home_value_2000_weights <- home_value_2000_weights %>% mutate(estimate = value * wt_ownhu)
-home_value_2000_weights %>% filter(estimate > 0)#178 rows
+home_value_2000_weights %>% filter(estimate > 0)#162 rows
 test_dc_median_home_value_12_test <- dc_median_home_value_12%>% filter(estimate >0 )#175 rows
 
 df_home_2012 <- st_drop_geometry(dc_median_home_value_12)
-value_2000_2012 <- left_join(home_value_2000_weights, df_home_2012, join_by = "GEOID")
+
+dc_median_home_value_12 %>% m
+df_home_200_to_2012 <- st_drop_geometry(home_value_2000_weights)
+
+
+value_2000_2012 <- left_join(df_home_200_to_2012, df_home_2012, by = "GEOID")
+value_2000_2012 %>% as.numeric(estimate.x)
   
