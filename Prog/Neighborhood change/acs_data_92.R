@@ -123,6 +123,9 @@ Crosswalk_2020_to_2010 <- read_csv<- read_csv("C:/Users/slieberman/Downloads/nhg
 #crosswalking 2000 data to 2010
 Crosswalk_2000_to_2010 <- Crosswalk_2000_to_2010 %>% mutate(GEOID = as.character(tr2000ge))
 
+
 left_join(dc_median_home_value_2000, Crosswalk_2000_to_2010, by = "GEOID" )
 home_value_2000_weights <- left_join(dc_median_home_value_2000, Crosswalk_2000_to_2010, by = "GEOID" )
+
+home_value_2000_weights <- mutate(val)
   
