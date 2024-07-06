@@ -740,9 +740,18 @@ PROC CONTENTS data= Housing_needs_baseline_2018_22;
 run;
 
 /*export datasets*/
- data DMPED.DC_2018_22_housing_needs_alt(label= "DC households 2018-2022 alternative file"); 
+ /* data DMPED.DC_2018_22_housing_needs_alt(label= "DC households 2018-2022 alternative file"); 
    set Housing_needs_baseline_2018_22;
-  run;
+  run; */
+
+%Finalize_data_set( 
+  data=Housing_needs_baseline_2018_22,
+  out=DC_2018_22_housing_needs_alt,
+  outlib=DMPED,
+  label="DC households 2018-2022 alternative file",
+  sortby=hud_inc,
+  revisions=%str(New file.)
+)
 
  proc contents data= DMPED.DC_2018_22_housing_needs_alt;
  run;
