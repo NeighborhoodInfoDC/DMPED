@@ -729,7 +729,7 @@ data Housing_needs_vacant_2018_22 Other_vacant_2018_22 ;
 				  structureyear = 'Age of structure'
 				  structure = 'Housing structure type'
 				;
-	format ownlevel curownlevel ocost. rentlevel rcost. vacancy_r VACANCY_F. allcostlevel acost. paycategory paycategory.; ; 
+	format hud_inc hud_inc. ownlevel curownlevel ocost. rentlevel rcost. vacancy_r VACANCY_F. allcostlevel acost. paycategory paycategory.; ; 
 
 	*output other vacant - seasonal separately ;
 	if vacancy in (1, 2, 3) then output Housing_needs_vacant_2018_22;
