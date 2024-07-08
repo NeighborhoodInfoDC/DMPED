@@ -583,6 +583,8 @@ data Housing_needs_vacant_2018_22 Other_vacant_2018_22 ;
   	if _n_ = 1 then set Ratio_2018_22;
 
  	retain Total 1;
+  * Add hud_inc variable for vacant = 7; 
+	hud_inc = 7; 
 
   *reassign vacant but rented or sold based on whether rent or value is available; 	
   vacancy_r=vacancy; 
@@ -740,10 +742,8 @@ PROC CONTENTS data= Housing_needs_baseline_2018_22;
 run;
 
 /*export datasets*/
- /* data DMPED.DC_2018_22_housing_needs_alt(label= "DC households 2018-2022 alternative file"); 
-   set Housing_needs_baseline_2018_22;
-  run; */
 
+* Housing needs; 
 %Finalize_data_set( 
   data=Housing_needs_baseline_2018_22,
   out=DC_2018_22_housing_needs_alt,
@@ -753,18 +753,25 @@ run;
   revisions=%str(New file.)
 )
 
- proc contents data= DMPED.DC_2018_22_housing_needs_alt;
- run;
+* Housing needs vacant; 
+%Finalize_data_set( 
+  data=Housing_needs_vacant_2018_22,
+  out=DC_2018_22_housing_needs_vacant_alt,
+  outlib=DMPED,
+  label="DC for sale/rent vacant 2018-2022 alternative file",
+  sortby=hud_inc,
+  revisions=%str(New file.)
+)
 
- data DMPED.DC_2018_22_vacant_alt(label= "DC vacant units 18-22 pooled alternative file"); 
-   set Housing_needs_vacant_2018_22;
-   run;
-
- proc contents data= DMPED.DC_2018_22_vacant_alt; run;
-
- data DMPED.other_2018_22_vacant_alt (label= "DC other vacant units 2022 alternative file"); 
-   set other_vacant_2018_22;
- run;
+* Other vacant; 
+%Finalize_data_set( 
+  data=other_vacant_2018_22,
+  out=DC_2018_22_other_vacant_alt,
+  outlib=DMPED,
+  label="DC for other vacant 2018-2022 alternative file",
+  sortby=hud_inc,
+  revisions=%str(New file.)
+)
 
 
  /*Make combined dataset of occupied/vacant */
@@ -775,7 +782,18 @@ data all(label= "DC all regular housing units 2018-22");;
 run; 
 
 
-/*Export datasets for future projections*/
+%Finalize_data_set( 
+  data=all,
+  out=DC_2018_22_all_regular_housing_units_alt,
+  outlib=DMPED,
+  label="DC all regular housing units 2018-22",
+  sortby=hud_inc,
+  revisions=%str(New file.)
+)
+
+
+
+/*Export datasets for future projections
 PROC EXPORT DATA = Housing_needs_baseline_2018_22
 	outfile="C:\DCData\Libraries\DMPED\Prog\Housing Forecast\Housing_needs_baseline_2018_22.csv"
    dbms=csv
@@ -793,6 +811,10 @@ PROC EXPORT DATA = other_vacant_2018_22
    dbms=csv
    replace;
    run; 
+
+*/
+
+
 /* Desired tables 
 • Household Tenure (e.g. Number/Share of Households: Renter, Owner, Total)
 • Household Income (HUD AMI Categories)
@@ -988,6 +1010,20 @@ run;
 
 proc export data=abil_pay_own_first_all_units
  	outfile="C:\DCData\Libraries\DMPED\Prog\Housing Forecast\abil_pay_own_first_all_units_&date..csv"
+   dbms=csv
+   replace;
+   run;
+
+
+/* OTHER VACANT */
+
+PROC FREQ DATA = other_vacant_2018_22;
+	TABLES VACANCY/  out=other_vacancy_by_type;
+	Weight hhwt;
+RUN;
+
+proc export data=other_vacancy_by_type
+ 	outfile="C:\DCData\Libraries\DMPED\Prog\Housing Forecast\other_vacancy_by_type_&date..csv"
    dbms=csv
    replace;
    run;
