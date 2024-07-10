@@ -163,21 +163,11 @@ consolidated_2000_value_unit_weights <- consolidated_2000_value_unit_weights %>%
 consolidated_2000_value_unit_weights <- consolidated_2000_value_unit_weights %>%
   mutate(aggregate_2010 = aggregate_metric * wt_ownhu)
 
-#now multiply the total units by the weight
+##group by target geographie and then summarize
 
-consolidated_2000_value_unit_weights <- consolidated_2000_value_unit_weights %>%
-  mutate(count_2010 = value.x * wt_ownhu)
+#after that divide by the original count
 
-#now I divide the aggregate_metric in 2010 by the 2010 weighted count to derive 2000
-#median housing values crosswalked into 2010 census tracts
 
-consolidated_2000_value_unit_weights <- consolidated_2000_value_unit_weights %>%
-  mutate(crosswalked_2000_to_2010_housing_values = aggregate_2010 / count_2010)
 
-#now I group by / summarize by the 2010 tracts to get the correct values
-
-grouped_2000_to_2010_home_values <- consolidated_2000_value_unit_weights %>% 
-  distinct(tr2010gj, .keep_all = TRUE)
-  
 
   
