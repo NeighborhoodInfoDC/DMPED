@@ -746,7 +746,7 @@ run;
 * Housing needs; 
 %Finalize_data_set( 
   data=Housing_needs_baseline_2018_22,
-  out=DC_2018_22_housing_needs_alt,
+  out=DC_2018_22_housing_needs,
   outlib=DMPED,
   label="DC households 2018-2022 alternative file",
   sortby=hud_inc,
@@ -756,7 +756,7 @@ run;
 * Housing needs vacant; 
 %Finalize_data_set( 
   data=Housing_needs_vacant_2018_22,
-  out=DC_2018_22_housing_needs_vacant_alt,
+  out=DC_2018_22_housing_needs_vac,
   outlib=DMPED,
   label="DC for sale/rent vacant 2018-2022 alternative file",
   sortby=hud_inc,
@@ -766,7 +766,7 @@ run;
 * Other vacant; 
 %Finalize_data_set( 
   data=other_vacant_2018_22,
-  out=DC_2018_22_other_vacant_alt,
+  out=DC_2018_22_other_vac,
   outlib=DMPED,
   label="DC for other vacant 2018-2022 alternative file",
   sortby=hud_inc,
@@ -784,7 +784,7 @@ run;
 
 %Finalize_data_set( 
   data=all,
-  out=DC_2018_22_all_regular_housing_units_alt,
+  out=DC_2018_22_all_reg_units,
   outlib=DMPED,
   label="DC all regular housing units 2018-22",
   sortby=hud_inc,
