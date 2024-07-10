@@ -166,7 +166,7 @@ consolidated_2000_value_unit_weights <- consolidated_2000_value_unit_weights %>%
 ##group by target geographie and then summarize
 
 #after that divide by the original count
-
+#
 
 
 
