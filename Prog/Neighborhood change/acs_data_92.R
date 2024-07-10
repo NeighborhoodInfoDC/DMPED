@@ -23,7 +23,7 @@ dc_median_home_value_12 <-
 #pull in total home counts dc
 dc_median_home_value_2000 <- 
   get_decennial(geography = "tract",
-          variables = c("H001001", "H076001"),
+          variables = c("H076001"),
           year = 2000,
           state = "DC",
           geometry = TRUE)
@@ -132,13 +132,35 @@ Crosswalk_2020_to_2010 <- read_csv("C:/Users/slieberman/Downloads/nhgis_tr2020_t
 #crosswalking 2000 data to 2010
 Crosswalk_2000_to_2010 <- Crosswalk_2000_to_2010 %>% mutate(GEOID = as.character(tr2000ge))
 
-
-
-left_join(dc_median_home_value_2000, Crosswalk_2000_to_2010, by = "GEOID" )
-home_value_2000_weights <- left_join(dc_median_home_value_2000, Crosswalk_2000_to_2010, by = "GEOID") #put in keep argument
-
-#(multiply median by count to get back to count, then multiple by the weight), 
+#(multiply median by (specific count, in this case housing count) to get back to count, then multiple by the weight), 
 #then divide by the count I used before grouping targets
+#first put the total housing units through the crosswalk 
+
+total_units_2000_weights <- left_join(total_units_2000, Crosswalk_2000_to_2010, by = "GEOID")
+
+
+home_value_df_2000 <- st_drop_geometry(dc_median_home_value_2000)
+
+#now pull average values into the dataframe
+
+consolidated_2000_value_unit_weights <- left_join(total_units_2000_weights, home_value_df_2000, by = "GEOID") #put in keep argument
+
+#now multiply the totals by the median, this will be me aggregate metric
+
+consolidated_2000_value_unit_weights <- consolidated_2000_value_unit_weights %>%
+  mutate(aggregate_metric = value.x * value.y)
+#now multiply the aggregate across the crosswalk
+
+consolidated_2000_value_unit_weights <- consolidated_2000_value_unit_weights %>%
+  mutate(aggregate_2010 = aggregate_metric * wt_ownhu)
+
+#now multiply the total units by the weight
+
+
+
+###2000 count of homes times the median value = x1 median, multiple x1 and the count both by the weight
+### then I divide the new x1 by the new weighted count 
+#then group so I have one row per 2010 tract ID
 home_value_2000_weights <- home_value_2000_weights %>% mutate(estimate = value * wt_ownhu)
 
 #put in checks back there 
