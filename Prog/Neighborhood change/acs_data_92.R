@@ -156,29 +156,15 @@ consolidated_2000_value_unit_weights <- consolidated_2000_value_unit_weights %>%
 
 #now multiply the total units by the weight
 
+consolidated_2000_value_unit_weights <- consolidated_2000_value_unit_weights %>%
+  mutate(count_2010 = value.x * wt_ownhu)
+
+#now I divide the aggregate_metric in 2010 by the 2010 weighted count to derive 2000
+#median housing values crosswalked into 2010 census tracts
+
+consolidated_2000_value_unit_weights <- consolidated_2000_value_unit_weights %>%
+  mutate(crosswalked_2000_to_2010_housing_values = aggregate_2010 / count_2010)
 
 
-###2000 count of homes times the median value = x1 median, multiple x1 and the count both by the weight
-### then I divide the new x1 by the new weighted count 
-#then group so I have one row per 2010 tract ID
-home_value_2000_weights <- home_value_2000_weights %>% mutate(estimate = value * wt_ownhu)
-
-#put in checks back there 
-
-home_value_2000_weights %>% filter(estimate > 0)#178 rows
-
-dc_median_home_value_2000 %>% filter(value > 0)
-test_dc_median_home_value_12_test <- dc_median_home_value_12%>% filter(estimate >0 )#175 rows
-
-df_home_2012 <- st_drop_geometry(dc_median_home_value_12)
-
-df_home_200_to_2012 <- st_drop_geometry(home_value_2000_weights)
-
-
-value_2000_2012 <- left_join(df_home_200_to_2012, df_home_2012, by = "GEOID")
-mean(value_2000_2012$estimate.x, na.rm = TRUE) #210398.6
-mean(value_2000_2012$estimate.y, na.rm = TRUE) #459524.3
-
-#SOMETHING IS WRONG
 
   
