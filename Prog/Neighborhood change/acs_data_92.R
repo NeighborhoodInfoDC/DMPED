@@ -1,9 +1,12 @@
 library(tidyverse)
 library(tidycensus)
 library(sf)
+library(mapview)
 
 census_api_key("e623b8b3caeaf6ad382196d1dac43e625440e80f", install = TRUE, overwrite = TRUE)
 readRenviron("~/.Renviron")
+
+
 
 #ACS median home value 2018-2022
 
@@ -120,6 +123,12 @@ total_units_2000 <-
                 year = 2000,
                 state = "DC",
                 geometry = TRUE)
+total_units_2010 <-
+  get_decennial(geography = "tract",
+                variable = "H001001",
+                year = 2010,
+                state = "DC",
+                geometry = TRUE)
 
 #now joining the weights to the totals
 
@@ -165,6 +174,10 @@ consolidated_2000_value_unit_weights <- consolidated_2000_value_unit_weights %>%
 consolidated_2000_value_unit_weights <- consolidated_2000_value_unit_weights %>%
   mutate(crosswalked_2000_to_2010_housing_values = aggregate_2010 / count_2010)
 
+#now I group by / summarize by the 2010 tracts to get the correct values
 
+grouped_2000_to_2010_home_values <- consolidated_2000_value_unit_weights %>% 
+  distinct(tr2010gj, .keep_all = TRUE)
+  
 
   
