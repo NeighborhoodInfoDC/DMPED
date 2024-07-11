@@ -163,14 +163,31 @@ consolidated_2000_value_unit_weights <- consolidated_2000_value_unit_weights %>%
 consolidated_2000_value_unit_weights <- consolidated_2000_value_unit_weights %>%
   mutate(aggregate_2010 = aggregate_metric * wt_ownhu)
 
+#testing the formula
+cons_test <- consolidated_2000_value_unit_weights %>%
+  mutate(new = aggregate_2010 / value.x)
+#that works, I just need to group by right
+
+
 ##group by target geography and then summarize
+# library(dplyr)
+# df %>%
+#   group_by(group_var1, group_var2) %>%
+#   summarise(across(c(values_var1, values_var2), sum))
+
+#
 
 consolidated_2000_value_unit_weights_grouped <- consolidated_2000_value_unit_weights %>%
-  group_by(tr2000ge, NAME.y) %>%
-  summarise(aggregate_2010 = sum(aggregate_2010))
+  group_by(tr2000ge) %>%
+  summarise(across(c(aggregate_2010, value.x), sum))
+
 
 #after that divide by the original count
-#
+
+consolidated_2000_value_unit_weights_grouped <- consolidated_2000_value_unit_weights_grouped %>%
+  mutate(crosswalked_2000_to_2010_home_values = aggregate_2010 / value.x)
+
+#LETS GO THATS RIGHT
 
 
 
