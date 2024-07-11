@@ -217,5 +217,5 @@ consolidated_2000_rent_unit_weights_grouped <- consolidated_2000_rent_unit_weigh
 
 #after that divide by the original count
 
-consolidated_2000_rent_unit_weights_grouped <- consolidated_2000_value_unit_weights_grouped %>%
-  mutate(crosswalked_2000_to_2010_rents = aggregate_2010 / value.x)
+consolidated_2000_rent_unit_weights_grouped <- consolidated_2000_rent_unit_weights_grouped %>%
+ mutate(crosswalked_2000_rents = aggregate_2010 / value.x)
