@@ -147,6 +147,9 @@ Crosswalk_2000_to_2010 <- Crosswalk_2000_to_2010 %>% mutate(GEOID = as.character
 
 total_units_2000_weights <- left_join(total_units_2000, Crosswalk_2000_to_2010, by = "GEOID")
 
+#/
+#/ #/ #/ #/ crosswalking 2000 to 2010 home value #\ #\ 
+#/ 
 
 home_value_df_2000 <- st_drop_geometry(dc_median_home_value_2000)
 
@@ -190,9 +193,29 @@ consolidated_2000_value_unit_weights_grouped <- consolidated_2000_value_unit_wei
 #LETS GO THATS RIGHT
 #consolidated_2000_value_unit_weights_grouped is the crosswalked home value data
 
-#crosswalking 2000 to 2010 rents
+#/
+#/ #/ #/ #/ crosswalking 2000 to 2010 rents #\ #\ 
+#/ 
 
+dc_median_rent_2000_df <- st_drop_geometry(dc_median_rent_2000)
 
+consolidated_2000_rent_unit_weights <- left_join(total_units_2000_weights, dc_median_rent_2000_df, by = "GEOID") #put in keep argument
 
+#now multiply the totals by the median, this will be me aggregate metric
 
-  
+consolidated_2000_rent_unit_weights <- consolidated_2000_rent_unit_weights %>%
+  mutate(aggregate_metric = value.x * value.y)
+
+#now multiply the aggregate across the crosswalk
+consolidated_2000_rent_unit_weights <- consolidated_2000_rent_unit_weights %>%
+  mutate(aggregate_2010 = aggregate_metric * wt_renthu)
+
+#grouping
+consolidated_2000_rent_unit_weights_grouped <- consolidated_2000_rent_unit_weights %>%
+  group_by(tr2010ge) %>%
+  summarise(across(c(aggregate_2010, value.x), sum))
+
+#after that divide by the original count
+
+consolidated_2000_rent_unit_weights_grouped <- consolidated_2000_value_unit_weights_grouped %>%
+  mutate(crosswalked_2000_to_2010_rents = aggregate_2010 / value.x)
