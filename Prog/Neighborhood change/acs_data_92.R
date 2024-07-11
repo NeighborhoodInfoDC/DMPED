@@ -163,7 +163,11 @@ consolidated_2000_value_unit_weights <- consolidated_2000_value_unit_weights %>%
 consolidated_2000_value_unit_weights <- consolidated_2000_value_unit_weights %>%
   mutate(aggregate_2010 = aggregate_metric * wt_ownhu)
 
-##group by target geographie and then summarize
+##group by target geography and then summarize
+
+consolidated_2000_value_unit_weights_grouped <- consolidated_2000_value_unit_weights %>%
+  group_by(tr2000ge, NAME.y) %>%
+  summarise(aggregate_2010 = sum(aggregate_2010))
 
 #after that divide by the original count
 #
