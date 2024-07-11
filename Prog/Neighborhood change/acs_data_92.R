@@ -178,7 +178,7 @@ cons_test <- consolidated_2000_value_unit_weights %>%
 #
 
 consolidated_2000_value_unit_weights_grouped <- consolidated_2000_value_unit_weights %>%
-  group_by(tr2000ge) %>%
+  group_by(tr2010ge) %>%
   summarise(across(c(aggregate_2010, value.x), sum))
 
 
@@ -188,6 +188,10 @@ consolidated_2000_value_unit_weights_grouped <- consolidated_2000_value_unit_wei
   mutate(crosswalked_2000_to_2010_home_values = aggregate_2010 / value.x)
 
 #LETS GO THATS RIGHT
+#consolidated_2000_value_unit_weights_grouped is the crosswalked home value data
+
+#crosswalking 2000 to 2010 rents
+
 
 
 
