@@ -221,12 +221,6 @@ PROC IMPORT DATAFILE = "C:\DCData\Libraries\DMPED\Prog\Housing forecast\Housing_
 RUN;
 */
 
-*All housing units (occupied and vacant combined, NOT other_vacant);
-DATA all_reg_units;
-	SET DMPED.dc_2018_22_all_reg_units;
-RUN;
-
-
 
 /*** OCCUPIED TOTALS ***/
 PROC FREQ DATA = Housing_needs_baseline_2018_22;
@@ -266,21 +260,15 @@ RUN;
 /*** VACANT UNITS ***/
 
 *5) For vacant units, take allcostlevel and put values into mallcostlevel variable so it can be put into same table as occupied;
-DATA all_reg_units;
-	SET all_reg_units;
-	IF hud_inc = 7 THEN mallcostlevel = allcostlevel;
+DATA Housing_needs_vacant_2018_22;
+	SET Housing_needs_vacant_2018_22;
+	mallcostlevel = allcostlevel;
 RUN;
 
 *Calculate vacancy rates of all regular units;
-PROC FREQ DATA = all_reg_units; 
-	TABLE hud_inc*mallcostlevel/norow nopercent out = vacancy_rate_cost_matrix;
+PROC FREQ DATA = Housing_needs_vacant_2018_22; 
+	TABLE hud_inc*mallcostlevel/norow nocol nopercent out = vacancy_rate_cost_matrix;
 	WEIGHT hhwt;
-RUN;
-
-*Drop occupied units;
-DATA vacancy_rate_cost_matrix;
-	SET vacancy_rate_cost_matrix;
-	WHERE hud_inc = 7;
 RUN;
 
 *Calculating household growth rate between 2018-22 and each of the 5-year increments;
