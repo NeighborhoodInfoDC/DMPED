@@ -8,20 +8,20 @@
  Environment:  Local Windows session (desktop)
  
  Description:  
-For future 5-year increments (2035 plus backup 2020-2035)
+Project future housing needs at 5-year increments by tenure (2035 plus backup 2020-2035) 
 	* use the current distribution of households and the maximum housing costs each household could afford or would desire 
-		to pay based on their income and apply it to the number of households expected to be added in each income band.	
+		to pay based on their income and tenure and apply it to the number of households expected to be added in each income x tenure band.	
+	* Will do this for a "mid" and a "high" HH projection scenario
 	* Assume all households are placed in the housing category appropriate to their income level (no burden)
 	* Add additional housing units in each cost category sufficient to maintain the current overall vacancy rates
-
+For alternate gentrification scenario ("Alt")
+	*Use HH projections under extreme gentrification to understand housing costs additional households could afford by tenure
 
 Tables: 
 
-Net new Housing units needed to accommodate growth (2020-2035) (including increasing vacant units) (low-mid-high) 
+Net new Housing units needed to accommodate growth (2020-2035) (including increasing vacant units) (mid, high, alt) 
 
-Housing Cost levels additional households could afford in 2035  (owner is firstime homebuyer costs) (low-mid-high) 
-
-Housing cost levels new households could afford by tenure in 2035 (low-mid-high) 
+Housing cost levels new households could afford by tenure in 2035 (mid, high, alt) 
 
 
 **************************************************************************/
@@ -32,7 +32,7 @@ Housing cost levels new households could afford by tenure in 2035 (low-mid-high)
 %DCData_lib( DMPED )
 %DCData_lib( Ipums )
 
-%let date=07162024Alt; 
+%let date=07172024; 
 
 PROC FORMAT;
 
@@ -91,39 +91,44 @@ RUN;
 
 
 
-/** STEPS -- to be used within a macro that uses low-mid-high projections: 
+/** STEPS -- to be used within a macro that uses mid, high, and alt projections: 
 1) Read in current needs and vacancy datasets;
-2) Read in hh growth matrix by hud inc; 
+2) Read in hh growth matrices by hud inc for each of the three scenarios; 
 
 Occupied dataset
-3) Using (NOTE - desired var?) mallcostlevel (tenure-combine) housing cast categoreis based on max affordable-desired,
-create crosstab (PROC FREQ) of current households - HUD inc vs mallcostlevel; 
-4) Using table percentages for each income bracket x mallcostlevel pair,
+3) By tenure, and using tenure-specific max desired/affordable housing cost variables (mrentlevel for renters, mownlevel for owners)
+create crosstab (PROC FREQ) of current households - HUD inc vs cost var; 
+4) Using table percentages for each income bracket x cost level pair,
 Apply future number of households for the year (e.g., 2035) broken out by hud income level 
 to calculate anticipated number of HHs matrix for that year's values;
 
 Vacant 
-*5) For vacant units, take allcostlevel and put values into mallcostlevel variable so it can be put into same table as occupied;
+*5) For vacant units, take tenure-specific cost var (rentlevel for units that are "For rent or sale" and ownlevel for those that are "for sale only")
+and put values into mrentlevel and mownlevel variables so it can be put into same table as occupied;
 *6) For 2025-2040 at 5-year increments, calculate growth rate from Steven's table 1 total units, between 2018-22 
 ACS total and the projection year;
 *7)  Create table output of vacant units by cost level;
 *8) Apply that to vacant unit totals to create projections;
 
+Combined
+9) Combine the occupied and vacant tables by tenure
+10) Calculate the "net new" units for each 5-year increment for inc X cost intersection
+
 **/
 
-**MACRO FOR MID VERSUS HIGH LEVEL PROJECTIONS;
+**MACRO FOR MID VERSUS HIGH VERSUS ALT (GENTRIFICATION) LEVEL PROJECTIONS;
 
-%MACRO mid_high(level = );
+%MACRO mid_high_alt(level = );
 /* Read in data*/
 
 *household projections total by income level;
-* Importing "All" tenures; 
-PROC IMPORT DATAFILE = "C:\DCData\Libraries\DMPED\Prog\Housing forecast\Projected_&Level._Households_by_HUD_Income.csv" 
+* No longer need "All" tenures; 
+/*PROC IMPORT DATAFILE = "C:\DCData\Libraries\DMPED\Prog\Housing forecast\Projected_&Level._Households_by_HUD_Income.csv" 
 	OUT = &Level._all_hh_proj_1
 	dbms = dlm
 	replace;
 	delimiter = ',';
-RUN;
+RUN;*/
 
 * Importing Renters tenures;
 PROC IMPORT DATAFILE = "C:\DCData\Libraries\DMPED\Prog\Housing forecast\Projected_&Level._Renter_Households_by_HUD_Income.csv" 
@@ -180,17 +185,17 @@ RUN;
 
 %mend hh_proj_tenure;
 
-%hh_proj_tenure(tenure = all);
+*%hh_proj_tenure(tenure = all);
 %hh_proj_tenure(tenure = renter);
 %hh_proj_tenure(tenure = owner);
 
 
-*housing needs baseline dataset from current needs script;  
+*Importing housing needs baseline dataset from current needs script;  
 DATA Housing_needs_baseline_2018_22; 
 	SET DMPED.dc_2018_22_housing_needs;
 RUN;
 
-*housing vacancies dataset from current needs script;
+*Importing housing vacancies dataset from current needs script;
 DATA Housing_needs_vacant_2018_22; 
 	SET DMPED.dc_2018_22_housing_needs_vac;
 RUN;
@@ -320,13 +325,13 @@ PROC EXPORT DATA = &level._proj_rent_by_cost_inc
    run; 
 
 *Owner occupied and for-sale only vacant;
-DATA &level._proj_own_units_by_cost_inc ; 
+DATA &level._proj_own_by_cost_inc ; 
 	SET &level._proj_owner_hh_inc_cost  &level._proj_sale_only_vacant_cost; 
 	KEEP hud_inc mownlevel COUNT PROJ_2025 PROJ_2030 PROJ_2035 PROJ_2040;
 RUN;
 
 *Exporting table; 
-PROC EXPORT DATA = &level._proj_own_units_by_cost_inc
+PROC EXPORT DATA = &level._proj_own_by_cost_inc
 	outfile="C:\DCData\Libraries\DMPED\Prog\Housing Forecast\&level._Future_all_owner_sale_units_by_cost_&date..csv"
    dbms=csv
    replace;
@@ -334,11 +339,10 @@ PROC EXPORT DATA = &level._proj_own_units_by_cost_inc
 
 
 * NET NEW UNITS ;
-*NOTE NEED TO UPDATE THIS BY TENURE;
 %MACRO net_new_by_tenure(tenure_name = );
 
 DATA &level._new_proj_&tenure_name._by_cost_inc ; 
-	SET &level._proj_&tenure_name._units_by_cost_inc;
+	SET &level._proj_&tenure_name._by_cost_inc;
 	ARRAY proj_year(4) PROJ_2025 PROJ_2030 PROJ_2035 PROJ_2040; *existing vars;
 	ARRAY net_new(4) NET_NEW_2025 NET_NEW_2030 NET_NEW_2035 NET_NEW_2040;
 	DO i = 1 to 4;
@@ -347,7 +351,7 @@ DATA &level._new_proj_&tenure_name._by_cost_inc ;
 RUN;
 
 * Creating summary table for net new housing needed (totals);
-PROC EXPORT DATA = &level._new_proj_units_by_cost_inc 
+PROC EXPORT DATA =  &level._new_proj_&tenure_name._by_cost_inc
 	outfile="C:\DCData\Libraries\DMPED\Prog\Housing Forecast\&level._Future_net_new_&tenure_name._units_by_cost_&date..csv"
    dbms=csv
    replace;
@@ -356,6 +360,7 @@ PROC EXPORT DATA = &level._new_proj_units_by_cost_inc
 %net_new_by_tenure(tenure_name = rent);
 %net_new_by_tenure(tenure_name = own);
 
-%mend mid_high;
-%mid_high(level = mid);
-%mid_high(level = high);
+%mend mid_high_alt;
+%mid_high_alt(level = mid);
+%mid_high_alt(level = high);
+%mid_high_alt(level = alt);
