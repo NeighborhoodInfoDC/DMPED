@@ -184,6 +184,12 @@ consolidated_2000_value_unit_weights_grouped <- consolidated_2000_value_unit_wei
   group_by(tr2010ge) %>%
   summarise(across(c(aggregate_2010, value.x), sum))
 
+###
+alt_consolidated_2000_value_unit_weights_grouped <- consolidated_2000_value_unit_weights %>%
+  group_by(tr2010ge) %>%
+  summarise(across(c(aggregate_2010, value.x, co), sum))
+
+
 
 #after that divide by the original count
 
@@ -220,3 +226,6 @@ consolidated_2000_rent_unit_weights_grouped <- consolidated_2000_rent_unit_weigh
  mutate(crosswalked_2000_rents = aggregate_2010 / value.x)
 
 #############some of these numbers are making me wonder if i should be weighting the totals before dividing?
+
+
+
