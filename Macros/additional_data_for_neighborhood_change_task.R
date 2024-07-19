@@ -20,6 +20,7 @@ dc_median_income_22 <-
           year = 2022,
           state = "DC",
           geometry = TRUE)
+#potential top coding/ seems to be a data error not a coding error
 mapview(dc_median_income_22, zcol = "estimate")
 # alt_dc_median_income_22 <- 
 #   get_acs(geography = "tract",
@@ -44,3 +45,8 @@ dc_bachelors_25_and_over <-
           state = "DC",
           geometry = TRUE)
 sum(dc_bachelors_25_and_over$estimate)#124860 hmmmm
+#try to do it as percetn of pop >25
+
+v21 <- load_variables(2021, "acs5", cache = TRUE)
+
+

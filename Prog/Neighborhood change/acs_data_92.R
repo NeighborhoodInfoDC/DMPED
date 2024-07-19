@@ -15,21 +15,21 @@ get_acs(geography = "tract",
         variables = c("B25038_001", "B25107_001"),
         year = 2022,
         state = "DC",
-        geometry = TRUE)
+        geometry = FALSE)
 
 dc_median_home_value_12 <- 
   get_acs(geography = "tract",
           variable = c("B25038_001","B25107_001"),
           year = 2012,
           state = "DC",
-          geometry = TRUE)
+          geometry = FALSE)
 #pull in total home counts dc
 dc_median_home_value_2000 <- 
   get_decennial(geography = "tract",
           variables = c("H076001"),
           year = 2000,
           state = "DC",
-          geometry = TRUE)
+          geometry = FALSE)
 
 #median rents 2000 - 2022
 
@@ -38,19 +38,19 @@ dc_median_rent_2000 <-
                 variable = "H063001",
                 year = 2000,
                 state = "DC",
-                geometry = TRUE)
+                geometry = FALSE)
 dc_median_rent_22 <- 
   get_acs(geography = "tract",
           variable = "B25113_001",
           year = 2022,
           state = "DC",
-          geometry = TRUE)
+          geometry = FALSE)
 dc_median_rent_2012 <- 
   get_acs(geography = "tract",
           variable = "B25113_001",
           year = 2012,
           state = "DC",
-          geometry = TRUE)
+          geometry = FALSE)
 #now going to cross walk the data
 
 #need to get weights 
@@ -63,7 +63,7 @@ total_unit_test <-
           variable = "B25087_001",
           year = 2022,
           state = "DC",
-          geometry = TRUE)
+          geometry = FALSE)
 sum(total_unit_test$estimate)
 #B25081_001
 #130,865
@@ -72,7 +72,7 @@ total_unit_test_2 <-
           variable = "B25081_001",
           year = 2022,
           state = "DC",
-          geometry = TRUE)
+          geometry = FALSE)
 sum(total_unit_test_2$estimate)
 #B25042_001
 #315,785 <- this is the right var
@@ -81,7 +81,7 @@ total_unit_test_3 <-
           variable = "B25042_001",
           year = 2022,
           state = "DC",
-          geometry = TRUE)
+          geometry = FALSE)
 sum(total_unit_test_3$estimate)
 
 ##weight identified, B25042_001
@@ -92,7 +92,7 @@ total_unit_test_4 <-
           variable = "B25038_001",
           year = 2022,
           state = "DC",
-          geometry = TRUE)
+          geometry = FALSE)
 sum(total_unit_test_4$estimate)
 
 
@@ -102,33 +102,33 @@ total_units_2022_alt <-
          variable = "B25038_001",
          year = 2022,
          state = "DC",
-         geometry = TRUE)
+         geometry = FALSE)
 sum(total_units_2022_alt$estimate)
 total_units_2022 <- 
   get_acs(geography = "tract",
           variable = "B25042_001",
           year = 2022,
           state = "DC",
-          geometry = TRUE)
+          geometry = FALSE)
 sum(total_units_2022$estimate)
 total_units_2012 <-
   get_acs(geography = "tract",
            variable = "B25042_001",
            year = 2012,
            state = "DC",
-           geometry = TRUE)
+           geometry = FALSE)
 total_units_2000 <-
   get_decennial(geography = "tract",
                 variable = "H001001",
                 year = 2000,
                 state = "DC",
-                geometry = TRUE)
+                geometry = FALSE)
 total_units_2010 <-
   get_decennial(geography = "tract",
                 variable = "H001001",
                 year = 2010,
                 state = "DC",
-                geometry = TRUE)
+                geometry = FALSE)
 
 #now joining the weights to the totals
 
@@ -151,7 +151,6 @@ total_units_2000_weights <- left_join(total_units_2000, Crosswalk_2000_to_2010, 
 #/ #/ #/ #/ crosswalking 2000 to 2010 home value #\ #\ 
 #/ 
 
-home_value_df_2000 <- st_drop_geometry(dc_median_home_value_2000)
 
 #now pull average values into the dataframe
 
@@ -161,14 +160,16 @@ consolidated_2000_value_unit_weights <- left_join(total_units_2000_weights, home
 
 consolidated_2000_value_unit_weights <- consolidated_2000_value_unit_weights %>%
   mutate(aggregate_metric = value.x * value.y)
+
+#potential edit point
 #now multiply the aggregate across the crosswalk
 
 consolidated_2000_value_unit_weights <- consolidated_2000_value_unit_weights %>%
   mutate(aggregate_2010 = aggregate_metric * wt_ownhu)
 
 #testing the formula
-cons_test <- consolidated_2000_value_unit_weights %>%
-  mutate(new = aggregate_2010 / value.x)
+# cons_test <- consolidated_2000_value_unit_weights %>%
+#   mutate(new = aggregate_2010 / value.x)
 #that works, I just need to group by right
 
 
@@ -180,21 +181,33 @@ cons_test <- consolidated_2000_value_unit_weights %>%
 
 #
 
-consolidated_2000_value_unit_weights_grouped <- consolidated_2000_value_unit_weights %>%
-  group_by(tr2010ge) %>%
-  summarise(across(c(aggregate_2010, value.x), sum))
+# consolidated_2000_value_unit_weights_grouped <- consolidated_2000_value_unit_weights %>%
+#   group_by(tr2010ge) %>%
+#   summarise(across(c(aggregate_2010, value.x), sum))
 
 ###
-alt_consolidated_2000_value_unit_weights_grouped <- consolidated_2000_value_unit_weights %>%
+consolidated_2000_value_unit_weights_grouped <- consolidated_2000_value_unit_weights %>%
   group_by(tr2010ge) %>%
-  summarise(across(c(aggregate_2010, value.x, co), sum))
+  summarize(total_units_2010 = sum(value.x, na.rm = TRUE),
+            agg_median_value_2010 = sum(aggregate_2010)) %>%
+  ungroup() %>%
+  mutate(median_value_2010 = agg_median_value_2010 / total_units_2010)
+  
 
 
 
-#after that divide by the original count
 
-consolidated_2000_value_unit_weights_grouped <- consolidated_2000_value_unit_weights_grouped %>%
-  mutate(crosswalked_2000_to_2010_home_values = aggregate_2010 / value.x)
+final_data <- intersection_data %>% 
+  group_by(target_geoid) %>% 
+  summarise(number_of_trees = sum(trees_sub_parts, na.rm = TRUE), 
+            median_tree_cost_agg = sum(median_cost_subpart)) %>% #summarise by the target geography
+  ungroup() %>% 
+  mutate(median_tree_cost = median_tree_cost_agg / number_of_trees) #divide the adjusted median number by the count number in order to get back to an approximation of the median 
+# 
+# #after that divide by the original count
+# 
+# consolidated_2000_value_unit_weights_grouped <- consolidated_2000_value_unit_weights_grouped %>%
+#   mutate(crosswalked_2000_to_2010_home_values = aggregate_2010 / value.x)
 
 #LETS GO THATS RIGHT
 #consolidated_2000_value_unit_weights_grouped is the crosswalked home value data
