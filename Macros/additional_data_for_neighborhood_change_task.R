@@ -36,4 +36,11 @@ dc_bachelors <-
           year = 2022,
           state = "DC",
           geometry = TRUE)
-dc_bachelors$estimate
+sum(dc_bachelors$estimate) #124860  -> number seems low but also not accounting for children
+dc_bachelors_25_and_over <- 
+  get_acs(geography = "tract",
+          variable =  "B15003_022",
+          year = 2022,
+          state = "DC",
+          geometry = TRUE)
+sum(dc_bachelors_25_and_over$estimate)#124860 hmmmm
