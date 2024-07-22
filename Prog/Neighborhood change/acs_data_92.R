@@ -167,25 +167,7 @@ consolidated_2000_value_unit_weights <- consolidated_2000_value_unit_weights %>%
 consolidated_2000_value_unit_weights <- consolidated_2000_value_unit_weights %>%
   mutate(aggregate_2010 = aggregate_metric * wt_ownhu)
 
-#testing the formula
-# cons_test <- consolidated_2000_value_unit_weights %>%
-#   mutate(new = aggregate_2010 / value.x)
-#that works, I just need to group by right
-
-
-##group by target geography and then summarize
-# library(dplyr)
-# df %>%
-#   group_by(group_var1, group_var2) %>%
-#   summarise(across(c(values_var1, values_var2), sum))
-
-#
-
-# consolidated_2000_value_unit_weights_grouped <- consolidated_2000_value_unit_weights %>%
-#   group_by(tr2010ge) %>%
-#   summarise(across(c(aggregate_2010, value.x), sum))
-
-###
+#group and divide
 consolidated_2000_value_unit_weights_grouped <- consolidated_2000_value_unit_weights %>%
   group_by(tr2010ge) %>%
   summarize(total_units_2010 = sum(value.x, na.rm = TRUE),
@@ -194,27 +176,9 @@ consolidated_2000_value_unit_weights_grouped <- consolidated_2000_value_unit_wei
   mutate(median_value_2010 = agg_median_value_2010 / total_units_2010)
   
 
+#####
 
 
-
-final_data <- intersection_data %>% 
-  group_by(target_geoid) %>% 
-  summarise(number_of_trees = sum(trees_sub_parts, na.rm = TRUE), 
-            median_tree_cost_agg = sum(median_cost_subpart)) %>% #summarise by the target geography
-  ungroup() %>% 
-  mutate(median_tree_cost = median_tree_cost_agg / number_of_trees) #divide the adjusted median number by the count number in order to get back to an approximation of the median 
-# 
-# #after that divide by the original count
-# 
-# consolidated_2000_value_unit_weights_grouped <- consolidated_2000_value_unit_weights_grouped %>%
-#   mutate(crosswalked_2000_to_2010_home_values = aggregate_2010 / value.x)
-
-#LETS GO THATS RIGHT
-#consolidated_2000_value_unit_weights_grouped is the crosswalked home value data
-
-#/
-#/ #/ #/ #/ crosswalking 2000 to 2010 rents #\ #\ 
-#/ 
 
 dc_median_rent_2000_df <- st_drop_geometry(dc_median_rent_2000)
 
