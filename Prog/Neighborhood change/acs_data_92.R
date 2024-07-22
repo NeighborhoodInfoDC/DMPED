@@ -205,4 +205,4 @@ consolidated_2000_rent_unit_weights_grouped <- consolidated_2000_rent_unit_weigh
 #############some of these numbers are making me wonder if i should be weighting the totals before dividing?
 
 
-
+e
