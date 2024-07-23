@@ -154,7 +154,7 @@ total_units_2000_weights <- left_join(total_units_2000, Crosswalk_2000_to_2010, 
 
 #now pull average values into the dataframe
 
-consolidated_2000_value_unit_weights <- left_join(total_units_2000_weights, home_value_df_2000, by = "GEOID") #put in keep argument
+consolidated_2000_value_unit_weights <- left_join(total_units_2000_weights, dc_median_home_value_2000, by = "GEOID") #put in keep argument
 
 #now multiply the totals by the median, this will be me aggregate metric
 
@@ -170,7 +170,7 @@ consolidated_2000_value_unit_weights <- consolidated_2000_value_unit_weights %>%
 consolidated_2000_value_unit_weights_grouped <- consolidated_2000_value_unit_weights %>%
   group_by(tr2010ge) %>%
   summarize(total_units_2010 = sum(value.x, na.rm = TRUE),
-            agg_median_value_2010 = sum(aggregate_2010)) %>%
+            agg_median_value_2010 = sum(aggregate_2010, na.rm= TRUE)) %>%
   ungroup() %>%
   mutate(median_value_2010 = agg_median_value_2010 / total_units_2010)
   
@@ -187,11 +187,10 @@ consolidated_2000_rent_unit_weights <- consolidated_2000_rent_unit_weights %>%
 consolidated_2000_rent_unit_weights_grouped <- consolidated_2000_rent_unit_weights %>%
   group_by(tr2010ge) %>%
   summarize(total_units_2010 = sum(value.x, na.rm = TRUE),
-            agg_rent_value_2010 = sum(aggregate_2010)) %>%
+            agg_rent_value_2010 = sum(aggregate_2010, na.rm = TRUE)) %>%
   ungroup() %>%
   mutate(median_rent_2010 = agg_rent_value_2010 / total_units_2010)
 
-###crosswalking the 2000 data, which has already been crosswalked to 2010, over to 2020
 
 ####
 
@@ -213,12 +212,45 @@ consolidated_2010_value_weights <- consolidated_2010_value_weights %>%
 consolidated_2010_value_weights_grouped <- consolidated_2010_value_weights %>%
   group_by(tr2020ge) %>%
   summarize(total_units_2020 = sum(value, na.rm = TRUE),
-            agg_median_value_2020 = sum(aggregate_2020)) %>%
+            agg_median_value_2020 = sum(aggregate_2020, na.rm = TRUE)) %>%
   ungroup() %>%
   mutate(median_value_2020 = agg_median_value_2020 / total_units_2020)
 
+###---### rents 2012
+
+#rents
+consolidated_2010_rent_weights <- left_join(total_2010_weights, dc_median_rent_2012, by = "GEOID")
+
+#now multiply the totals by the median, this will be me aggregate metric
+consolidated_2010_rent_weights <- consolidated_2010_rent_weights %>%
+  mutate(aggregate_metric = value * estimate)
+#now multiply the aggregate across the crosswalk
+consolidated_2010_rent_weights <- consolidated_2010_rent_weights %>%
+  mutate(aggregate_2020 = aggregate_metric * wt_ownhu)
+
+#group and divide
+consolidated_2010_rent_weights_grouped <- consolidated_2010_rent_weights %>%
+  group_by(tr2020ge) %>%
+  summarize(total_units_2020 = sum(value, na.rm = TRUE),
+            agg_median_rents_2020 = sum(aggregate_2020, na.rm = TRUE)) %>%
+  ungroup() %>%
+  mutate(median_rents_2020 = agg_median_rents_2020 / total_units_2020)
+
+ 
+
+#####cleaning the data
+consolidated_2010_value_weights_grouped <- consolidated_2010_value_weights_grouped %>%
+  select(-agg_median_value_2020, -total_units_2020)
+consolidated_2010_rent_weights_grouped <- consolidated_2010_rent_weights_grouped %>%
+  select(-total_units_2020)
+consolidated_2000_rent_unit_weights_grouped <- consolidated_2000_rent_unit_weights_grouped %>%
+  select(-total_units_2010, -agg_rent_value_2010)
+consolidated_2000_value_unit_weights_grouped <- consolidated_2000_value_unit_weights_grouped %>%
+  select(-total_units_2010, -agg_median_value_2010)
+
+###crosswalking the 2000 data, which has already been crosswalked to 2010, over to 2020
 
 
-#####
-
+#homevalue
+reweighted_value_2000_to_2020 <- left_join(total_2010_weights, consolidated_2000_value_unit_weights_grouped)
 
