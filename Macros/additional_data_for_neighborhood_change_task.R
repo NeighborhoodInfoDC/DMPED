@@ -38,15 +38,23 @@ dc_bachelors <-
           state = "DC",
           geometry = TRUE)
 sum(dc_bachelors$estimate) #124860  -> number seems low but also not accounting for children
-dc_bachelors_25_and_over <- 
-  get_acs(geography = "tract",
-          variable =  "B15003_022",
-          year = 2022,
-          state = "DC",
-          geometry = TRUE)
-sum(dc_bachelors_25_and_over$estimate)#124860 hmmmm
-#try to do it as percetn of pop >25
+ 
+##gathering the age data
 
-v21 <- load_variables(2021, "acs5", cache = TRUE)
+percent_bachelors_over_25 <- get_acs(geography = "tract",
+                                     variables = c("B15003_022", "B07001_006","B07001_007", "B07001_008",
+                                     "B07001_009", "B07001_010", "B07001_011", "B07001_012", "B07001_013",
+                                     "B07001_014", "B07001_015", "B07001_016" ),
+                                     year = 2022,
+                                     state = "DC",
+                                     geometry = FALSE) %>%
+  pivot_wider(id_cols = c(GEOID, NAME),
+              names_from = variable,
+              values_from = estimate) %>%
+  mutate(over_25 = B07001_006 +  B07001_007 + B07001_008 + B07001_009 + B07001_010 + B07001_011 
+         + B07001_012  + B07001_013  + B07001_014  + B07001_015  + B07001_016, #AGGREGATING THE 25 AND UP AGE CATEGORIES
+         percent_bachelors = B15003_022/over_25) 
+
+
 
 

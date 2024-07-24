@@ -45,6 +45,7 @@ dc_median_rent_22 <-
           year = 2022,
           state = "DC",
           geometry = FALSE)
+mapview(dc_median_rent_22)
 dc_median_rent_2012 <- 
   get_acs(geography = "tract",
           variable = "B25113_001",
@@ -252,5 +253,7 @@ consolidated_2000_value_unit_weights_grouped <- consolidated_2000_value_unit_wei
 
 
 #homevalue
+#use the official counts from 2010 but also try out my weighted total from the crosswalks
+#also try the missouri one to cross reference for the 2000 to 2020 versus the 
 reweighted_value_2000_to_2020 <- left_join(total_2010_weights, consolidated_2000_value_unit_weights_grouped)
 
