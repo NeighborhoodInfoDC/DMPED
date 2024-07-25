@@ -58,3 +58,4 @@ percent_bachelors_over_25 <- get_acs(geography = "tract",
 
 
 
+

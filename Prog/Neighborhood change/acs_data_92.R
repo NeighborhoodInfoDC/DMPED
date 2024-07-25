@@ -258,11 +258,29 @@ reweighted_2000_2010_rents <- reweighted_2000_2010_rents %>%
 reweighted_2000_2010_rents <- reweighted_2000_2010_rents %>%
   mutate(aggregate_2020 = aggregate_2010_rents * wt_renthu)
 #group and divide
-egge
 
+reweighted_2000_2020_rents_grouped <- reweighted_2000_2010_rents %>%
+  group_by(tr2020ge) %>%
+  summarize(total_units_2020 = sum(value, na.rm = TRUE),
+            agg_rents_2020 = sum(aggregate_2020, na.rm = TRUE)) %>%
+  ungroup() %>%
+  mutate(median_rent_2020 = agg_rents_2020/total_units_2020)
 
-#homevalue
-#use the official counts from 2010 but also try out my weighted total from the crosswalks
-#also try the missouri one to cross reference for the 2000 to 2020 versus the 
-reweighted_value_2000_to_2020 <- left_join(total_2010_weights, consolidated_2000_value_unit_weights_grouped)
+#home value
+reweighted_2000_2010_values <- 
+  left_join(consolidated_2000_value_unit_weights_grouped, total_2010_weights)
+reweighted_2000_2010_values <- reweighted_2000_2010_values %>%
+  mutate(aggregate_2010_values = value * median_value_2010)
+reweighted_2000_2010_values <- reweighted_2000_2010_values %>%
+  mutate(aggregate_2020 = aggregate_2010_values * wt_ownhu)
+
+reweighted_2000_2010_values_grouped <- reweighted_2000_2010_values %>%
+  group_by(tr2020ge) %>%
+  summarize(total_units_2020 = sum(value, na.rm = TRUE),
+            agg_value_2020 = sum(aggregate_2020, na.rm = TRUE)) %>%
+  ungroup() %>%
+  mutate(median_value_2020 =  agg_value_2020/total_units_2020)
+
+#realized I named variables poorly
+#done besides that!!!!
 
