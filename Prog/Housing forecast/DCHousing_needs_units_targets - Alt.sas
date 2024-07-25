@@ -877,11 +877,6 @@ tables rentlevel/  out=renter_costs_cat_all_units;
 weight hhwt;
 run;
 
-data check;
-	set all; 
-	where tenure = 1 AND rentlevel = .;
-RUN;
-
 proc export data=renter_costs_cat_all_units
  	outfile="C:\DCDATA\Libraries\DMPED\Prog\Housing Forecast\renter_costs_cat_all_units_&date..csv"
    dbms=csv
