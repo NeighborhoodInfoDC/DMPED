@@ -45,7 +45,7 @@ dc_median_rent_22 <-
           year = 2022,
           state = "DC",
           geometry = FALSE)
-mapview(dc_median_rent_22)
+
 dc_median_rent_2012 <- 
   get_acs(geography = "tract",
           variable = "B25113_001",
@@ -250,6 +250,15 @@ consolidated_2000_value_unit_weights_grouped <- consolidated_2000_value_unit_wei
   select(-total_units_2010, -agg_median_value_2010)
 
 ###crosswalking the 2000 data, which has already been crosswalked to 2010, over to 2020
+#rent
+reweighted_2000_2010_rents <- 
+left_join(consolidated_2000_rent_unit_weights_grouped, total_2010_weights)
+reweighted_2000_2010_rents <- reweighted_2000_2010_rents %>%
+  mutate(aggregate_2010_rents = value * median_rent_2010)
+reweighted_2000_2010_rents <- reweighted_2000_2010_rents %>%
+  mutate(aggregate_2020 = aggregate_2010_rents * wt_renthu)
+#group and divide
+egge
 
 
 #homevalue
