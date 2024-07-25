@@ -314,7 +314,7 @@ data Housing_needs_baseline_2018_22;
 			rentlevel=.;
 			if 0 <=rentgrs<900 then rentlevel=1; *900 is 30% of the monthly income for HH2 (34,200*.3/12 = 855) extremely low income, rounded to nearest 100;
             if 900 <=rentgrs<1400 then rentlevel=2; *1400 is 30% of the monthly income for HH2 (56,950*.3/12 = 1424) with very low income, rounded to nearest 100; 
-            if 1500 <=rentgrs<1800 then rentlevel=3; *1800 is 30% monthly income HH2 (72,000*.3/12 = 1800) with low incomes, already rounded to nearest 100;
+            if 1400 <=rentgrs<1800 then rentlevel=3; *1800 is 30% monthly income HH2 (72,000*.3/12 = 1800) with low incomes, already rounded to nearest 100;
             if 1800 <=rentgrs<2300 then rentlevel=4;
             if 2300 <=rentgrs<2800 then rentlevel=5;
             if rentgrs >= 2800 then rentlevel=6;
@@ -877,6 +877,11 @@ tables rentlevel/  out=renter_costs_cat_all_units;
 weight hhwt;
 run;
 
+data check;
+	set all; 
+	where tenure = 1 AND rentlevel = .;
+RUN;
+
 proc export data=renter_costs_cat_all_units
  	outfile="C:\DCDATA\Libraries\DMPED\Prog\Housing Forecast\renter_costs_cat_all_units_&date..csv"
    dbms=csv
@@ -1006,7 +1011,7 @@ proc export data=abil_pay_own_first_all_units
 
 /* VACANT BY TYPE */
 PROC FREQ DATA = Housing_needs_vacant_2018_22;
-	TABLES VACANCY/  out=vacancy_by_type;
+	TABLES VACANCY_R /  out=vacancy_by_type;
 	Weight hhwt;
 RUN;
 
