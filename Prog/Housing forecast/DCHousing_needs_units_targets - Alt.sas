@@ -43,7 +43,7 @@
 %DCData_lib( DMPED )
 %DCData_lib( Ipums )
 
-%let date=07242024Alt; 
+%let date=07252024; 
 
 proc format;
 
@@ -131,16 +131,6 @@ DATA DCarea_2018_22;
 	SET Ipums.Acs_2018_22_dc;
 	WHERE MULTYEAR NE .; /*QUICK FIX, REMOVE ONCE SINGLE YEAR DATA REMOVED FROM MULTIYEAR DATASET*/
 RUN;
-
-/* Also, are now using just DC overall as opposed to by pumas
-PROC SORT DATA = DCvacant_2018_22;
-	BY upuma;
-RUN;
-
-PROC SORT DATA = DCarea_2018_22;
-	BY upuma;
-RUN;
-*/
 
  **create ratio for rent to rentgrs to adjust rents on vacant units**;
 	DATA Ratio_2018_22;
@@ -324,7 +314,7 @@ data Housing_needs_baseline_2018_22;
 			rentlevel=.;
 			if 0 <=rentgrs<900 then rentlevel=1; *900 is 30% of the monthly income for HH2 (34,200*.3/12 = 855) extremely low income, rounded to nearest 100;
             if 900 <=rentgrs<1400 then rentlevel=2; *1400 is 30% of the monthly income for HH2 (56,950*.3/12 = 1424) with very low income, rounded to nearest 100; 
-            if 1500 <=rentgrs<1800 then rentlevel=3; *1800 is 30% monthly income HH2 (72,000*.3/12 = 1800) with low incomes, already rounded to nearest 100;
+            if 1400 <=rentgrs<1800 then rentlevel=3; *1800 is 30% monthly income HH2 (72,000*.3/12 = 1800) with low incomes, already rounded to nearest 100;
             if 1800 <=rentgrs<2300 then rentlevel=4;
             if 2300 <=rentgrs<2800 then rentlevel=5;
             if rentgrs >= 2800 then rentlevel=6;
@@ -1014,8 +1004,19 @@ proc export data=abil_pay_own_first_all_units
    replace;
    run;
 
+/* VACANT BY TYPE */
+PROC FREQ DATA = Housing_needs_vacant_2018_22;
+	TABLES VACANCY_R /  out=vacancy_by_type;
+	Weight hhwt;
+RUN;
 
-/* OTHER VACANT */
+proc export data=vacancy_by_type
+ 	outfile="C:\DCDATA\Libraries\DMPED\Prog\Housing Forecast\vacancy_by_type_&date..csv"
+   dbms=csv
+   replace;
+   run;
+
+/* OTHER VACANT BY TYPE */
 
 PROC FREQ DATA = other_vacant_2018_22;
 	TABLES VACANCY/  out=other_vacancy_by_type;
