@@ -43,7 +43,7 @@
 %DCData_lib( DMPED )
 %DCData_lib( Ipums )
 
-%let date=07242024Alt; 
+%let date=07252024; 
 
 proc format;
 
@@ -131,16 +131,6 @@ DATA DCarea_2018_22;
 	SET Ipums.Acs_2018_22_dc;
 	WHERE MULTYEAR NE .; /*QUICK FIX, REMOVE ONCE SINGLE YEAR DATA REMOVED FROM MULTIYEAR DATASET*/
 RUN;
-
-/* Also, are now using just DC overall as opposed to by pumas
-PROC SORT DATA = DCvacant_2018_22;
-	BY upuma;
-RUN;
-
-PROC SORT DATA = DCarea_2018_22;
-	BY upuma;
-RUN;
-*/
 
  **create ratio for rent to rentgrs to adjust rents on vacant units**;
 	DATA Ratio_2018_22;
@@ -1014,8 +1004,19 @@ proc export data=abil_pay_own_first_all_units
    replace;
    run;
 
+/* VACANT BY TYPE */
+PROC FREQ DATA = Housing_needs_vacant_2018_22;
+	TABLES VACANCY/  out=vacancy_by_type;
+	Weight hhwt;
+RUN;
 
-/* OTHER VACANT */
+proc export data=vacancy_by_type
+ 	outfile="C:\DCDATA\Libraries\DMPED\Prog\Housing Forecast\vacancy_by_type_&date..csv"
+   dbms=csv
+   replace;
+   run;
+
+/* OTHER VACANT BY TYPE */
 
 PROC FREQ DATA = other_vacant_2018_22;
 	TABLES VACANCY/  out=other_vacancy_by_type;
