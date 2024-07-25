@@ -43,7 +43,7 @@
 %DCData_lib( DMPED )
 %DCData_lib( Ipums )
 
-%let date=07242024Alt; 
+%let date=07252024; 
 
 proc format;
 
@@ -131,16 +131,6 @@ DATA DCarea_2018_22;
 	SET Ipums.Acs_2018_22_dc;
 	WHERE MULTYEAR NE .; /*QUICK FIX, REMOVE ONCE SINGLE YEAR DATA REMOVED FROM MULTIYEAR DATASET*/
 RUN;
-
-/* Also, are now using just DC overall as opposed to by pumas
-PROC SORT DATA = DCvacant_2018_22;
-	BY upuma;
-RUN;
-
-PROC SORT DATA = DCarea_2018_22;
-	BY upuma;
-RUN;
-*/
 
  **create ratio for rent to rentgrs to adjust rents on vacant units**;
 	DATA Ratio_2018_22;

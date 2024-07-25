@@ -32,7 +32,7 @@ Housing cost levels new households could afford by tenure in 2035 (mid, high, al
 %DCData_lib( DMPED )
 %DCData_lib( Ipums )
 
-%let date=07172024; 
+%let date=07252024; 
 
 PROC FORMAT;
 
@@ -49,17 +49,17 @@ PROC FORMAT;
 
 	 value rcost
 	  1= "$0 to $899"
-	  2= "$900 to $1,499"
-	  3= "$1,500 to $1,899"
-	  4= "$1,900 to $2,399"
-	  5= "$2,400 to $2,799"
+	  2= "$900 to $1,399"
+	  3= "$1,400 to $1,799"
+	  4= "$1,800 to $2,299"
+	  5= "$2,300 to $2,799"
 	  6= "More than $2,800"
   ;
 
     value ocost
-	  1= "$0 to $1,499"
-	  2= "$1,500 to $1,899"
-	  3= "$1,899 to $2,499"
+	  1= "$0 to $1,399"
+	  2= "$1,400 to $1,799"
+	  3= "$1,800 to $2,499"
 	  4= "$2,500 to $3,199"
 	  5= "$3,200 to $4,199"
 	  6= "More than $4,200"
@@ -68,9 +68,9 @@ PROC FORMAT;
 
   value acost
 	  1= "$0 to $899"
-	  2= "$900 to $1,499"
-	  3= "$1,500 to $1,899"
-	  4= "$1,900 to $2,799"
+	  2= "$900 to $1,399"
+	  3= "$1,400 to $1,799"
+	  4= "$1,800 to $2,799"
 	  5= "$2,800 to $3,599"
 	  6= "More than $3,600"
    ;
@@ -197,7 +197,7 @@ RUN;
 
 *Importing housing vacancies dataset from current needs script;
 DATA Housing_needs_vacant_2018_22; 
-	SET DMPED.dc_2018_22_housing_needs_vac;
+	SET DMPED.dc_2018_22_housing_needs_vacant;
 RUN;
 
 
