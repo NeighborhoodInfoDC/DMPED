@@ -347,6 +347,17 @@ data Housing_needs_baseline_2018_22;
 
 				end; 
 
+				*for future housing needs categories are based on desired cost distribution;
+					
+					fmrentlevel=.;
+					if max_rent<900 then fmrentlevel=1;
+					if 900 <=max_rent<1400 then fmrentlevel=2;
+					if 1400 <=max_rent<1800 then fmrentlevel=3;
+					if 1800 <=max_rent<2300 then fmrentlevel=4;
+					if 2300 <=max_rent<2800 then fmrentlevel=5;
+					if max_rent >= 2800 then fmrentlevel=6;
+
+
 
 		 *rent cost categories now used in targets that provide a set of categories useable for renters and owners combined; 
 			
@@ -482,6 +493,15 @@ data Housing_needs_baseline_2018_22;
 	           if 3200 <=owncost<4200 then curownlevel=5;
 	           if owncost >= 4200 then curownlevel=6;
 
+			*future housing needs categories based on desired cost distribution;
+
+			   fmownlevel=.;
+						if max_ocost<1400 then fmownlevel=1; *removed zero on one end to capture 2 HHs with negative HHINCOME and max_ocost;
+		            if 1400 <=max_ocost<1800 then fmownlevel=2;
+		            if 1800 <=max_ocost<2500 then fmownlevel=3;
+		            if 2500 <=max_ocost<3200 then fmownlevel=4;
+		            if 3200 <=max_ocost<4200 then fmownlevel=5;
+		            if max_ocost >= 4200 then fmownlevel=6;
 
 
 		 *owner cost categories now used in targets that provide a set of categories useable for renters and owners combined; 
@@ -556,11 +576,13 @@ data Housing_needs_baseline_2018_22;
 
 
 			label rentlevel = 'Rent Level Categories based on Current Gross Rent'
-		 		  mrentlevel='Rent Level Categories based on Max affordable-desired rent'
+		 		  mrentlevel='Rent Level Categories based on Max affordable-desired rent - Current Needs'
+				  fmrentlevel='Rent Level Categories based on Max affordable-desired rent - Future Needs'
 				  allcostlevel='Housing Cost Categories (tenure combined) based on Current Rent or Current Owner Costs'
 				  mallcostlevel='Housing Cost Categories (tenure combined) based on Max affordable-desired Rent-Owner Cost'
 				  ownlevel = 'Owner Cost Categories based on First-Time HomeBuyer Costs'
-				  mownlevel = 'Owner Cost Categories based on Max affordable-desired First-Time HomeBuyer Costs'
+				  mownlevel = 'Owner Cost Categories based on Max affordable-desired - Current needs'
+				  fmownlevel = 'Owner Cost Categories based Max affordable-desired - Future needs'
 				  curownlevel = 'Owner Cost Categories based on Current Owner Costs'
 				  couldpaymore = "Occupant Could Afford to Pay More - Costs+10% are > Max affordable cost"
 				  paycategory = "Whether Occupant pays too much, the right amount or too little" 
@@ -569,7 +591,7 @@ data Housing_needs_baseline_2018_22;
 				;
 
 	
-format mownlevel ownlevel curownlevel ocost. rentlevel mrentlevel rcost. allcostlevel mallcostlevel acost. hud_inc hud_inc. structure structure. tenure tenure. paycategory paycategory.; 
+format fmownlevel mownlevel ownlevel curownlevel ocost. rentlevel fmrentlevel mrentlevel rcost. allcostlevel mallcostlevel acost. hud_inc hud_inc. structure structure. tenure tenure. paycategory paycategory.; 
 run;
 proc sort data=Housing_needs_baseline_2018_22;
 by hud_inc tenure;
@@ -991,7 +1013,7 @@ proc export data=abil_pay_own_cur_all_units
    replace;
    run;
 
-*own based on current payment; 
+*own based on first time buyer payment; 
 PROC FREQ DATA = all; 
 where tenure = 2;
 tables paycategory*ownlevel /  out=abil_pay_own_first_all_units OUTPCT;
