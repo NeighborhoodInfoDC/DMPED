@@ -69,5 +69,5 @@ sum(dc_health_insurance$estimate)
 
 #661596
 #gonna divide with population as I crosswalk
-
+#
 
