@@ -13,6 +13,7 @@ dc_total_population_22 <-
           year = 2022,
           state = "DC",
           geometry = TRUE)
+sum(dc_total_population_22$estimate)
 ###median income
 dc_median_income_22 <- 
   get_acs(geography = "tract",
@@ -55,7 +56,18 @@ percent_bachelors_over_25 <- get_acs(geography = "tract",
          + B07001_012  + B07001_013  + B07001_014  + B07001_015  + B07001_016, #AGGREGATING THE 25 AND UP AGE CATEGORIES
          percent_bachelors = B15003_022/over_25) 
 
+#health insurance
+#B27001_001
+#B01003_001
+dc_health_insurance <- 
+  get_acs(geography = "tract",
+          variables =  "B27001_001",
+          year = 2022,
+          state = "DC",
+          geometry = TRUE)
+sum(dc_health_insurance$estimate)
 
-
+#661596
+#gonna divide with population as I crosswalk
 
 
