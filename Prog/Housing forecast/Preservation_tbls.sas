@@ -19,6 +19,8 @@
 %DCData_lib( PresCat, local=n )
 %DCData_lib( RealProp, local=n )
 
+
+
 /** Macro Ward_tbl - Start Definition **/
 
 %macro Ward_tbl( ProgCatValues=, Title= );
@@ -71,6 +73,34 @@
   title4;
 
 %mend Expiration_tbl;
+
+/** End Macro Definition **/
+
+/** Macro Expiration_alltbl - Start Definition **/
+
+%macro Expiration_alltbl( Title=, Date=poa_end );
+
+  proc tabulate data=Subsidy_project_owner format=comma10. noseps missing;
+    where Subsidy_active and year( &date ) >= 2024;
+    class &Date;
+    var units_assist;
+    table 
+      /** Rows **/
+      all='\b Total' &Date=' ',
+      /** Columns **/
+      sum='Assisted units' * ( Units_assist=' ' )
+      n='Projects'
+      ;
+    format &Date year4.;
+    title3 "Project and assisted unit counts by expiration date";
+    title4 &title;
+    footnote1 height=9pt "Source: DC Preservation Catalog";
+    footnote2 height=9pt "Prepared by Urban-Greater DC (greaterdc.urban.org), &fdate..";
+    footnote3 height=9pt j=r '{Page}\~{\field{\*\fldinst{\pard\b\i0\chcbpat8\qc\f1\fs19\cf1{PAGE }\cf0\chcbpat0}}}';
+  run;
+  title4;
+
+%mend Expiration_alltbl;
 
 /** End Macro Definition **/
 
@@ -169,6 +199,7 @@ ods rtf file="&_dcdata_default_path\DMPED\Prog\Housing Forecast\DMPED_tbls.rtf" 
 %Ward_tbl( ProgCatValues=( 2, 9 ), Title="Section 8" )
 
 %Ward_tbl( ProgCatValues=( 8, 3 ), Title="LIHTC" )*/
+%Expiration_alltbl(Title="All Units")
 
 %Expiration_tbl( Portfolio="PB8", Title="Section 8" )
 
