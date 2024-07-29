@@ -282,7 +282,7 @@ reweighted_2000_2010_values_grouped <- reweighted_2000_2010_values %>%
   mutate(median_value_2020 =  agg_value_2020/total_units_2020)
 
 #realized I named variables poorly
-#will rename
+#will change
 #done besides that!!!!
 
 

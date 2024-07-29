@@ -3,6 +3,7 @@ library(tidyverse)
 library(tidycensus)
 library(sf)
 library(mapview)
+library(hudr)
 
 census_api_key("e623b8b3caeaf6ad382196d1dac43e625440e80f", install = TRUE, overwrite = TRUE)
 readRenviron("~/.Renviron")
@@ -12,17 +13,31 @@ dc_total_population_22 <-
           variable = "B01003_001",
           year = 2022,
           state = "DC",
-          geometry = TRUE)
+          geometry = FALSE)
 sum(dc_total_population_22$estimate)
+dc_total_population_12 <- 
+  get_acs(geography = "tract",
+          variable = "B01003_001",
+          year = 2012,
+          state = "DC",
+          geometry = FALSE)
+sum(dc_total_population_12$estimate)
+dc_total_population_2000 <- 
+get_decennial(geography = "tract",
+              variables = "P001001",
+              year = 2000,
+              state = "DC",
+              geometry = FALSE)
+sum(dc_total_population_2000$value)
 ###median income
 dc_median_income_22 <- 
   get_acs(geography = "tract",
           variable =  "B19013_001",
           year = 2022,
           state = "DC",
-          geometry = TRUE)
+          geometry = FALSE)
 #potential top coding/ seems to be a data error not a coding error
-mapview(dc_median_income_22, zcol = "estimate")
+
 # alt_dc_median_income_22 <- 
 #   get_acs(geography = "tract",
 #           variable = "B25119_001",
@@ -37,7 +52,7 @@ dc_bachelors <-
           variable =  "B07009_005",
           year = 2022,
           state = "DC",
-          geometry = TRUE)
+          geometry = FALSE)
 sum(dc_bachelors$estimate) #124860  -> number seems low but also not accounting for children
  
 ##gathering the age data
@@ -64,10 +79,57 @@ dc_health_insurance <-
           variables =  "B27001_001",
           year = 2022,
           state = "DC",
-          geometry = TRUE)
+          geometry = FALSE)
 sum(dc_health_insurance$estimate)
 
 #661596
 #gonna divide with population as I crosswalk
-#
+#B09019_001
+total_housing_units<- 
+  get_acs(geography = "tract",
+          variables =  "B25002_002",
+          year = 2022,
+          state = "DC",
+          geometry = FALSE)
+sum(dc_households$estimate)
+#homeowners
+dc_homeowners<- 
+  get_acs(geography = "tract",
+          variables =  "B25003_002",
+          year = 2022,
+          state = "DC",
+          geometry = FALSE)
+dc_homeowners <- left_join(dc_homeowners, total_housing_units, by = "GEOID")
+dc_homeowners <- dc_homeowners %>% select(-moe.x, -moe.y, -NAME.y)
+dc_homeowners <- dc_homeowners %>% rename(owner_occupied_homes = estimate.x, housing_units = estimate.y )
+dc_homeowners <- dc_homeowners %>% mutate(share_homeowners = owner_occupied_homes/housing_units)
 
+#no mortgage
+dc_no_mortgage_homeowners <-
+  get_acs(geography = "tract",
+          variables =  "B25140_006",
+          year = 2022,
+          state = "DC",
+          geometry = FALSE)
+dc_no_mortgage_homeowners <- dc_no_mortgage_homeowners %>% rename(mortgaged_homes = estimate)
+sum(dc_no_mortgage_homeowners$mortgaged_homes) 
+
+#renters
+
+
+
+
+#CROSSWALK
+Crosswalk_2000_to_2010 <- read_csv("C:/Users/slieberman/Downloads/nhgis_tr2000_tr2010_11/nhgis_tr2000_tr2010_11.csv")
+Crosswalk_2010_to_2020 <- read_csv("C:/Users/slieberman/Downloads/nhgis_tr2010_tr2020_11/nhgis_tr2010_tr2020_11.csv")
+
+
+#totals crosswalk
+#adding population in
+
+#health insurance
+
+#total housing units
+
+
+#renters
