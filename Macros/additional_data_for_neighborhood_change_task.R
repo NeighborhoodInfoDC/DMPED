@@ -296,21 +296,59 @@ renters_2000<-
           state = "DC",
           geometry = FALSE)
 
-mortgage_status <- get_acs (
+#better method
+mortgage_status_22 <- get_acs (
   geography = "tract",
   state = "DC",
   year = 2022,
   variables = c(
-    "B25081_001", ## denominator, mortgage
     "B25081_002", ## with a mortgage
     "B25003_001", ## tenure - total
-    "B25003_002" ## tenure - owner
+    "B25003_002", ## tenure - owner
+    "B25081_009", ##without mortgage
+    "B25003_003" ## renter occupied
   ),
   geometry = FALSE)%>%
   pivot_wider(id_cols = c(GEOID, NAME),
               names_from = variable,
               values_from = estimate) %>%
-  rename(owner_occuped = B25003_002, total_units = B25003_001, with_mortgage = B25081_002)
+  rename( total_units = B25003_001, with_mortgage = B25081_002, 
+         without_mortgage = B25081_009, renter_occupied = B25003_003, owner_occupied = B25003_002 ) 
+#12
+mortgage_status_12 <- get_acs (
+  geography = "tract",
+  state = "DC",
+  year = 2012,
+  variables = c(
+    "B25081_002", ## with a mortgage
+    "B25003_001", ## tenure - total
+    "B25003_002", ## tenure - owner
+    "B25081_008", ##without mortgage
+    "B25003_003" ## renter occupied
+  ),
+  geometry = FALSE)%>%
+  pivot_wider(id_cols = c(GEOID, NAME),
+              names_from = variable,
+              values_from = estimate) %>%
+  rename( total_units = B25003_001, with_mortgage = B25081_002, 
+          without_mortgage = B25081_008, renter_occupied = B25003_003, owner_occupied = B25003_002 ) 
+
+mortgage_status_2000<- 
+  get_decennial(geography = "tract",
+                variables =  c("H004002", ## owner occupied
+                               "H004003", ## renter occupied
+                               "H004001", #tenure total
+                               "H080008", ##units without mortgage
+                               "H090002", #units with mortgage
+                ),
+                year = 2000,
+                state = "DC",
+                geometry = FALSE) %>%
+  pivot_wider(id_cols = c(GEOID, NAME),
+              names_from = variable,
+              values_from = value) %>%
+  rename(total_units = H004001 )
+
 
 
 
