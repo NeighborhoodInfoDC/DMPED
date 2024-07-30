@@ -239,16 +239,30 @@ total_housing_units_2000 <-
           state = "DC",
           geometry = FALSE)
 #homeowners
-dc_homeowners<- 
+owner_occupied_22 <- 
   get_acs(geography = "tract",
           variables =  "B25003_002",
           year = 2022,
           state = "DC",
           geometry = FALSE)
-dc_homeowners <- left_join(dc_homeowners, total_housing_units, by = "GEOID")
-dc_homeowners <- dc_homeowners %>% select(-moe.x, -moe.y, -NAME.y)
-dc_homeowners <- dc_homeowners %>% rename(owner_occupied_homes = estimate.x, housing_units = estimate.y )
-dc_homeowners <- dc_homeowners %>% mutate(share_homeowners = owner_occupied_homes/housing_units)
+owner_occupied_12<- 
+  get_acs(geography = "tract",
+          variables =  "B25003_002",
+          year = 2012,
+          state = "DC",
+          geometry = FALSE)
+
+owner_occupied_2000<- 
+  get_decennial(geography = "tract",
+          variables =  "H004002",
+          year = 2000,
+          state = "DC",
+          geometry = FALSE)
+
+# dc_homeowners <- left_join(dc_homeowners, total_housing_units, by = "GEOID")
+# dc_homeowners <- dc_homeowners %>% select(-moe.x, -moe.y, -NAME.y)
+# dc_homeowners <- dc_homeowners %>% rename(owner_occupied_homes = estimate.x, housing_units = estimate.y )
+# dc_homeowners <- dc_homeowners %>% mutate(share_homeowners = owner_occupied_homes/housing_units)
 
 #no mortgage
 dc_no_mortgage_homeowners <-
@@ -261,16 +275,22 @@ dc_no_mortgage_homeowners <- dc_no_mortgage_homeowners %>% rename(mortgaged_home
 sum(dc_no_mortgage_homeowners$mortgaged_homes) 
 
 #renters
-dc_renters_22<- 
+renters_22<- 
   get_acs(geography = "tract",
           variables =  "B25003_003",
           year = 2022,
           state = "DC",
           geometry = FALSE)
-dc_renters_12<- 
+renters_12<- 
   get_acs(geography = "tract",
           variables =  "B25003_003",
           year = 2012,
+          state = "DC",
+          geometry = FALSE)
+renters_2000<- 
+  get_decennial(geography = "tract",
+          variables =  "H004003",
+          year = 2000,
           state = "DC",
           geometry = FALSE)
 
