@@ -106,46 +106,138 @@ sum(percent_bachelors_over_25_2012$over_25)
 #P012011 m25-29, P012012	= m30-34, "P012013" m35-39 "P012014" = m40-44, "P012015" =m45-49, "P012016"=m50-54, "P012017" = m55-59
 #"P012018 = 60-61, "P012019" = 62-64,"P012020" 65- 66, "P012021 - 67-69, "P012022 70-74" "P012023" 75-79, "P012024" 80 -84, 
 #"P012025"= 85+
-percent_bachelors_over_25_2000 <- get_decennial(geography = "tract",
-                                          variables = c("P037015", "P037016", "P037017", "P037018", "P012011", "P012012", "P012013",
-                                                        "P012014", "P012015", "P0120146", "P012017", "P012018", "P012019", "P012020",
-                                                        "P012021", "P012022", "P012023", "P012024","P012025"),
-                                          year = 2000,
-                                          state = "DC",
-                                          geometry = FALSE) %>%
+
+#issues below
+# m_percent_bachelors_over_25_2000 <- get_decennial(geography = "tract",
+#                                           variables = c("P037015", "P037016", "P037017", "P037018", "P012011", "P012012", "P012013",
+#                                                         "P012014", "P012015", "P012016", "P012017", "P012018", "P012019", "P012020",
+#                                                         "P012021", "P012022", "P012023", "P012024","P012025"),
+#                                           year = 2000,
+#                                           state = "DC",
+#                                           geometry = FALSE) %>%
+#   pivot_wider(id_cols = c(GEOID, NAME),
+#               names_from = variable,
+#               values_from = value) %>%
+#   mutate(m_over_25 = P012011 + P012012 + P012013 + P012014 + P012015 + P012016 + P012017 + P012018 + P012019 + P012020 +
+#          P012021 + P012022 + P012023 + P012024 + P012025,
+#          m_bachelors_or_more = P037015 + P037016 + P037017 + P037018,
+#          m_percent_bachelors = m_bachelors_or_more/m_over_25) 
+# sum(m_percent_bachelors_over_25_2000$m_bachelors_or_more)
+# sum(m_percent_bachelors_over_25_2000$m_over_25)
+# 74203 /396648
+#age 25 and above men
+m_over_25_2000 <- get_decennial(geography = "tract",
+                                                  variables = c("P012011", "P012012", "P012013",
+                                                                "P012014", "P012015", "P012016", "P012017", "P012018", "P012019", "P012020",
+                                                                "P012021", "P012022", "P012023", "P012024","P012025"),
+                                                  year = 2000,
+                                                  state = "DC",
+                                                  geometry = FALSE) %>%
   pivot_wider(id_cols = c(GEOID, NAME),
               names_from = variable,
-              values_from = estimate) %>%
-  mutate(over_25 =   
-         bachelors_or_more = P037015
-         percent_bachelors = bachelors_or_more/over_25) 
-sum(percent_bachelors_over_25_2012$bachelors_or_more)
-sum(percent_bachelors_over_25_2012$over_25)
+              values_from = value) %>%
+  mutate(m_over_25 = P012011 + P012012 + P012013 + P012014 + P012015 + P012016 + P012017 + P012018 + P012019 + P012020 +
+           P012021 + P012022 + P012023 + P012024 + P012025)
+#bachelors men 2000
+m_percent_bachelors_over_25_2000 <- get_decennial(geography = "tract",
+                                                  variables = c("P037015", "P037016", "P037017", "P037018"),
+                                                  year = 2000,
+                                                  state = "DC",
+                                                  geometry = FALSE) %>%
+  pivot_wider(id_cols = c(GEOID, NAME),
+              names_from = variable,
+              values_from = value) %>%
+  mutate(m_bachelors_or_more = P037015 + P037016 + P037017 + P037018)
+#joining together
+m_percent_bachelors_over_25_2000 <- left_join(m_percent_bachelors_over_25_2000, m_over_25_2000, by = "GEOID")
+m_percent_bachelors_over_25_2000 <- m_percent_bachelors_over_25_2000 %>%
+  select(-NAME.y)
+sum(m_percent_bachelors_over_25_2000$m_bachelors_or_more)
+sum(m_percent_bachelors_over_25_2000$m_over_25)
+74203/178393 #thats right
 
+#women over 25 2000
+w_over_25_2000 <- get_decennial(geography = "tract",
+                                variables = c("P012035", "P012036", "P012037", "P012038", "P012039",
+                                              "P012040", "P012041", "P012042", "P012043", "P012044",
+                                              "P012045", "P012046", "P012047", "P012048", "P012049"),
+                                year = 2000,
+                                state = "DC",
+                                geometry = FALSE) %>%
+  pivot_wider(id_cols = c(GEOID, NAME),
+              names_from = variable,
+              values_from = value) %>%
+  mutate(w_over_25 = P012035 + P012036 + P012037 + P012038 + P012039 + P012040 + P012041 + 
+           P012042 + P012043 + P012044 + P012045 + P012046 + P012047 + P012048 + P012049)
 
+#women bachelors 2000
+w_percent_bachelors_over_25_2000 <- get_decennial(geography = "tract",
+                                                  variables = c("P037032", "P037033", "P037034", "P037035"),
+                                                  year = 2000,
+                                                  state = "DC",
+                                                  geometry = FALSE) %>%
+  pivot_wider(id_cols = c(GEOID, NAME),
+              names_from = variable,
+              values_from = value) %>%
+  mutate(w_bachelors_or_more = P037032 + P037033 + P037034 + P037035)
+#joining
+w_percent_bachelors_over_25_2000 <- left_join(w_percent_bachelors_over_25_2000, w_over_25_2000, by = "GEOID")
+w_percent_bachelors_over_25_2000 <- w_percent_bachelors_over_25_2000 %>% select(-NAME.x)
+#alltogether
+percent_bachelors_over_25_2000 <-
+  left_join(m_percent_bachelors_over_25_2000, w_percent_bachelors_over_25_2000, by = "GEOID")
+percent_bachelors_over_25_2000 <- percent_bachelors_over_25_2000 %>%
+  mutate(over_25 = m_over_25 + w_over_25) %>%
+  mutate(bachelors_or_more = m_bachelors_or_more + w_bachelors_or_more)
 
+sum(percent_bachelors_over_25_2000$over_25)
+sum(percent_bachelors_over_25_2000$bachelors_or_more)
+#150237/384430 thats right
 
 #health insurance
 #B27001_001
 #B01003_001
-dc_health_insurance <- 
+dc_health_insurance_22 <- 
   get_acs(geography = "tract",
           variables =  "B27001_001",
           year = 2022,
           state = "DC",
           geometry = FALSE)
-sum(dc_health_insurance$estimate)
+dc_health_insurance_12 <- 
+  get_acs(geography = "tract",
+          variables =  "B27001_001",
+          year = 2012,
+          state = "DC",
+          geometry = FALSE)
+#cant find a 2000 decennial var
+# dc_health_insurance_2000 <-
+#   get_decennial(geography = "tract",
+#                 variables = "",
+#                 year = 2000,
+#                 geometry = FALSE)
 
 #661596
 #gonna divide with population as I crosswalk
 #B09019_001
-total_housing_units<- 
+
+total_housing_units_22<- 
   get_acs(geography = "tract",
           variables =  "B25002_002",
           year = 2022,
           state = "DC",
           geometry = FALSE)
-sum(dc_households$estimate)
+total_housing_units_12<- 
+  get_acs(geography = "tract",
+          variables =  "B25002_002",
+          year = 2012,
+          state = "DC",
+          geometry = FALSE)
+total_housing_units_2000 <- 
+  get_decennial(geography = "tract",
+          variables =  "H001001",
+          year = 2000,
+          state = "DC",
+          geometry = FALSE)
 #homeowners
 dc_homeowners<- 
   get_acs(geography = "tract",
