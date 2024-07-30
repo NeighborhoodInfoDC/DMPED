@@ -265,14 +265,16 @@ owner_occupied_2000<-
 # dc_homeowners <- dc_homeowners %>% mutate(share_homeowners = owner_occupied_homes/housing_units)
 
 #no mortgage
-dc_no_mortgage_homeowners <-
+no_mortgage_homeowners_22 <-
   get_acs(geography = "tract",
-          variables =  "B25140_006",
+          variables =  "B25081_009",
           year = 2022,
           state = "DC",
           geometry = FALSE)
+sum(no_mortgage_homeowners_22$estimate)
 dc_no_mortgage_homeowners <- dc_no_mortgage_homeowners %>% rename(mortgaged_homes = estimate)
 sum(dc_no_mortgage_homeowners$mortgaged_homes) 
+#will return to this ^^^^
 
 #renters
 renters_22<- 
@@ -294,6 +296,20 @@ renters_2000<-
           state = "DC",
           geometry = FALSE)
 
+mortgage_status <- get_acs (
+  geography = "tract",
+  state = "DC",
+  year = 2022,
+  variables = c(
+    "B25081_001", ## denominator, mortgage
+    "B25081_002", ## with a mortgage
+    "B25003_001", ## tenure - total
+    "B25003_002" ## tenure - owner
+  ),
+  geometry = FALSE)%>%
+  pivot_wider(id_cols = c(GEOID, NAME),
+              names_from = variable,
+              values_from = estimate) 
 
 
 
