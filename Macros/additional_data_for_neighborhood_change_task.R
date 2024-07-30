@@ -309,7 +309,8 @@ mortgage_status <- get_acs (
   geometry = FALSE)%>%
   pivot_wider(id_cols = c(GEOID, NAME),
               names_from = variable,
-              values_from = estimate) 
+              values_from = estimate) %>%
+  rename(owner_occuped = B25003_002, total_units = B25003_001, with_mortgage = B25081_002)
 
 
 
