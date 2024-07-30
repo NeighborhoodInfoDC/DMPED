@@ -209,6 +209,7 @@ dc_health_insurance_12 <-
           year = 2012,
           state = "DC",
           geometry = FALSE)
+
 #cant find a 2000 decennial var
 # dc_health_insurance_2000 <-
 #   get_decennial(geography = "tract",
@@ -356,8 +357,21 @@ Crosswalk_2000_to_2010 <- read_csv("C:/Users/slieberman/Downloads/nhgis_tr2000_t
 Crosswalk_2010_to_2020 <- read_csv("C:/Users/slieberman/Downloads/nhgis_tr2010_tr2020_11/nhgis_tr2010_tr2020_11.csv")
 
 
-#totals crosswalk
-
+#totals crosswalk 2000-2010 - pop / bachelors degrees
+Crosswalk_2000_to_2010 <- Crosswalk_2000_to_2010 %>% mutate(GEOID = as.character(tr2000ge))
+total_weights_bypop_2000_to_2010 <- left_join(dc_total_population_2000, Crosswalk_2000_to_2010, by = "GEOID")
+total_weights_bypop_2000_to_2010 <- total_weights_bypop_2000_to_2010  %>% rename(population = value)
+total_weights_bypop_2000_to_2010 <- left_join(percent_bachelors_over_25_2000, total_weights_bypop_2000_to_2010, by = "GEOID")
+total_weights_bypop_2000_to_2010 <- total_weights_bypop_2000_to_2010 %>% select(-c(3:45))
+total_weights_bypop_2000_to_2010 <- total_weights_bypop_2000_to_2010 %>% select(-NAME, -variable)
+#multiply across the crosswalk
+total_weights_bypop_2000_to_2010 <- total_weights_bypop_2000_to_2010 %>%
+  mutate(over_25_2000_2010 = over_25 * wt_pop) %>%
+  mutate(bachelors_or_more_cw_2000_2010 =  bachelors_or_more * wt_pop) %>%
+  mutate(pop_cw_2000_2010 = population * wt_pop)
+#group and divide
+weights_bypop_2000_to_2010_grouped <- total_weights_bypop_2000_to_2010 %>%
+  
 #adding population in
 
 #health insurance
