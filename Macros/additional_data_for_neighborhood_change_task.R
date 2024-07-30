@@ -333,13 +333,13 @@ mortgage_status_12 <- get_acs (
   rename( total_units = B25003_001, with_mortgage = B25081_002, 
           without_mortgage = B25081_008, renter_occupied = B25003_003, owner_occupied = B25003_002 ) 
 
+
 mortgage_status_2000<- 
   get_decennial(geography = "tract",
-                variables =  c("H004002", ## owner occupied
-                               "H004003", ## renter occupied
-                               "H004001", #tenure total
-                               "H080008", ##units without mortgage
-                               "H090002", #units with mortgage
+                variables =  c( "H007002", #owner occupied
+                                "H007003", # renter occupied
+                               "H098018", ##units without mortgage
+                               "H098002" #units with mortgage
                 ),
                 year = 2000,
                 state = "DC",
@@ -347,11 +347,10 @@ mortgage_status_2000<-
   pivot_wider(id_cols = c(GEOID, NAME),
               names_from = variable,
               values_from = value) %>%
-  rename(total_units = H004001 )
+  rename(without_mortgage = H098018, with_mortgage = H098002, owner_occupied = H007002, renter_occupied = H007003) 
 
-
-
-
+####################################################################################################################
+####################################################################################################################
 #CROSSWALK
 Crosswalk_2000_to_2010 <- read_csv("C:/Users/slieberman/Downloads/nhgis_tr2000_tr2010_11/nhgis_tr2000_tr2010_11.csv")
 Crosswalk_2010_to_2020 <- read_csv("C:/Users/slieberman/Downloads/nhgis_tr2010_tr2020_11/nhgis_tr2010_tr2020_11.csv")
