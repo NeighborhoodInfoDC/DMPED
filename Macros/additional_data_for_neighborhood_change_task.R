@@ -15,6 +15,7 @@ dc_total_population_22 <-
           state = "DC",
           geometry = FALSE)
 sum(dc_total_population_22$estimate)
+sum(percent_bachelors_over_25_2022$over_25)
 dc_total_population_12 <- 
   get_acs(geography = "tract",
           variable = "B01003_001",
@@ -365,16 +366,24 @@ weights_bypop_2000_to_2010_grouped <- total_weights_bypop_2000_to_2010 %>%
             cw_pop_cw_2000_2010 =  sum(pop_cw_2000_2010, na.rm = TRUE)) %>%
   ungroup()
 bach <- weights_bypop_2000_to_2010_grouped %>% mutate(percent_bach = cw_bachelors_or_more_cw_2000_2010 / cw_over_25_2000_2010) 
-
+remove(total_wei)
 #totals 2000 to 2010 crosswalked over to 2022
 Crosswalk_2010_to_2020 <- Crosswalk_2010_to_2020 %>% mutate(GEOID = as.character(tr2010ge) )
 total_weights_bypop_200_to_2020 <- left_join(weights_bypop_2000_to_2010_grouped, Crosswalk_2010_to_2020)
-total_weights_bypop_200_to_2020 <- total_weights_bypop_200_to_2020 %>%
-  mutate()
+total_weights_bypop_200_to_2020 <-  total_weights_bypop_200_to_2020 %>%
+  mutate(bachelors_or_more_2000_to_2020 = cw_bachelors_or_more_cw_2000_2010 * wt_pop) %>%
+  mutate(over_25_2000_to_2020 = cw_over_25_2000_2010 * wt_pop) %>%
+  mutate(pop_2000_to_2020 = cw_pop_cw_2000_2010 * wt_pop)
   
+total_weights_2000_2020_grouped <- total_weights_bypop_200_to_2020 %>%
+  group_by(tr2020ge) %>%
+  summarize(crw_pop_2000_2020 = sum(pop_2000_to_2020, na.rm = TRUE),
+            crw_over_25_2000_2020 = sum(over_25_2000_to_2020, na.rm = TRUE),
+            crw_bachelors_or_more_2000_to_2020 = sum(bachelors_or_more_2000_to_2020, na.rm = TRUE)) %>%
+  ungroup() %>%
+  mutate(percent_bachelors = crw_bachelors_or_more_2000_to_2020 / crw_over_25_2000_2020 )
 
-
-#health insurance
+#health insuranceee
 
 #total housing units
 
