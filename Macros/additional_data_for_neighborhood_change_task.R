@@ -383,10 +383,16 @@ total_weights_2000_2020_grouped <- total_weights_bypop_200_to_2020 %>%
   ungroup() %>%
   mutate(percent_bachelors = crw_bachelors_or_more_2000_to_2020 / crw_over_25_2000_2020 )
 
-#health insuranceee
+#2012 totals crosswalked to 2020
+total_weights_bypop_2010_to_2020 <- left_join(dc_total_population_12, Crosswalk_2010_to_2020, by = "GEOID")
+total_weights_bypop_2010_to_2020 <- total_weights_bypop_2010_to_2020 %>% rename(population = estimate)
+total_weights_bypop_2010_to_2020 <- left_join(percent_bachelors_over_25_2012, total_weights_bypop_2010_to_2020, by = "GEOID")
+
+#health insurance
+#will return to this shortly
 
 #total housing units
-
+housing_weights_2000_2010
 
 #renters
 
