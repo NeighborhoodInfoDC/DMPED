@@ -373,10 +373,10 @@ total_weights_bypop_2000_to_2010 <- total_weights_bypop_2000_to_2010 %>%
 weights_bypop_2000_to_2010_grouped <- total_weights_bypop_2000_to_2010 %>%
   group_by(tr2010ge) %>%
   summarize(cw_over_25_2000_2010 = sum(over_25_2000_2010, na.rm = TRUE),
+            cw_bachelors_or_more_cw_2000_2010 = sum(bachelors_or_more_cw_2000_2010, na.rm = TRUE),
             cw_pop_cw_2000_2010 =  sum(pop_cw_2000_2010, na.rm = TRUE)) %>%
   ungroup()
-#adding population in
-
+bach <- weights_bypop_2000_to_2010_grouped %>% mutate(percent_bach = cw_bachelors_or_more_cw_2000_2010 / cw_over_25_2000_2010) 
 #health insurance
 
 #total housing units
