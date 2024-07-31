@@ -265,18 +265,6 @@ owner_occupied_2000<-
 # dc_homeowners <- dc_homeowners %>% rename(owner_occupied_homes = estimate.x, housing_units = estimate.y )
 # dc_homeowners <- dc_homeowners %>% mutate(share_homeowners = owner_occupied_homes/housing_units)
 
-#no mortgage
-no_mortgage_homeowners_22 <-
-  get_acs(geography = "tract",
-          variables =  "B25081_009",
-          year = 2022,
-          state = "DC",
-          geometry = FALSE)
-sum(no_mortgage_homeowners_22$estimate)
-dc_no_mortgage_homeowners <- dc_no_mortgage_homeowners %>% rename(mortgaged_homes = estimate)
-sum(dc_no_mortgage_homeowners$mortgaged_homes) 
-#will return to this ^^^^
-
 #renters
 renters_22<- 
   get_acs(geography = "tract",
@@ -377,9 +365,20 @@ weights_bypop_2000_to_2010_grouped <- total_weights_bypop_2000_to_2010 %>%
             cw_pop_cw_2000_2010 =  sum(pop_cw_2000_2010, na.rm = TRUE)) %>%
   ungroup()
 bach <- weights_bypop_2000_to_2010_grouped %>% mutate(percent_bach = cw_bachelors_or_more_cw_2000_2010 / cw_over_25_2000_2010) 
+
+#totals 2000 to 2010 crosswalked over to 2022
+Crosswalk_2010_to_2020 <- Crosswalk_2010_to_2020 %>% mutate(GEOID = as.character(tr2010ge) )
+total_weights_bypop_200_to_2020 <- left_join(weights_bypop_2000_to_2010_grouped, Crosswalk_2010_to_2020)
+total_weights_bypop_200_to_2020 <- total_weights_bypop_200_to_2020 %>%
+  
+
+
 #health insurance
 
 #total housing units
 
 
 #renters
+
+
+#median income
