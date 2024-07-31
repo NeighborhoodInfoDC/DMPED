@@ -371,7 +371,10 @@ total_weights_bypop_2000_to_2010 <- total_weights_bypop_2000_to_2010 %>%
   mutate(pop_cw_2000_2010 = population * wt_pop)
 #group and divide
 weights_bypop_2000_to_2010_grouped <- total_weights_bypop_2000_to_2010 %>%
-  
+  group_by(tr2010ge) %>%
+  summarize(cw_over_25_2000_2010 = sum(over_25_2000_2010, na.rm = TRUE),
+            cw_pop_cw_2000_2010 =  sum(pop_cw_2000_2010, na.rm = TRUE)) %>%
+  ungroup()
 #adding population in
 
 #health insurance
