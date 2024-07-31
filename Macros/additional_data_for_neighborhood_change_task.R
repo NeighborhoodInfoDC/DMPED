@@ -370,6 +370,7 @@ bach <- weights_bypop_2000_to_2010_grouped %>% mutate(percent_bach = cw_bachelor
 Crosswalk_2010_to_2020 <- Crosswalk_2010_to_2020 %>% mutate(GEOID = as.character(tr2010ge) )
 total_weights_bypop_200_to_2020 <- left_join(weights_bypop_2000_to_2010_grouped, Crosswalk_2010_to_2020)
 total_weights_bypop_200_to_2020 <- total_weights_bypop_200_to_2020 %>%
+  mutate()
   
 
 
