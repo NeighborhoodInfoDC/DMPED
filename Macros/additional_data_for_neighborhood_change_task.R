@@ -367,6 +367,7 @@ weights_bypop_2000_to_2010_grouped <- total_weights_bypop_2000_to_2010 %>%
   ungroup()
 bach <- weights_bypop_2000_to_2010_grouped %>% mutate(percent_bach = cw_bachelors_or_more_cw_2000_2010 / cw_over_25_2000_2010) 
 remove(total_wei)
+
 #totals 2000 to 2010 crosswalked over to 2022
 Crosswalk_2010_to_2020 <- Crosswalk_2010_to_2020 %>% mutate(GEOID = as.character(tr2010ge) )
 total_weights_bypop_200_to_2020 <- left_join(weights_bypop_2000_to_2010_grouped, Crosswalk_2010_to_2020)
@@ -387,6 +388,22 @@ total_weights_2000_2020_grouped <- total_weights_bypop_200_to_2020 %>%
 total_weights_bypop_2010_to_2020 <- left_join(dc_total_population_12, Crosswalk_2010_to_2020, by = "GEOID")
 total_weights_bypop_2010_to_2020 <- total_weights_bypop_2010_to_2020 %>% rename(population = estimate)
 total_weights_bypop_2010_to_2020 <- left_join(percent_bachelors_over_25_2012, total_weights_bypop_2010_to_2020, by = "GEOID")
+total_weights_bypop_2010_to_2020 <- total_weights_bypop_2010_to_2020 %>% select(-c(3:17))
+total_weights_bypop_2010_to_2020 <- total_weights_bypop_2010_to_2020 %>% select(- NAME.y)
+total_weights_bypop_2010_to_2020 <- total_weights_bypop_2010_to_2020 %>% select(-percent_bachelors)
+#multiply across crosswalk
+total_weights_bypop_2010_to_2020 <- total_weights_bypop_2010_to_2020 %>%
+  mutate(over_25_2010_2020 = over_25 * wt_pop) %>%
+  mutate(pop_2010_2020 = population * wt_pop) %>%
+  mutate(bachelors_or_more_2010_2020 = bachelors_or_more * wt_pop)
+#group and divide
+weights_bypop_2010_2020_grouped <- total_weights_bypop_2010_to_2020 %>%
+  group_by(tr2020ge) %>%
+  summarise(cw_over_25_2010_2020 = sum(over_25_2010_2020, na.rm = TRUE),
+            cw_pop_2010_2020 = sum(pop_2010_2020, na.rm = TRUE),
+            cw_bachelors_or_more_2010_2020 = sum(bachelors_or_more_2010_2020, na.rm = TRUE)) %>%
+  ungroup() %>%
+  mutate(percent_bachelors = cw_bachelors_or_more_2010_2020 /cw_over_25_2010_2020 )
 
 #health insurance
 #will return to this shortly
