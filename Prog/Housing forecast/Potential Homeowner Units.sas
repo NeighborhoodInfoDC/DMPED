@@ -78,8 +78,7 @@ data maxunits;
 
 			*assuming that owner_occ_sale unknown are not owner occupants for our purposes;
 			if owner_occ_sale=.u then owner_occ_sale=0; 
-			if ui_proptype in("13") and usecode
-
+			
 			run; 
 
 		proc sort data=all_&y.;
