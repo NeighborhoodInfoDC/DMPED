@@ -41,7 +41,8 @@ data maxunits;
 
 
 	data ownerpt_&y. except_&y.;
-	set RealPr_r.ownerpt_&r. (where=(ui_proptype in ('10','11','12','13')));
+	set RealPr_r.ownerpt_&r. (where=(ui_proptype in ('10','11','12') | usecode in('023' '024'))); 
+			*restricting rental to residential flats < 5 or res conversions < 5 (made up 98% of rental properties with owner occ in 2024); 
 		year=&y.;
 		count=1; 
 
@@ -65,7 +66,7 @@ data maxunits;
 
 	
 	proc freq data=ownerpt_&y.a;
-	tables owner_occ_sale*ui_proptype/missprint;
+	tables owner_occ_sale*usecode/missprint;
 	where ui_proptype in("13");
 	title "owner-occupied sales for multifamily &y."; 
 	run;
@@ -77,6 +78,7 @@ data maxunits;
 
 			*assuming that owner_occ_sale unknown are not owner occupants for our purposes;
 			if owner_occ_sale=.u then owner_occ_sale=0; 
+			if ui_proptype in("13") and usecode
 
 			run; 
 
