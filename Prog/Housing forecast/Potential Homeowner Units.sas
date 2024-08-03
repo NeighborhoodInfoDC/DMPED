@@ -28,20 +28,20 @@ data maxunits;
 
 *look at owner point files going back in time. */;
 %let real=2002_05 2003_07 2004_07 2005_06 2006_07 2007_05 2008_06 2009_06 2010_07 2011_06 2012_06 2013_03 2014_01 2016_04 
-		  2017_02 2018_05 2019_09 2020_05 2021_01 2022_06 2023_05 2024_05;
+		  2017_02 /*2018_05*/ 2019_09 2020_05 2021_01 2022_06 2023_05 2024_05;
 
-%let year=2002 2003 2004 2005 2006 2007 2008 2009 2010 2011 2012 2013 2014 2016 2017 2018 2019 2020 2021 2022 2023 2024;
+%let year=2002 2003 2004 2005 2006 2007 2008 2009 2010 2011 2012 2013 2014 2016 2017 /*2018*/ 2019 2020 2021 2022 2023 2024;
 
 %macro getdata;
 
-	%do i=1 %to 22; 
+	%do i=1 %to 21; 
 
 	%let r=%scan(&real.,&i.," "); 
 	%let y=%scan(&year.,&i.," ");
 
 
 	data ownerpt_&y. except_&y.;
-	set RealPr_r.ownerpt_&r. (where=(ui_proptype in ('10','11','12')));
+	set RealPr_r.ownerpt_&r. (where=(ui_proptype in ('10','11','12','13')));
 		year=&y.;
 		count=1; 
 
@@ -63,6 +63,14 @@ data maxunits;
 	title "owner-occupied sales for single family and condo &y."; 
 	run;
 
+	
+	proc freq data=ownerpt_&y.a;
+	tables owner_occ_sale*ui_proptype/missprint;
+	where ui_proptype in("13");
+	title "owner-occupied sales for multifamily &y."; 
+	run;
+
+
 		data all_&y.;
 			set except_&y. (in=a) ownerpt_&y.a;
 			if a then owner_occ_sale=0; 
@@ -76,7 +84,7 @@ data maxunits;
 		by ui_proptype owner_occ_sale;
 
 		proc summary data= all_&y.;
-		where ui_proptype in("10" "11" );
+		where ui_proptype in("10" "11" "13");
 		by ui_proptype owner_occ_sale;
 
 		var count; 
