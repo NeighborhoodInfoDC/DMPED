@@ -50,10 +50,10 @@
 
 /** Macro Expiration_tbl - Start Definition **/
 
-%macro Expiration_tbl( Portfolio=, Title=, Date=poa_end );
+%macro Expiration_tbl( Portfolio=, Title=, Date=end_date );
 
   proc tabulate data=Subsidy_project_owner format=comma10. noseps missing;
-    where Subsidy_active and Portfolio = &Portfolio and year( &date ) >= 2024;
+    where Subsidy_active and Portfolio = &Portfolio and  &date >= 2024;
     class &Date;
     var units_assist;
     table 
@@ -63,7 +63,7 @@
       sum='Assisted units' * ( Units_assist=' ' )
       n='Projects'
       ;
-    format &Date year4.;
+    format &Date year4. &Date. exp.;
     title3 "Project and assisted unit counts by expiration date";
     title4 &title;
     footnote1 height=9pt "Source: DC Preservation Catalog";
@@ -162,6 +162,10 @@ data Subsidy_project_owner;
   by nlihc_id;
   
   if in1;
+
+  end_date=year(poa_end);
+  compl_end_year=year(compl_end);
+  format end_date compl_end_year exp.;
   
 run;
 
@@ -188,6 +192,12 @@ proc format;
     6 = 'DC HPTF only'
     10 = 'Section 202/811 only'
     20, 30 = 'Other subsidies/combinations';
+	value exp
+	2024 - 2029 = "2024-2029"
+	2030 - 2034 = "2030-2034"
+	2035 - 2039 = "2035-2039" 
+	2040 - high = "2040 and later" 
+	;
 run;
 
 ods rtf file="&_dcdata_default_path\DMPED\Prog\Housing Forecast\DMPED_tbls.rtf" style=Styles.Rtf_arial_9pt;
@@ -203,7 +213,7 @@ ods rtf file="&_dcdata_default_path\DMPED\Prog\Housing Forecast\DMPED_tbls.rtf" 
 
 %Expiration_tbl( Portfolio="PB8", Title="Section 8" )
 
-%Expiration_tbl( Portfolio="LIHTC", Title="LIHTC", date=compl_end )
+%Expiration_tbl( Portfolio="LIHTC", Title="LIHTC", date=compl_end_year )
 
 %Expiration_tbl( Portfolio="HUDMORT", Title="HUD mortgage" )
 
@@ -243,6 +253,38 @@ proc tabulate data=PresCat.Project_assisted_units format=comma10. noseps missing
   title1 "Prepared for District of Columbia Deputy Mayor for Planning and Economic Development";
   title2 " ";
   title3 "Project and assisted unit counts";
+run;
+
+/*test tables*/
+data units_for_exp;
+	set PresCat.Project_assisted_units;
+
+	exp_year=year(poa_end_max);
+	format exp_year exp.;
+	run;
+
+
+proc tabulate data=units_for_exp format=comma10. noseps missing;
+  where ProgCat ~= . and exp_year >=2024;
+  class ProgCat / preloadfmt order=data;
+  class exp_year;
+  var mid_asst_units;
+  table 
+    /** Rows **/
+    all='\b Total' ProgCat=' ',
+    /** Columns **/
+    n='Projects' * ( all='Total' exp_year=' ' )
+    ;
+  table 
+    /** Rows **/
+    all='\b Total' ProgCat=' ',
+    /** Columns **/
+    sum='Assisted units' * ( all='Total' exp_year=' ' ) * mid_asst_units=' '
+    ;
+  format ProgCat ProgCat. exp_year exp.;
+  title1 "Prepared for District of Columbia Deputy Mayor for Planning and Economic Development";
+  title2 " ";
+  title3 "Project and assisted unit counts, by year of last subsidy expiration";
 run;
 
 ods rtf close;
