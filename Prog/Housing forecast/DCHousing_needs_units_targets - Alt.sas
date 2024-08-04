@@ -238,8 +238,8 @@ RUN;
 
   data Housing_needs_baseline_2018_22_1;
   set DCarea_2018_22
-        (keep=year upuma serial pernum MET2013 hhwt hhincome numprec UNITSSTR BUILTYR2 bedrooms gq ownershp owncost ownershpd mortgage rentgrs valueh
-         where=(pernum=1 and gq in (1,2) and ownershpd in ( 12,13,21,22 )));
+        (keep=year upuma serial pernum MET2013 hhwt hhincome numprec UNITSSTR BUILTYR2 bedrooms gq ownershp owncost ownershpd mortgage rentgrs valueh 
+			empstat uhrswork wkswork2 occ  where=(pernum=1 and gq in (1,2) and ownershpd in ( 12,13,21,22 )));
 
 
 	 /*  adjustment of income data is NOT needed for multiyear data, which is already adjusted to 2022 in this case
@@ -247,6 +247,16 @@ RUN;
 		if hhincome ~=.n or hhincome ~=9999999 then do; 
 		 %dollar_convert( hhincome, hhincome_a, MULTYEAR, 2022, series=CUUR0000SA0L2 )
 	   end; */ 
+
+	/* Flag 35+ hours worked as full time */
+  if uhrswork >= 35 then fulltime=1;
+  else if uhrswork > 0 then fulltime=0;
+  else fulltime = .n;
+
+  /* Flag 50-52 weeks per year as year-round */
+  if wkswork2 = 6  then yearround=1;
+  else if wkswork2 > 0 then yearround=0;
+  else yearround = .n;
 
 
 %Hud_inc_22_dmped(hhinc=hhincome, hhsize = numprec); 
@@ -807,19 +817,19 @@ run;
 
 /*Export datasets for future projections
 PROC EXPORT DATA = Housing_needs_baseline_2018_22
-	outfile="C:\DCData\Libraries\DMPED\Prog\Housing Forecast\Housing_needs_baseline_2018_22.csv"
+	outfile="&_dcdata_default_path\DMPED\Prog\Housing Forecast\Housing_needs_baseline_2018_22.csv"
    dbms=csv
    replace;
    run; 
 
 PROC EXPORT DATA = Housing_needs_vacant_2018_22
-	outfile="C:\DCData\Libraries\DMPED\Prog\Housing Forecast\Housing_needs_vacant_2018_22.csv"
+	outfile="&_dcdata_default_path\DMPED\Prog\Housing Forecast\Housing_needs_vacant_2018_22.csv"
    dbms=csv
    replace;
    run; 
 
 PROC EXPORT DATA = other_vacant_2018_22
-	outfile="C:\DCData\Libraries\DMPED\Prog\Housing Forecast\other_vacant_2018_22.csv"
+	outfile="&_dcdata_default_path\DMPED\Prog\Housing Forecast\other_vacant_2018_22.csv"
    dbms=csv
    replace;
    run; 
@@ -848,7 +858,7 @@ weight hhwt;
 run; 
 
 proc export data=tenure_totals
- 	outfile="C:\DCDATA\Libraries\DMPED\Prog\Housing Forecast\Tenure_totals_occupied_&date..csv"
+ 	outfile="&_dcdata_default_path\DMPED\Prog\Housing Forecast\Tenure_totals_occupied_&date..csv"
    dbms=csv
    replace;
    run;
@@ -861,7 +871,45 @@ weight hhwt;
 run; 
 
 proc export data=hud_inc_cat
- 	outfile="C:\DCDATA\Libraries\DMPED\Prog\Housing Forecast\hud_inc_cat_&date..csv"
+ 	outfile="&_dcdata_default_path\DMPED\Prog\Housing Forecast\hud_inc_cat_&date..csv"
+   dbms=csv
+   replace;
+   run;
+*look up relevant occupations;
+ *https://usa.ipums.org/usa/volii/occ2018.shtml ; 
+ proc print data=Housing_needs_baseline_2018_22 (obs=10);
+ where hud_inc=1 and numprec=2 and fulltime=1 and yearround=1;
+ var tenure empstat occ hud_inc;
+ run;
+ proc print data=Housing_needs_baseline_2018_22 (obs=10);
+ where hud_inc=2 and numprec=2 and fulltime=1 and yearround=1;
+ var tenure empstat occ hud_inc;
+ run;
+  proc print data=Housing_needs_baseline_2018_22 (obs=10);
+ where hud_inc=3 and numprec=2 and fulltime=1 and yearround=1;
+ var tenure empstat occ hud_inc;
+ run;
+  proc print data=Housing_needs_baseline_2018_22 (obs=10);
+ where hud_inc=4 and numprec=2 and fulltime=1 and yearround=1;
+ var tenure empstat occ hud_inc;
+ run;
+  proc print data=Housing_needs_baseline_2018_22 (obs=10);
+ where hud_inc=5 and numprec=2 and fulltime=1 and yearround=1;
+ var tenure empstat occ hud_inc;
+ run;
+  proc print data=Housing_needs_baseline_2018_22 (obs=10);
+ where hud_inc=6 and numprec=2 and fulltime=1 and yearround=1;
+ var tenure empstat occ hud_inc;
+ run;
+
+ proc freq data=Housing_needs_baseline_2018_22;
+ where  numprec=2 and fulltime=1 and yearround=1;
+ weight hhwt;
+ tables occ*hud_inc / out=hud_inc_occ;
+ run;
+
+proc export data=hud_inc_occ
+ 	outfile="&_dcdata_default_path\DMPED\Prog\Housing Forecast\hud_inc_occ_&date..csv"
    dbms=csv
    replace;
    run;
@@ -874,7 +922,7 @@ run;
 
 
 proc export data=tenure_hud_inc_cat
- 	outfile="C:\DCDATA\Libraries\DMPED\Prog\Housing Forecast\tenure_hud_inc_cat_&date..csv"
+ 	outfile="&_dcdata_default_path\DMPED\Prog\Housing Forecast\tenure_hud_inc_cat_&date..csv"
    dbms=csv
    replace;
    run;
@@ -886,7 +934,7 @@ weight hhwt;
 run;
 
 proc export data=burden_tenure_hud_inc
- 	outfile="C:\DCDATA\Libraries\DMPED\Prog\Housing Forecast\burden_tenure_hud_inc_&date..csv"
+ 	outfile="&_dcdata_default_path\DMPED\Prog\Housing Forecast\burden_tenure_hud_inc_&date..csv"
    dbms=csv
    replace;
    run;
@@ -900,7 +948,7 @@ weight hhwt;
 run;
 
 proc export data=renter_costs_cat_all_units
- 	outfile="C:\DCDATA\Libraries\DMPED\Prog\Housing Forecast\renter_costs_cat_all_units_&date..csv"
+ 	outfile="&_dcdata_default_path\DMPED\Prog\Housing Forecast\renter_costs_cat_all_units_&date..csv"
    dbms=csv
    replace;
    run;
@@ -924,10 +972,21 @@ weight hhwt;
 run;
 
 proc export data=own_costs_cat_all_units
- 	outfile="C:\DCDATA\Libraries\DMPED\Prog\Housing Forecast\own_costs_cat_all_units_&date..csv"
+ 	outfile="&_dcdata_default_path\DMPED\Prog\Housing Forecast\own_costs_cat_all_units_&date..csv"
    dbms=csv
    replace;
    run;
+proc sort data=all;
+by curownlevel;
+proc means data=all;
+by curownlevel;
+var valueh;
+weight hhwt;
+run; 
+proc means data=all;
+var valueh;
+weight hhwt;
+run; 
 
 /* HOUSING COSTS FOR FIRST-TIME OWNERS */
 *Including occupied and vacant units;
@@ -938,7 +997,7 @@ weight hhwt;
 run;
 
 proc export data=first_own_costs_cat_all_units
- 	outfile="C:\DCDATA\Libraries\DMPED\Prog\Housing Forecast\first_own_costs_cat_all_units_&date..csv"
+ 	outfile="&_dcdata_default_path\DMPED\Prog\Housing Forecast\first_own_costs_cat_all_units_&date..csv"
    dbms=csv
    replace;
    run;
@@ -952,7 +1011,7 @@ weight hhwt;
 run;
 
 proc export data=afford_hous_cost_tenure
- 	outfile="C:\DCDATA\Libraries\DMPED\Prog\Housing Forecast\afford_hous_cost_tenure_&date..csv"
+ 	outfile="&_dcdata_default_path\DMPED\Prog\Housing Forecast\afford_hous_cost_tenure_&date..csv"
    dbms=csv
    replace;
    run;
@@ -965,7 +1024,7 @@ weight hhwt;
 run;
 
 proc export data=afford_rent_cost
- 	outfile="C:\DCDATA\Libraries\DMPED\Prog\Housing Forecast\afford_rent_cost_&date..csv"
+ 	outfile="&_dcdata_default_path\DMPED\Prog\Housing Forecast\afford_rent_cost_&date..csv"
    dbms=csv
    replace;
    run;
@@ -979,7 +1038,7 @@ run;
 
 
 proc export data=afford_own_cost
- 	outfile="C:\DCDATA\Libraries\DMPED\Prog\Housing Forecast\afford_own_cost_&date..csv"
+ 	outfile="&_dcdata_default_path\DMPED\Prog\Housing Forecast\afford_own_cost_&date..csv"
    dbms=csv
    replace;
    run;
@@ -995,7 +1054,7 @@ weight hhwt;
 run;
 
 proc export data=abil_pay_rent_all_units
- 	outfile="C:\DCDATA\Libraries\DMPED\Prog\Housing Forecast\abil_pay_rent_all_units_&date..csv"
+ 	outfile="&_dcdata_default_path\DMPED\Prog\Housing Forecast\abil_pay_rent_all_units_&date..csv"
    dbms=csv
    replace;
    run;
@@ -1008,7 +1067,7 @@ weight hhwt;
 run;
 
 proc export data=abil_pay_own_cur_all_units
- 	outfile="C:\DCDATA\Libraries\DMPED\Prog\Housing Forecast\abil_pay_own_cur_all_units_&date..csv"
+ 	outfile="&_dcdata_default_path\DMPED\Prog\Housing Forecast\abil_pay_own_cur_all_units_&date..csv"
    dbms=csv
    replace;
    run;
@@ -1021,7 +1080,7 @@ weight hhwt;
 run;
 
 proc export data=abil_pay_own_first_all_units
- 	outfile="C:\DCDATA\Libraries\DMPED\Prog\Housing Forecast\abil_pay_own_first_all_units_&date..csv"
+ 	outfile="&_dcdata_default_path\DMPED\Prog\Housing Forecast\abil_pay_own_first_all_units_&date..csv"
    dbms=csv
    replace;
    run;
@@ -1033,7 +1092,7 @@ PROC FREQ DATA = Housing_needs_vacant_2018_22;
 RUN;
 
 proc export data=vacancy_by_type
- 	outfile="C:\DCDATA\Libraries\DMPED\Prog\Housing Forecast\vacancy_by_type_&date..csv"
+ 	outfile="&_dcdata_default_path\DMPED\Prog\Housing Forecast\vacancy_by_type_&date..csv"
    dbms=csv
    replace;
    run;
@@ -1046,7 +1105,7 @@ PROC FREQ DATA = other_vacant_2018_22;
 RUN;
 
 proc export data=other_vacancy_by_type
- 	outfile="C:\DCDATA\Libraries\DMPED\Prog\Housing Forecast\other_vacancy_by_type_&date..csv"
+ 	outfile="&_dcdata_default_path\DMPED\Prog\Housing Forecast\other_vacancy_by_type_&date..csv"
    dbms=csv
    replace;
    run;
