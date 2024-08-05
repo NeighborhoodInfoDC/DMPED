@@ -293,7 +293,6 @@ mortgage_status_22 <- get_acs (
   year = 2022,
   variables = c(
     "B25081_002", ## with a mortgage
-    "B25003_001", ## tenure - total
     "B25003_002", ## tenure - owner
     "B25081_009", ##without mortgage
     "B25003_003" ## renter occupied
@@ -302,7 +301,7 @@ mortgage_status_22 <- get_acs (
   pivot_wider(id_cols = c(GEOID, NAME),
               names_from = variable,
               values_from = estimate) %>%
-  rename( total_units = B25003_001, with_mortgage = B25081_002, 
+  rename( with_mortgage = B25081_002, 
          without_mortgage = B25081_009, renter_occupied = B25003_003, owner_occupied = B25003_002 ) 
 #12
 mortgage_status_12 <- get_acs (
@@ -311,7 +310,6 @@ mortgage_status_12 <- get_acs (
   year = 2012,
   variables = c(
     "B25081_002", ## with a mortgage
-    "B25003_001", ## tenure - total
     "B25003_002", ## tenure - owner
     "B25081_008", ##without mortgage
     "B25003_003" ## renter occupied
@@ -320,7 +318,7 @@ mortgage_status_12 <- get_acs (
   pivot_wider(id_cols = c(GEOID, NAME),
               names_from = variable,
               values_from = estimate) %>%
-  rename( total_units = B25003_001, with_mortgage = B25081_002, 
+  rename( with_mortgage = B25081_002, 
           without_mortgage = B25081_008, renter_occupied = B25003_003, owner_occupied = B25003_002 ) 
 
 
@@ -408,14 +406,18 @@ weights_bypop_2010_2020_grouped <- total_weights_bypop_2010_to_2020 %>%
 #health insurance
 #will return to this shortly
 
-#total housing units
+#mortgage status
 housing_crosswalk_2000_2010 <- left_join(mortgage_status_2000, Crosswalk_2000_to_2010, by = "GEOID")
 #multiply across crosswalk
 housing_crosswalk_2000_2010 <- housing_crosswalk_2000_2010 %>%
   mutate(owner_occupied_2000_2010 = owner_occupied * wt_ownhu) %>%
   mutate(renter_occupied_2000_2010 = renter_occupied * wt_renthu) %>%
-  
+  mutate(wout_mortgage_2000_2010 = without_mortgage * wt_ownhu) %>%
+  mutate(with_mortgage_2000_2010 = with_mortgage * wt_ownhu)
+#group and divide
 
+#total units (numbers for 2000 are weird because they come from different source files) 
+#or I could add total units back in to the mortgage status files and then do total units a different way
 #renters
 
 
