@@ -409,7 +409,12 @@ weights_bypop_2010_2020_grouped <- total_weights_bypop_2010_to_2020 %>%
 #will return to this shortly
 
 #total housing units
-housing_weights_2000_2010
+housing_crosswalk_2000_2010 <- left_join(mortgage_status_2000, Crosswalk_2000_to_2010, by = "GEOID")
+#multiply across crosswalk
+housing_crosswalk_2000_2010 <- housing_crosswalk_2000_2010 %>%
+  mutate(owner_occupied_2000_2010 = owner_occupied * wt_ownhu) %>%
+  mutate(renter_occupied_2000_2010 = renter_occupied * wt_renthu) %>%
+  
 
 #renters
 
