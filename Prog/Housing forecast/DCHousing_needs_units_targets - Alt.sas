@@ -64,7 +64,7 @@ proc format;
 	  3= "$1,400 to $1,799"
 	  4= "$1,800 to $2,299"
 	  5= "$2,300 to $2,799"
-	  6= "More than $2,800"
+	  6= "$2,800 and above" 
   ;
 
     value ocost
@@ -73,7 +73,7 @@ proc format;
 	  3= "$1,800 to $2,499"
 	  4= "$2,500 to $3,199"
 	  5= "$3,200 to $4,199"
-	  6= "More than $4,200"
+	  6= "$4,200 and above"
   ;
 
 
@@ -83,7 +83,7 @@ proc format;
 	  3= "$1,400 to $1,799"
 	  4= "$1,800 to $2,799"
 	  5= "$2,800 to $3,599"
-	  6= "More than $3,600"
+	  6= "$3,600 and above"
    ;
 
   value inc_cat
@@ -434,6 +434,7 @@ data Housing_needs_baseline_2018_22;
 			else if max_ocost <= owncost*1.1 then couldpaymore=0; 
 		end; 
 
+		
 	    **** 
 	    Calculate monthly payment for first-time homebuyers. 
 	    Using 5.48% as the effective mortgage rate for DC in 2022 (pulled from overall US Freddie Mac) https://urbanorg.app.box.com/file/933065867963, 
@@ -453,7 +454,13 @@ data Housing_needs_baseline_2018_22;
 	    total_month = monthly_PI + PMI + tax_ins; **Sum of monthly payment components;
 
 		
-	
+		*create flag for household could "afford" cost of housing if it was sold at current value; 
+		couldafford=.;
+		if max_ocost ~=. then do;
+			if max_ocost > total_month then couldafford=1;
+			else if max_ocost <= total_month then couldafford=0;
+		end;
+
 			/*create owner cost level categories (first-time homebuyer)*/ 
 			
 
@@ -595,6 +602,7 @@ data Housing_needs_baseline_2018_22;
 				  fmownlevel = 'Owner Cost Categories based Max affordable-desired - Future needs'
 				  curownlevel = 'Owner Cost Categories based on Current Owner Costs'
 				  couldpaymore = "Occupant Could Afford to Pay More - Costs+10% are > Max affordable cost"
+				  couldafford = "Occupant Could Afford to Purchase Unit at Current Value" 
 				  paycategory = "Whether Occupant pays too much, the right amount or too little" 
                   structure = 'Housing structure type'
 				  structureyear = 'Age of structure'
@@ -727,6 +735,7 @@ data Housing_needs_vacant_2018_22 Other_vacant_2018_22 ;
 
 
 	  paycategory=4; *add vacant as a category to paycategory; 
+	  couldafford=2; *add vacant as a category to could afford to buy at current value;
 
 		if BUILTYR2 in ( 00, 9999999, .n , . ) then structureyear=.;
 		else do; 
@@ -748,6 +757,7 @@ data Housing_needs_vacant_2018_22 Other_vacant_2018_22 ;
 				  ownlevel = 'Owner Cost Categories based on First-Time HomeBuyer Costs'
 				  curownlevel = 'Owner Cost Categories based on Current Owner Costs'
 				  paycategory = "Whether Occupant pays too much, the right amount or too little" 
+				  couldafford = "Occupant Could Afford to Purchase Unit at Current Value"
 				  structureyear = 'Age of structure'
 				  structure = 'Housing structure type'
 				;
@@ -1075,7 +1085,7 @@ proc export data=abil_pay_own_cur_all_units
 *own based on first time buyer payment; 
 PROC FREQ DATA = all; 
 where tenure = 2;
-tables paycategory*ownlevel /  out=abil_pay_own_first_all_units OUTPCT;
+tables couldafford*ownlevel /  out=abil_pay_own_first_all_units OUTPCT;
 weight hhwt;
 run;
 
