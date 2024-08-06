@@ -165,7 +165,8 @@ data Subsidy_project_owner;
 
   end_date=year(poa_end);
   compl_end_year=year(compl_end);
-  format end_date compl_end_year exp.;
+  poa_end_year=year(poa_end);
+  format end_date compl_end_year poa_end_year exp.;
   
 run;
 
@@ -200,7 +201,7 @@ proc format;
 	;
 run;
 
-ods rtf file="&_dcdata_default_path\DMPED\Prog\Housing Forecast\DMPED_tbls.rtf" style=Styles.Rtf_arial_9pt;
+ods rtf file="&_dcdata_default_path\DMPED\Prog\Housing Forecast\DMPED_tbls.rtf" style=Styles.Rtf_lato_9pt;
 /*
 %Ward_tbl( ProgCatValues=( 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 20, 30 ), Title="All projects" )
 
@@ -213,7 +214,8 @@ ods rtf file="&_dcdata_default_path\DMPED\Prog\Housing Forecast\DMPED_tbls.rtf" 
 
 %Expiration_tbl( Portfolio="PB8", Title="Section 8" )
 
-%Expiration_tbl( Portfolio="LIHTC", Title="LIHTC", date=compl_end_year )
+%Expiration_tbl( Portfolio="LIHTC", Title="LIHTC (compliance end date)", date=compl_end_year )
+%Expiration_tbl( Portfolio="LIHTC", Title="LIHTC (extended use end date)", date=poa_end_year )
 
 %Expiration_tbl( Portfolio="HUDMORT", Title="HUD mortgage" )
 
@@ -228,7 +230,7 @@ ods rtf file="&_dcdata_default_path\DMPED\Prog\Housing Forecast\DMPED_tbls.rtf" 
 ods rtf close;
 
 
-ods rtf file="&_dcdata_default_path\DMPED\Prog\Housing Forecast\DMPED_tbls_handout.rtf" style=Styles.Rtf_arial_9pt;
+ods rtf file="&_dcdata_default_path\DMPED\Prog\Housing Forecast\DMPED_tbls_handout.rtf" style=Styles.Rtf_lato_9pt;
 
 options nodate nonumber missing='-';
 
