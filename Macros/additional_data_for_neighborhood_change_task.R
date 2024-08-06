@@ -431,6 +431,15 @@ housing_weights_2000_2020 <- housing_weights_2000_2020 %>%
   mutate(wout_mortgage_2000_2020 = cw_wout_mortgage_2000_2010 * wt_ownhu) %>%
   mutate(with_mortgage_2000_2020 = cw_with_mortgage_2000_2010 * wt_ownhu)
 #group and divide
+housing_weights_2000_2020_grouped <- housing_weights_2000_2020 %>% 
+  group_by(tr2020ge) %>%
+  summarize(cw_owner_occupied_2000_2020 = sum(owner_occupied_2000_2020, na.rm = TRUE),
+            cw_renter_occupied_2000_2020 = sum(renter_occupied_2000_2020, na.rm = TRUE),
+            cw_wout_mortgage_2000_2020 = sum(wout_mortgage_2000_2020, na.rm = TRUE),
+            cw_with_mortgage_2000_2020 = sum(with_mortgage_2000_2020, na.rm = TRUE)) %>%
+  ungroup()
+
+#2012 total housing status crosswalked to 2020
 
 #total units (numbers for 2000 are weird because they come from different source files) 
 #or I could add total units back in to the mortgage status files and then do total units a different way
