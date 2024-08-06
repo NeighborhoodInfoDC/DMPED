@@ -406,6 +406,7 @@ weights_bypop_2010_2020_grouped <- total_weights_bypop_2010_to_2020 %>%
 #health insurance
 #will return to this shortly
 
+#2000-2010 crosswalk
 #mortgage status
 housing_crosswalk_2000_2010 <- left_join(mortgage_status_2000, Crosswalk_2000_to_2010, by = "GEOID")
 #multiply across crosswalk
@@ -414,6 +415,21 @@ housing_crosswalk_2000_2010 <- housing_crosswalk_2000_2010 %>%
   mutate(renter_occupied_2000_2010 = renter_occupied * wt_renthu) %>%
   mutate(wout_mortgage_2000_2010 = without_mortgage * wt_ownhu) %>%
   mutate(with_mortgage_2000_2010 = with_mortgage * wt_ownhu)
+#group and divide
+housing_crosswalk_2000_2010_grouped <- housing_crosswalk_2000_2010 %>%
+  group_by(tr2010ge) %>%
+  summarize(cw_owner_occupied_2000_2010 = sum(owner_occupied_2000_2010, na.rm = TRUE),
+            cw_renter_occupied_2000_2010 = sum(renter_occupied_2000_2010, na.rm = TRUE),
+             cw_wout_mortgage_2000_2010 = sum(wout_mortgage_2000_2010, na.rm = TRUE),
+             cw_with_mortgage_2000_2010 = sum(with_mortgage_2000_2010, na.rm = TRUE)) %>%
+  ungroup()  
+#2000 to 2020 via the above 2010            
+housing_weights_2000_2020 <- left_join(housing_crosswalk_2000_2010_grouped, Crosswalk_2010_to_2020)
+housing_weights_2000_2020 <- housing_weights_2000_2020 %>% 
+  mutate(owner_occupied_2000_2020 = cw_owner_occupied_2000_2010 * wt_ownhu) %>%
+  mutate(renter_occupied_2000_2020 = cw_renter_occupied_2000_2010 * wt_renthu) %>%
+  mutate(wout_mortgage_2000_2020 = cw_wout_mortgage_2000_2010 * wt_ownhu) %>%
+  mutate(with_mortgage_2000_2020 = cw_with_mortgage_2000_2010 * wt_ownhu)
 #group and divide
 
 #total units (numbers for 2000 are weird because they come from different source files) 
