@@ -756,7 +756,7 @@ run;
 * Housing needs; 
 %Finalize_data_set( 
   data=Housing_needs_baseline_2018_22,
-  out=DC_2018_22_housing_needs_hud60,
+  out=DC_2018_22_housing_needs_60,
   outlib=DMPED,
   label="DC households for DMPED Housing Needs 2018-2022 file",
   sortby=hud_inc,
@@ -766,7 +766,7 @@ run;
 * Housing needs vacant; 
 %Finalize_data_set( 
   data=Housing_needs_vacant_2018_22,
-  out=DC_2018_22_housing_needs_vacant_hud60,
+  out=DC_2018_22_housing_needs_vacant_60,
   outlib=DMPED,
   label="DC for sale/rent vacant units for DMPED Housing Needs 2018-2022 file",
   sortby=hud_inc,
@@ -776,7 +776,7 @@ run;
 * Other vacant; 
 %Finalize_data_set( 
   data=other_vacant_2018_22,
-  out=DC_2018_22_other_vacant_hud60,
+  out=DC_2018_22_other_vacant_60,
   outlib=DMPED,
   label="DC for other vacant for DMPED Housing Needs 2018-2022 file",
   sortby=hud_inc,
@@ -794,7 +794,7 @@ run;
 
 %Finalize_data_set( 
   data=all,
-  out=DC_2018_22_all_housing_units_hud60,
+  out=DC_2018_22_all_housing_units_60,
   outlib=DMPED,
   label="DC on housing market for DMPED Housing Needs 2018-22",
   sortby=hud_inc,
@@ -803,8 +803,11 @@ run;
 
 
 
+/* 
+*check; 
 
 PROC FREQ DATA = Housing_needs_baseline_2018_22; 
 	TABLE hud_inc;
 	WEIGHT hhwt;
 RUN;
+*/
