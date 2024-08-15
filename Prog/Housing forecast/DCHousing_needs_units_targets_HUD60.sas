@@ -766,7 +766,7 @@ run;
 * Housing needs vacant; 
 %Finalize_data_set( 
   data=Housing_needs_vacant_2018_22,
-  out=DC_2018_22_housing_needs_vacant_60,
+  out=DC_2018_22_housing_needs_vac_60,
   outlib=DMPED,
   label="DC for sale/rent vacant units for DMPED Housing Needs 2018-2022 file",
   sortby=hud_inc,
@@ -776,7 +776,7 @@ run;
 * Other vacant; 
 %Finalize_data_set( 
   data=other_vacant_2018_22,
-  out=DC_2018_22_other_vacant_60,
+  out=DC_2018_22_other_vac_60,
   outlib=DMPED,
   label="DC for other vacant for DMPED Housing Needs 2018-2022 file",
   sortby=hud_inc,
