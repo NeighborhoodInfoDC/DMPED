@@ -52,17 +52,17 @@ PROC FORMAT;
 
 	 value rcost
 	  1= "$0 to $899"
-	  2= "$900 to $1,499"
-	  3= "$1,500 to $1,899"
-	  4= "$1,900 to $2,399"
-	  5= "$2,400 to $2,799"
+	  2= "$900 to $1,399"
+	  3= "$1,400 to $1,799"
+	  4= "$1,800 to $2,299"
+	  5= "$2,300 to $2,799"
 	  6= "More than $2,800"
   ;
 
     value ocost
-	  1= "$0 to $1,499"
-	  2= "$1,500 to $1,899"
-	  3= "$1,899 to $2,499"
+	  1= "$0 to $1,399"
+	  2= "$1,400 to $1,799"
+	  3= "$1,800 to $2,499"
 	  4= "$2,500 to $3,199"
 	  5= "$3,200 to $4,199"
 	  6= "More than $4,200"
@@ -71,9 +71,9 @@ PROC FORMAT;
 
   value acost
 	  1= "$0 to $899"
-	  2= "$900 to $1,499"
-	  3= "$1,500 to $1,899"
-	  4= "$1,900 to $2,799"
+	  2= "$900 to $1,399"
+	  3= "$1,400 to $1,799"
+	  4= "$1,800 to $2,799"
 	  5= "$2,800 to $3,599"
 	  6= "More than $3,600"
    ;
@@ -255,8 +255,8 @@ PROC EXPORT DATA = &level._proj_&tenure_name._hh_inc_cost
 *5) For vacant units, take cost level and put values into corresponding fmrentlevel or fmownlevel variable so it can be put into same table as occupied;
 DATA Housing_needs_vacant_2018_22;
 	SET Housing_needs_vacant_2018_22;
-	mrentlevel = rentlevel;
-	mownlevel = ownlevel;
+	fmrentlevel = rentlevel;
+	fmownlevel = ownlevel;
 RUN;
 
 *Calculate vacancy rates of all regular units;
