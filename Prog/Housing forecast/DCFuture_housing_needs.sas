@@ -32,7 +32,7 @@ Housing cost levels new households could afford by tenure in 2035 (mid, high, al
 %DCData_lib( DMPED )
 %DCData_lib( Ipums )
 
-%let date=07172024; 
+%let date=07252024; 
 
 PROC FORMAT;
 
@@ -49,17 +49,17 @@ PROC FORMAT;
 
 	 value rcost
 	  1= "$0 to $899"
-	  2= "$900 to $1,499"
-	  3= "$1,500 to $1,899"
-	  4= "$1,900 to $2,399"
-	  5= "$2,400 to $2,799"
+	  2= "$900 to $1,399"
+	  3= "$1,400 to $1,799"
+	  4= "$1,800 to $2,299"
+	  5= "$2,300 to $2,799"
 	  6= "More than $2,800"
   ;
 
     value ocost
-	  1= "$0 to $1,499"
-	  2= "$1,500 to $1,899"
-	  3= "$1,899 to $2,499"
+	  1= "$0 to $1,399"
+	  2= "$1,400 to $1,799"
+	  3= "$1,800 to $2,499"
 	  4= "$2,500 to $3,199"
 	  5= "$3,200 to $4,199"
 	  6= "More than $4,200"
@@ -68,9 +68,9 @@ PROC FORMAT;
 
   value acost
 	  1= "$0 to $899"
-	  2= "$900 to $1,499"
-	  3= "$1,500 to $1,899"
-	  4= "$1,900 to $2,799"
+	  2= "$900 to $1,399"
+	  3= "$1,400 to $1,799"
+	  4= "$1,800 to $2,799"
 	  5= "$2,800 to $3,599"
 	  6= "More than $3,600"
    ;
@@ -96,7 +96,7 @@ RUN;
 2) Read in hh growth matrices by hud inc for each of the three scenarios; 
 
 Occupied dataset
-3) By tenure, and using tenure-specific max desired/affordable housing cost variables (mrentlevel for renters, mownlevel for owners)
+3) By tenure, and using tenure-specific max desired/affordable housing cost variables (fmrentlevel for renters, fmownlevel for owners)
 create crosstab (PROC FREQ) of current households - HUD inc vs cost var; 
 4) Using table percentages for each income bracket x cost level pair,
 Apply future number of households for the year (e.g., 2035) broken out by hud income level 
@@ -104,7 +104,7 @@ to calculate anticipated number of HHs matrix for that year's values;
 
 Vacant 
 *5) For vacant units, take tenure-specific cost var (rentlevel for units that are "For rent or sale" and ownlevel for those that are "for sale only")
-and put values into mrentlevel and mownlevel variables so it can be put into same table as occupied;
+and put values into fmrentlevel and fmownlevel variables so it can be put into same table as occupied;
 *6) For 2025-2040 at 5-year increments, calculate growth rate from Steven's table 1 total units, between 2018-22 
 ACS total and the projection year;
 *7)  Create table output of vacant units by cost level;
@@ -197,7 +197,7 @@ RUN;
 
 *Importing housing vacancies dataset from current needs script;
 DATA Housing_needs_vacant_2018_22; 
-	SET DMPED.dc_2018_22_housing_needs_vac;
+	SET DMPED.dc_2018_22_housing_needs_vacant;
 RUN;
 
 
@@ -249,8 +249,8 @@ PROC EXPORT DATA = &level._proj_&tenure_name._hh_inc_cost
    replace;
    run;
 %mend;
-%future_cost_by_tenure(tenure_name = renter, tenure_var = 1, cost = mrentlevel);
-%future_cost_by_tenure(tenure_name = owner, tenure_var = 2, cost = mownlevel);
+%future_cost_by_tenure(tenure_name = renter, tenure_var = 1, cost = fmrentlevel);
+%future_cost_by_tenure(tenure_name = owner, tenure_var = 2, cost = fmownlevel);
 
 
 /*** VACANT UNITS ***/
@@ -258,11 +258,11 @@ PROC EXPORT DATA = &level._proj_&tenure_name._hh_inc_cost
 *Split out by rent/own cost;
 * Vacancy_r has values of "for rent or sale" or "for sale only." The first has rentgrs, the second has owner costs.;
 
-*5) For vacant units, take cost level and put values into corresponding mrentlevel or mownlevel variable so it can be put into same table as occupied;
+*5) For vacant units, take cost level and put values into corresponding fmrentlevel or fmownlevel variable so it can be put into same table as occupied;
 DATA Housing_needs_vacant_2018_22;
 	SET Housing_needs_vacant_2018_22;
-	mrentlevel = rentlevel;
-	mownlevel = ownlevel;
+	fmrentlevel = rentlevel;
+	fmownlevel = ownlevel;
 RUN;
 
 *Calculate vacancy rates of all regular units;
@@ -304,8 +304,8 @@ DATA &level._proj_&tenure_name._vacant_cost;
 RUN;	
 
 %mend;
-%vacancy_by_tenure(tenure_name = rent_sale, tenure_var = 1, tenure_grow_name = renter, cost = mrentlevel);
-%vacancy_by_tenure(tenure_name = sale_only, tenure_var = 2,  tenure_grow_name = owner, cost = mownlevel);
+%vacancy_by_tenure(tenure_name = rent_sale, tenure_var = 1, tenure_grow_name = renter, cost = fmrentlevel);
+%vacancy_by_tenure(tenure_name = sale_only, tenure_var = 2,  tenure_grow_name = owner, cost = fmownlevel);
 
 
 /* COMBINING OCCUPIED AND VACANT INTO ONE TABLE*/
@@ -314,7 +314,7 @@ RUN;
 *Rental occupied and rent/sale vacant;
 DATA &level._proj_rent_by_cost_inc ; 
 	SET &level._proj_renter_hh_inc_cost  &level._proj_rent_sale_vacant_cost; 
-	KEEP hud_inc mrentlevel COUNT PROJ_2025 PROJ_2030 PROJ_2035 PROJ_2040; 
+	KEEP hud_inc fmrentlevel COUNT PROJ_2025 PROJ_2030 PROJ_2035 PROJ_2040; 
 RUN;
 
 *Exporting table; 
@@ -327,7 +327,7 @@ PROC EXPORT DATA = &level._proj_rent_by_cost_inc
 *Owner occupied and for-sale only vacant;
 DATA &level._proj_own_by_cost_inc ; 
 	SET &level._proj_owner_hh_inc_cost  &level._proj_sale_only_vacant_cost; 
-	KEEP hud_inc mownlevel COUNT PROJ_2025 PROJ_2030 PROJ_2035 PROJ_2040;
+	KEEP hud_inc fmownlevel COUNT PROJ_2025 PROJ_2030 PROJ_2035 PROJ_2040;
 RUN;
 
 *Exporting table; 
