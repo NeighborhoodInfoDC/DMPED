@@ -14,8 +14,8 @@ dc_total_population_22 <-
           year = 2022,
           state = "DC",
           geometry = FALSE)
-sum(dc_total_population_22$estimate)
-sum(percent_bachelors_over_25_2022$over_25)
+# sum(dc_total_population_22$estimate)
+# sum(percent_bachelors_over_25_2022$over_25)
 dc_total_population_12 <- 
   get_acs(geography = "tract",
           variable = "B01003_001",
@@ -337,6 +337,35 @@ mortgage_status_2000<-
               values_from = value) %>%
   rename(without_mortgage = H098018, with_mortgage = H098002, owner_occupied = H007002, renter_occupied = H007003) 
 
+#race data
+race_22 <- get_acs(geography = "tract",
+variables = c("B03002_001", "B03002_002", "B03002_003", "B03002_004",
+              "B03002_005", "B03002_006", "B03002_007", "B03002_008",
+              "B03002_009", "B03002_012"), state = "DC",
+year = 2022,) %>%
+  pivot_wider(id_cols = c(GEOID, NAME),
+              names_from = variable,
+              values_from = estimate)%>%
+  rename(total = B03002_001, non_hispanic = B03002_002, non_hispanic_white = B03002_003,
+         non_hispanic_black = B03002_004, non_hispanoc_indigenous = B03002_005,
+         non_hispanic_asian = B03002_006, non_hispanic_pacific = B03002_007,
+         some_other_race = B03002_008, two_or_more_races = B03002_009, hispanic_or_latino = B03002_012)
+race_12 <- get_acs(geography = "tract",
+                   variables = c("B03002_001", "B03002_002", "B03002_003", "B03002_004",
+                                 "B03002_005", "B03002_006", "B03002_007", "B03002_008",
+                                 "B03002_009", "B03002_012"), state = "DC",
+                   year = 2012,) %>%
+  pivot_wider(id_cols = c(GEOID, NAME),
+              names_from = variable,
+              values_from = estimate)%>%
+  rename(total = B03002_001, non_hispanic = B03002_002, non_hispanic_white = B03002_003,
+         non_hispanic_black = B03002_004, non_hispanoc_indigenous = B03002_005,
+         non_hispanic_asian = B03002_006, non_hispanic_pacific = B03002_007,
+         some_other_race = B03002_008, two_or_more_races = B03002_009, hispanic_or_latino = B03002_012)
+
+
+#all poc divided by total pop 
+
 ####################################################################################################################
 ####################################################################################################################
 #CROSSWALK
@@ -438,12 +467,26 @@ housing_weights_2000_2020_grouped <- housing_weights_2000_2020 %>%
             cw_wout_mortgage_2000_2020 = sum(wout_mortgage_2000_2020, na.rm = TRUE),
             cw_with_mortgage_2000_2020 = sum(with_mortgage_2000_2020, na.rm = TRUE)) %>%
   ungroup()
+#2012 mortgage status crosswalked to 2020
+housing_crosswalk_2012_2020 <- left_join(mortgage_status_12, Crosswalk_2010_to_2020, by = "GEOID")
+housing_crosswalk_2012_2020 <- housing_crosswalk_2012_2020 %>% 
+  mutate(owner_occupied_2012_2020 = owner_occupied * wt_ownhu) %>%
+  mutate(renter_occupied_2012_2020 = renter_occupied * wt_renthu) %>%
+  mutate(wout_mortgage_2012_2020 = without_mortgage * wt_ownhu) %>%
+  mutate(with_mortgage_2012_2020 = with_mortgage * wt_ownhu)
+#group_and_divide
 
-#2012 total housing status crosswalked to 2020
 
-#total units (numbers for 2000 are weird because they come from different source files) 
+###
+mortgage_status_t_2000 <- mortgage_status_2000 %>%
+  mutate(total = owner_occupied + renter_occupied)
+
+
+#total units (numbers for 2000 are weird because they come from different source files, this means some are unnacounted for) 
 #or I could add total units back in to the mortgage status files and then do total units a different way
 #renters
 
 
 #median income
+
+
