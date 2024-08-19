@@ -363,7 +363,17 @@ race_12 <- get_acs(geography = "tract",
          non_hispanic_asian = B03002_006, non_hispanic_pacific = B03002_007,
          some_other_race = B03002_008, two_or_more_races = B03002_009, hispanic_or_latino = B03002_012)
 
-
+race_2000 <- get_decennial(geography = "tract",
+                           variables = c("P003001", "P003003", "P003004", "P003005",
+                                         "P003006", "P003007", "P003008", "P003009",
+                                         "P004002"), state = "DC",
+                           year = 2000) %>%
+  pivot_wider(id_cols = c(GEOID, NAME),
+              names_from = variable,
+              values_from = value)%>%
+  rename(total = P003001, white_alone = P003003, black_alone = P003004, indigenous_alone = P003005,
+         asian_alone = P003006, pacific = P003007, some_other_race = P003008, two_or_more_races = P003009,
+         hispanic_or_latino = P004002)
 #all poc divided by total pop 
 
 ####################################################################################################################
