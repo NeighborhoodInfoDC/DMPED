@@ -390,11 +390,21 @@ total_weights_bypop_2000_to_2010 <- total_weights_bypop_2000_to_2010  %>% rename
 total_weights_bypop_2000_to_2010 <- left_join(percent_bachelors_over_25_2000, total_weights_bypop_2000_to_2010, by = "GEOID")
 total_weights_bypop_2000_to_2010 <- total_weights_bypop_2000_to_2010 %>% select(-c(3:45))
 total_weights_bypop_2000_to_2010 <- total_weights_bypop_2000_to_2010 %>% select(-NAME, -variable)
+total_weights_bypop_2000_to_2010 <- left_join(total_weights_bypop_2000_to_2010, race_2000)
 #multiply across the crosswalk
 total_weights_bypop_2000_to_2010 <- total_weights_bypop_2000_to_2010 %>%
   mutate(over_25_2000_2010 = over_25 * wt_pop) %>%
   mutate(bachelors_or_more_cw_2000_2010 =  bachelors_or_more * wt_pop) %>%
-  mutate(pop_cw_2000_2010 = population * wt_pop)
+  mutate(pop_cw_2000_2010 = population * wt_pop) %>%
+  mutate(white_alone_2000_2010 = white_alone * wt_pop) %>%
+  mutate(black_alone_2000_2010 = black_alone * wt_pop) %>%
+  mutate(indigenous_alone_2000_2010 = indigenous_alone * wt_pop) %>%
+  mutate(asian_alone_2000_2010 = asian_alone * wt_pop) %>%
+  mutate(hispanic_or_latino = hispanic_or_latino * wt_pop) %>%
+  mutate(pacific_alone_2000_2010 = pacific * wt_pop) %>%
+  mutate(some_other_race_2000_2010 = some_other_race * wt_pop) %>%
+  mutate(two_or_more_races_2000_2010 = some_other_race * wt_pop)
+
 #group and divide
 weights_bypop_2000_to_2010_grouped <- total_weights_bypop_2000_to_2010 %>%
   group_by(tr2010ge) %>%
@@ -402,8 +412,8 @@ weights_bypop_2000_to_2010_grouped <- total_weights_bypop_2000_to_2010 %>%
             cw_bachelors_or_more_cw_2000_2010 = sum(bachelors_or_more_cw_2000_2010, na.rm = TRUE),
             cw_pop_cw_2000_2010 =  sum(pop_cw_2000_2010, na.rm = TRUE)) %>%
   ungroup()
-bach <- weights_bypop_2000_to_2010_grouped %>% mutate(percent_bach = cw_bachelors_or_more_cw_2000_2010 / cw_over_25_2000_2010) 
-remove(total_wei)
+# bach <- weights_bypop_2000_to_2010_grouped %>% mutate(percent_bach = cw_bachelors_or_more_cw_2000_2010 / cw_over_25_2000_2010) 
+# remove(total_wei)
 
 #totals 2000 to 2010 crosswalked over to 2022
 Crosswalk_2010_to_2020 <- Crosswalk_2010_to_2020 %>% mutate(GEOID = as.character(tr2010ge) )
@@ -502,5 +512,6 @@ housing_crosswalk_2012_2020_grouped <- housing_crosswalk_2012_2020 %>%
 
 
 #race
+#race 2000 to 2010
 
 
