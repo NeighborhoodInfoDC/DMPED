@@ -439,21 +439,20 @@ total_weights_bypop_2000_to_2020 <-  total_weights_bypop_2000_to_2020 %>%
   mutate(some_other_race_2000_2020 = cw_some_other_race_2000_2010 * wt_pop) %>%
   mutate(two_or_more_races_2000_2020 = cw_two_or_more_races_2000_2010 * wt_pop)
   
-  
-total_weights_2000_2020_grouped <- total_weights_bypop_200_to_2020 %>%
+total_weights_2000_2020_grouped <- total_weights_bypop_2000_to_2020 %>%
   group_by(tr2020ge) %>%
-  summarize(crw_pop_2000_2020 = sum(pop_2000_to_2020, na.rm = TRUE),
-            crw_over_25_2000_2020 = sum(over_25_2000_to_2020, na.rm = TRUE),
-            crw_bachelors_or_more_2000_to_2020 = sum(bachelors_or_more_2000_to_2020, na.rm = TRUE),
-            cw_black_alone_2000_2020 = sum(black_alone_2000_2010, na.rm = TRUE),
-            cw_indigenous_alone_2000_2020 = sum(indigenous_alone_2000_2010, na.rm = TRUE),
-            cw_asian_alone_2000_2020 = sum(asian_alone_2000_2010, na.rm = TRUE),
-            cw_pacific_alone_2000_2020 = sum(pacific_alone_2000_2010, na.rm = TRUE),
+  summarize(cw_pop_2000_2020 = sum(pop_2000_to_2020, na.rm = TRUE),
+            cw_over_25_2000_2020 = sum(over_25_2000_to_2020, na.rm = TRUE),
+            cw_bachelors_or_more_2000_to_2020 = sum(bachelors_or_more_2000_to_2020, na.rm = TRUE),
+            cw_black_alone_2000_2020 = sum(black_alone_2000_2020, na.rm = TRUE),
+            cw_indigenous_alone_2000_2020 = sum(indigenous_alone_2000_2020, na.rm = TRUE),
+            cw_asian_alone_2000_2020 = sum(asian_alone_2000_2020, na.rm = TRUE),
+            cw_pacific_alone_2000_2020 = sum(pacific_alone_2000_2020, na.rm = TRUE),
             cw_hispanic_or_latino_2000_2020 = sum(hispanic_or_latino, na.rm = TRUE),
-            cw_some_other_race_2000_2020 = sum(some_other_race_2000_2010, na.rm = TRUE),
-            cw_two_or_more_races_2000_2020 = sum(two_or_more_races_2000_2010, na.rm = TRUE)) %>%
+            cw_some_other_race_2000_2020 = sum(some_other_race_2000_2020, na.rm = TRUE),
+            cw_two_or_more_races_2000_2020 = sum(two_or_more_races_2000_2020, na.rm = TRUE)) %>%
   ungroup() %>%
-  mutate(percent_bachelors = crw_bachelors_or_more_2000_to_2020 / crw_over_25_2000_2020 )
+  mutate(percent_bachelors = cw_bachelors_or_more_2000_to_2020 / cw_over_25_2000_2020 )
 
 #2012 totals crosswalked to 2020
 total_weights_bypop_2010_to_2020 <- left_join(dc_total_population_12, Crosswalk_2010_to_2020, by = "GEOID")
