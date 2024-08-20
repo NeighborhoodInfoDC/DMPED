@@ -434,7 +434,7 @@ total_weights_bypop_2000_to_2020 <-  total_weights_bypop_2000_to_2020 %>%
   mutate(black_alone_2000_2020 = cw_black_alone_2000_2010 * wt_pop) %>%
   mutate(indigenous_alone_2000_2020 = cw_indigenous_alone_2000_2010 * wt_pop) %>%
   mutate(asian_alone_2000_2020 = cw_asian_alone_2000_2010 * wt_pop) %>%
-  mutate(hispanic_or_latino = cw_hispanic_or_latino_2000_2010 * wt_pop) %>%
+  mutate(hispanic_or_latino_2000_2020 = cw_hispanic_or_latino_2000_2010 * wt_pop) %>%
   mutate(pacific_alone_2000_2020 = cw_pacific_alone_2000_2010 * wt_pop) %>%
   mutate(some_other_race_2000_2020 = cw_some_other_race_2000_2010 * wt_pop) %>%
   mutate(two_or_more_races_2000_2020 = cw_two_or_more_races_2000_2010 * wt_pop)
@@ -448,7 +448,7 @@ total_weights_2000_2020_grouped <- total_weights_bypop_2000_to_2020 %>%
             cw_indigenous_alone_2000_2020 = sum(indigenous_alone_2000_2020, na.rm = TRUE),
             cw_asian_alone_2000_2020 = sum(asian_alone_2000_2020, na.rm = TRUE),
             cw_pacific_alone_2000_2020 = sum(pacific_alone_2000_2020, na.rm = TRUE),
-            cw_hispanic_or_latino_2000_2020 = sum(hispanic_or_latino, na.rm = TRUE),
+            cw_hispanic_or_latino_2000_2020 = sum(hispanic_or_latino_2000_2020, na.rm = TRUE),
             cw_some_other_race_2000_2020 = sum(some_other_race_2000_2020, na.rm = TRUE),
             cw_two_or_more_races_2000_2020 = sum(two_or_more_races_2000_2020, na.rm = TRUE)) %>%
   ungroup() %>%
@@ -461,17 +461,29 @@ total_weights_bypop_2010_to_2020 <- left_join(percent_bachelors_over_25_2012, to
 total_weights_bypop_2010_to_2020 <- total_weights_bypop_2010_to_2020 %>% select(-c(3:17))
 total_weights_bypop_2010_to_2020 <- total_weights_bypop_2010_to_2020 %>% select(- NAME.y)
 total_weights_bypop_2010_to_2020 <- total_weights_bypop_2010_to_2020 %>% select(-percent_bachelors)
+total_weights_bypop_2010_to_2020 <- left_join(total_weights_bypop_2010_to_2020, race_12)
 #multiply across crosswalk
 total_weights_bypop_2010_to_2020 <- total_weights_bypop_2010_to_2020 %>%
   mutate(over_25_2010_2020 = over_25 * wt_pop) %>%
   mutate(pop_2010_2020 = population * wt_pop) %>%
-  mutate(bachelors_or_more_2010_2020 = bachelors_or_more * wt_pop)
+  mutate(bachelors_or_more_2010_2020 = bachelors_or_more * wt_pop) %>%
+  mutate(white_alone_2010_2020 = non_hispanic_white * wt_pop) %>%
+  mutate(black_alone_2010_2020 = non_hispanic_black * wt_pop) %>%
+  mutate(indigenous_alone_2010_2020 = non_hispanoc_indigenous * wt_pop) %>%
+  mutate(asian_alone_2010_2020 = non_hispanic_asian * wt_pop) %>%
+  mutate(hispanic_or_latino_2010_2020 = hispanic_or_latino * wt_pop) %>%
+  mutate(pacific_alone_2010_2020 = non_hispanic_pacific * wt_pop) %>%
+  mutate(some_other_race_2010_2020 = some_other_race * wt_pop) %>%
+  mutate(two_or_more_races_2010_2020 = two_or_more_races * wt_pop)
 #group and divide
 weights_bypop_2010_2020_grouped <- total_weights_bypop_2010_to_2020 %>%
   group_by(tr2020ge) %>%
   summarise(cw_over_25_2010_2020 = sum(over_25_2010_2020, na.rm = TRUE),
             cw_pop_2010_2020 = sum(pop_2010_2020, na.rm = TRUE),
-            cw_bachelors_or_more_2010_2020 = sum(bachelors_or_more_2010_2020, na.rm = TRUE)) %>%
+            cw_bachelors_or_more_2010_2020 = sum(bachelors_or_more_2010_2020, na.rm = TRUE),
+            cw_white_alone_2010_2020 = sum(white_alone_2010_2020, na.rm = TRUE),
+            cw_black_alone_2010_2020 = sum(black_alone_2010_2020, na.rm = TRUE),
+            ) %>%
   ungroup() %>%
   mutate(percent_bachelors = cw_bachelors_or_more_2010_2020 /cw_over_25_2010_2020 )
 
