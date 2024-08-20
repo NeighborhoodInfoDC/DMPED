@@ -485,18 +485,22 @@ housing_crosswalk_2012_2020 <- housing_crosswalk_2012_2020 %>%
   mutate(wout_mortgage_2012_2020 = without_mortgage * wt_ownhu) %>%
   mutate(with_mortgage_2012_2020 = with_mortgage * wt_ownhu)
 #group_and_divide
-
+housing_crosswalk_2012_2020_grouped <- housing_crosswalk_2012_2020 %>%
+  group_by(tr2020ge) %>%
+  summarize(cw_owner_occupied_2012_2020 = sum(owner_occupied_2012_2020, na.rm = TRUE),
+            cw_renter_occupied_2012_2020 = sum(renter_occupied_2012_2020, na.rm = TRUE),
+            cw_wout_mortgage_2012_2020 = sum(wout_mortgage_2012_2020, na.rm = TRUE),
+            cw_with_mortgage_2012_2020 = sum(with_mortgage_2012_2020, na.rm = TRUE)) %>%
+  ungroup()
 
 ###
-mortgage_status_t_2000 <- mortgage_status_2000 %>%
-  mutate(total = owner_occupied + renter_occupied)
-
-
 #total units (numbers for 2000 are weird because they come from different source files, this means some are unnacounted for) 
 #or I could add total units back in to the mortgage status files and then do total units a different way
 #renters
 
-
 #median income
+
+
+#race
 
 
