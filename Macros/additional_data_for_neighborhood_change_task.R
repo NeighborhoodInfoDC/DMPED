@@ -483,7 +483,8 @@ weights_bypop_2010_2020_grouped <- total_weights_bypop_2010_to_2020 %>%
             cw_bachelors_or_more_2010_2020 = sum(bachelors_or_more_2010_2020, na.rm = TRUE),
             cw_white_alone_2010_2020 = sum(white_alone_2010_2020, na.rm = TRUE),
             cw_black_alone_2010_2020 = sum(black_alone_2010_2020, na.rm = TRUE),
-            ) %>%
+            cw_indigenous_alone_2010_2020 = sum(indigenous_alone_2010_2020, na.rm = TRUE),
+            cw_) %>%
   ungroup() %>%
   mutate(percent_bachelors = cw_bachelors_or_more_2010_2020 /cw_over_25_2010_2020 )
 
