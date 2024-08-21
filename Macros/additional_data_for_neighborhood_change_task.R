@@ -453,7 +453,7 @@ total_weights_2000_2020_grouped <- total_weights_bypop_2000_to_2020 %>%
             cw_two_or_more_races_2000_2020 = sum(two_or_more_races_2000_2020, na.rm = TRUE)) %>%
   ungroup() %>%
   mutate(percent_bachelors = cw_bachelors_or_more_2000_to_2020 / cw_over_25_2000_2020 )
-write.csv(total_weights_2000_2020_grouped, "2000_demo_data.csv")
+#write.csv(total_weights_2000_2020_grouped, "2000_demo_data.csv")
 
 #2012 totals crosswalked to 2020
 total_weights_bypop_2010_to_2020 <- left_join(dc_total_population_12, Crosswalk_2010_to_2020, by = "GEOID")
@@ -494,7 +494,7 @@ weights_bypop_2010_2020_grouped <- total_weights_bypop_2010_to_2020 %>%
   mutate(percent_bachelors = cw_bachelors_or_more_2010_2020 /cw_over_25_2010_2020 )
 
 #write.csv(weights_bypop_2010_2020_grouped, "2012_demo_data.csv")
-# write.csv(race_22, "race_demo_data.csv")
+#write.csv(race_22, "2022_race_demo_data.csv")
 #health insurance
 #will return to this shortly
 
@@ -557,4 +557,5 @@ housing_crosswalk_2012_2020_grouped <- housing_crosswalk_2012_2020 %>%
 #race
 #race 2000 to 2010
 
+#race by household
 
