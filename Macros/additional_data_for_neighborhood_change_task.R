@@ -404,7 +404,7 @@ total_weights_bypop_2000_to_2010 <- total_weights_bypop_2000_to_2010 %>%
   mutate(pacific_alone_2000_2010 = pacific * wt_pop) %>%
   mutate(some_other_race_2000_2010 = some_other_race * wt_pop) %>%
   mutate(two_or_more_races_2000_2010 = some_other_race * wt_pop)
-
+##srtuff
 #group and divide
 weights_bypop_2000_to_2010_grouped <- total_weights_bypop_2000_to_2010 %>%
   group_by(tr2010ge) %>%
@@ -439,10 +439,11 @@ total_weights_bypop_2000_to_2020 <-  total_weights_bypop_2000_to_2020 %>%
   mutate(some_other_race_2000_2020 = cw_some_other_race_2000_2010 * wt_pop) %>%
   mutate(two_or_more_races_2000_2020 = cw_two_or_more_races_2000_2010 * wt_pop)
   
-total_weights_2000_2020_grouped <- total_weights_bypop_2000_to_2020 %>%
+weights_bypop_2000_2020_grouped <- total_weights_bypop_2000_to_2020 %>%
   group_by(tr2020ge) %>%
   summarize(cw_pop_2000_2020 = sum(pop_2000_to_2020, na.rm = TRUE),
             cw_over_25_2000_2020 = sum(over_25_2000_to_2020, na.rm = TRUE),
+            cw_white_alone_2000_2020 = sum(white_alone_2000_2020, na.rm = TRUE),
             cw_bachelors_or_more_2000_to_2020 = sum(bachelors_or_more_2000_to_2020, na.rm = TRUE),
             cw_black_alone_2000_2020 = sum(black_alone_2000_2020, na.rm = TRUE),
             cw_indigenous_alone_2000_2020 = sum(indigenous_alone_2000_2020, na.rm = TRUE),
@@ -453,7 +454,7 @@ total_weights_2000_2020_grouped <- total_weights_bypop_2000_to_2020 %>%
             cw_two_or_more_races_2000_2020 = sum(two_or_more_races_2000_2020, na.rm = TRUE)) %>%
   ungroup() %>%
   mutate(percent_bachelors = cw_bachelors_or_more_2000_to_2020 / cw_over_25_2000_2020 )
-#write.csv(total_weights_2000_2020_grouped, "2000_demo_data.csv")
+write.csv(weights_bypop_2000_2020_grouped, "2000_demo_data.csv")
 
 #2012 totals crosswalked to 2020
 total_weights_bypop_2010_to_2020 <- left_join(dc_total_population_12, Crosswalk_2010_to_2020, by = "GEOID")
@@ -477,7 +478,7 @@ total_weights_bypop_2010_to_2020 <- total_weights_bypop_2010_to_2020 %>%
   mutate(some_other_race_2010_2020 = some_other_race * wt_pop) %>%
   mutate(two_or_more_races_2010_2020 = two_or_more_races * wt_pop)
 #group and divide
-weights_bypop_2010_2020_grouped <- total_weights_bypop_2010_to_2020 %>%
+weights_bypop_2010_2020_grouped_2 <- total_weights_bypop_2010_to_2020 %>%
   group_by(tr2020ge) %>%
   summarise(cw_over_25_2010_2020 = sum(over_25_2010_2020, na.rm = TRUE),
             cw_pop_2010_2020 = sum(pop_2010_2020, na.rm = TRUE),
@@ -489,11 +490,14 @@ weights_bypop_2010_2020_grouped <- total_weights_bypop_2010_to_2020 %>%
             cw_hispanic_or_latino_2010_2020 = sum(hispanic_or_latino_2010_2020, na.rm = TRUE),
             cw_pacific_alone_2010_2020 = sum(pacific_alone_2010_2020, na.rm = TRUE),
             cw_some_other_race_2010_2020 = sum(some_other_race_2010_2020, na.rm = TRUE),
-            cw_two_or_more_races_2010_2020 = sum(two_or_more_races_2010_2020, na.rm = TRUE)) %>%
+            cw_two_or_more_races_2010_2020 = sum(two_or_more_races_2010_2020, na.rm = TRUE), %>%
+    
   ungroup() %>%
   mutate(percent_bachelors = cw_bachelors_or_more_2010_2020 /cw_over_25_2010_2020 )
+sum(weights_bypop_2010_2020_grouped$cw_pop_2010_2020)
 
-#write.csv(weights_bypop_2010_2020_grouped, "2012_demo_data.csv")
+
+write.csv(weights_bypop_2010_2020_grouped, "2012_demo_data.csv")
 #write.csv(race_22, "2022_race_demo_data.csv")
 #health insurance
 #will return to this shortly
