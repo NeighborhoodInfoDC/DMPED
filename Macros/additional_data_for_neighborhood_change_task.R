@@ -155,7 +155,7 @@ m_percent_bachelors_over_25_2000 <- m_percent_bachelors_over_25_2000 %>%
   select(-NAME.y)
 sum(m_percent_bachelors_over_25_2000$m_bachelors_or_more)
 sum(m_percent_bachelors_over_25_2000$m_over_25)
-74203/178393 #thats right
+# 74203/178393 #thats right
 
 #women over 25 2000
 w_over_25_2000 <- get_decennial(geography = "tract",
@@ -452,7 +452,8 @@ weights_bypop_2000_2020_grouped <- total_weights_bypop_2000_to_2020 %>%
             cw_hispanic_or_latino_2000_2020 = sum(hispanic_or_latino_2000_2020, na.rm = TRUE),
             cw_some_other_race_2000_2020 = sum(some_other_race_2000_2020, na.rm = TRUE),
             cw_two_or_more_races_2000_2020 = sum(two_or_more_races_2000_2020, na.rm = TRUE)) %>%
-  ungroup() %>%
+  ungroup() 
+weights_bypop_2000_2020_grouped <- weights_bypop_2000_2020_grouped %>%
   mutate(percent_bachelors = cw_bachelors_or_more_2000_to_2020 / cw_over_25_2000_2020 )
 write.csv(weights_bypop_2000_2020_grouped, "2000_demo_data.csv")
 
@@ -480,7 +481,7 @@ total_weights_bypop_2010_to_2020 <- total_weights_bypop_2010_to_2020 %>%
 #group and divide
 weights_bypop_2010_2020_grouped_2 <- total_weights_bypop_2010_to_2020 %>%
   group_by(tr2020ge) %>%
-  summarise(cw_over_25_2010_2020 = sum(over_25_2010_2020, na.rm = TRUE),
+  summarize(cw_over_25_2010_2020 = sum(over_25_2010_2020, na.rm = TRUE),
             cw_pop_2010_2020 = sum(pop_2010_2020, na.rm = TRUE),
             cw_bachelors_or_more_2010_2020 = sum(bachelors_or_more_2010_2020, na.rm = TRUE),
             cw_white_alone_2010_2020 = sum(white_alone_2010_2020, na.rm = TRUE),
@@ -490,12 +491,10 @@ weights_bypop_2010_2020_grouped_2 <- total_weights_bypop_2010_to_2020 %>%
             cw_hispanic_or_latino_2010_2020 = sum(hispanic_or_latino_2010_2020, na.rm = TRUE),
             cw_pacific_alone_2010_2020 = sum(pacific_alone_2010_2020, na.rm = TRUE),
             cw_some_other_race_2010_2020 = sum(some_other_race_2010_2020, na.rm = TRUE),
-            cw_two_or_more_races_2010_2020 = sum(two_or_more_races_2010_2020, na.rm = TRUE), %>%
-    
-  ungroup() %>%
-  mutate(percent_bachelors = cw_bachelors_or_more_2010_2020 /cw_over_25_2010_2020 )
-sum(weights_bypop_2010_2020_grouped$cw_pop_2010_2020)
-
+            cw_two_or_more_races_2010_2020 = sum(two_or_more_races_2010_2020, na.rm = TRUE)) %>%
+  ungroup() 
+weights_bypop_2010_2020_grouped_2 <- weights_bypop_2010_2020_grouped_2 %>%
+  mutate(percent_bachelors = cw_bachelors_or_more_2010_2020 /cw_over_25_2010_2020) 
 
 write.csv(weights_bypop_2010_2020_grouped, "2012_demo_data.csv")
 #write.csv(race_22, "2022_race_demo_data.csv")
@@ -554,7 +553,22 @@ housing_crosswalk_2012_2020_grouped <- housing_crosswalk_2012_2020 %>%
 #total units (numbers for 2000 are weird because they come from different source files, this means some are unnacounted for) 
 #or I could add total units back in to the mortgage status files and then do total units a different way
 #renters
-
+#totalunits crosswalk 2000 2010
+total_units_2000_2010 <- left_join(total_units_2000, Crosswalk_2000_to_2010, by = "GEOID")
+total_units_2000_2010 <- total_units_2000_2010 %>%
+  mutate(units_2000_2010 = value * wt_hu)
+total_units_2000_2010_grouped <- total_units_2000_2010 %>%
+  group_by(tr2010ge) %>%
+  summarise(cw_units_2000_2010 = sum(units_2000_2010, na.rm = TRUE)) %>%
+  ungroup()
+#crosswalking 2000 to 2020
+unit_crosswalk_2000_2020 <- left_join(total_units_2000_2010_grouped, Crosswalk_2010_to_2020)
+unit_crosswalk_2000_2020 <- unit_crosswalk_2000_2020 %>%
+  mutate(units_2000_2020 = cw_units_2000_2010 * wt_hu)
+unit_crosswalk_2000_2020_grouped <- unit_crosswalk_2000_2020 %>%
+  group_by(tr2020ge) %>%
+  summarise(cw_units_2000_2020 = sum(units_2000_2020, na.rm = TRUE)) %>%
+  ungroup()
 #median income
 
 
