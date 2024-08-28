@@ -386,10 +386,10 @@ race_household_22 <- get_acs(geography = "tract",
   pivot_wider(id_cols = c(GEOID, NAME),
               names_from = variable,
               values_from = estimate)%>%
-  rename(total = B11001_001, non_hispanic_white = B11001H_001,
-         non_hispanic_black = B11001B_001, non_hispanoc_indigenous = B11001C_001,
-         non_hispanic_asian = B11001D_001, non_hispanic_pacific = B11001E_001,
-         some_other_race = B11001F_001, two_or_more_races = B11001G_001, hispanic_or_latino = B11001I_001)
+  rename(total_hh = B11001_001, non_hispanic_white_hh = B11001H_001,
+         non_hispanic_black_hh = B11001B_001, non_hispanic_indigenous_hh = B11001C_001,
+         non_hispanic_asian_hh = B11001D_001, non_hispanic_pacific_hh = B11001E_001,
+         some_other_race_hh = B11001F_001, two_or_more_races_hh = B11001G_001, hispanic_or_latino_hh = B11001I_001)
 
 race_household_12 <- get_acs(geography = "tract",
                              variables = c("B11001H_001", "B11001_001", "B11001D_001", "B11001E_001", "B11001B_001",
@@ -399,10 +399,23 @@ race_household_12 <- get_acs(geography = "tract",
   pivot_wider(id_cols = c(GEOID, NAME),
               names_from = variable,
               values_from = estimate)%>%
-  rename(total = B11001_001, non_hispanic_white = B11001H_001,
-         non_hispanic_black = B11001B_001, non_hispanoc_indigenous = B11001C_001,
-         non_hispanic_asian = B11001D_001, non_hispanic_pacific = B11001E_001,
-         some_other_race = B11001F_001, two_or_more_races = B11001G_001, hispanic_or_latino = B11001I_001)
+  rename(total_hh = B11001_001, non_hispanic_white_hh = B11001H_001,
+         non_hispanic_black_hh = B11001B_001, non_hispanic_indigenous_hh = B11001C_001,
+         non_hispanic_asian_hh = B11001D_001, non_hispanic_pacific_hh = B11001E_001,
+         some_other_race_hh = B11001F_001, two_or_more_races_hh = B11001G_001, hispanic_or_latino_hh = B11001I_001)
+
+race_household_2000 <- get_decennial(geography = "tract",
+                             variables = c("P026001", "P026A001", "P026B001", "P026C001", "P026D001", "P026E001",
+                             "P026F001", "P026G001", "P026H001"              
+                             ), state = "DC",
+                             year = 2000,) %>%
+  pivot_wider(id_cols = c(GEOID, NAME),
+              names_from = variable,
+              values_from = value)%>%
+  rename(total_hh = P026001, non_hispanic_white_hh = P026A001,
+         non_hispanic_black_hh = P026B001, non_hispanoc_indigenous_hh = P026C001,
+         non_hispanic_asian_hh = P026D001, non_hispanic_pacific_hh = P026E001,
+         some_other_race_hh = P026F001	, two_or_more_races_hh = P026G001	, hispanic_or_latino_hh = P026H001)
 
 ####################################################################################################################
 ####################################################################################################################
@@ -411,7 +424,7 @@ Crosswalk_2000_to_2010 <- read_csv("C:/Users/slieberman/Downloads/nhgis_tr2000_t
 Crosswalk_2010_to_2020 <- read_csv("C:/Users/slieberman/Downloads/nhgis_tr2010_tr2020_11/nhgis_tr2010_tr2020_11.csv")
 
 
-#totals crosswalk 2000-2010 - pop / bachelors degrees
+#totals crosswalk 2000-2010 - pop / bachelors degrees / race / race household
 Crosswalk_2000_to_2010 <- Crosswalk_2000_to_2010 %>% mutate(GEOID = as.character(tr2000ge))
 total_weights_bypop_2000_to_2010 <- left_join(dc_total_population_2000, Crosswalk_2000_to_2010, by = "GEOID")
 total_weights_bypop_2000_to_2010 <- total_weights_bypop_2000_to_2010  %>% rename(population = value)
@@ -419,6 +432,8 @@ total_weights_bypop_2000_to_2010 <- left_join(percent_bachelors_over_25_2000, to
 total_weights_bypop_2000_to_2010 <- total_weights_bypop_2000_to_2010 %>% select(-c(3:45))
 total_weights_bypop_2000_to_2010 <- total_weights_bypop_2000_to_2010 %>% select(-NAME, -variable)
 total_weights_bypop_2000_to_2010 <- left_join(total_weights_bypop_2000_to_2010, race_2000)
+total_weights_bypop_2000_to_2010 <- left_join(total_weights_bypop_2000_to_2010, race_household_2000, by = "GEOID")
+total_weights_bypop_2000_to_2010 <- total_weights_bypop_2000_to_2010 %>% select(-NAME.x.x,)
 #multiply across the crosswalk
 total_weights_bypop_2000_to_2010 <- total_weights_bypop_2000_to_2010 %>%
   mutate(over_25_2000_2010 = over_25 * wt_pop) %>%
@@ -431,7 +446,10 @@ total_weights_bypop_2000_to_2010 <- total_weights_bypop_2000_to_2010 %>%
   mutate(hispanic_or_latino = hispanic_or_latino * wt_pop) %>%
   mutate(pacific_alone_2000_2010 = pacific * wt_pop) %>%
   mutate(some_other_race_2000_2010 = some_other_race * wt_pop) %>%
-  mutate(two_or_more_races_2000_2010 = some_other_race * wt_pop)
+  mutate(two_or_more_races_2000_2010 = some_other_race * wt_pop) %>%
+  mutate(total_hh_2000_2010 = total_hh * wt_hh) %>%
+  mutate(non_hispanic_white_hh_2000_2010 = non_hispanic_white_hh * wt_hh) %>%
+  
 ##srtuff
 #group and divide
 weights_bypop_2000_to_2010_grouped <- total_weights_bypop_2000_to_2010 %>%
