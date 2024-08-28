@@ -449,7 +449,13 @@ total_weights_bypop_2000_to_2010 <- total_weights_bypop_2000_to_2010 %>%
   mutate(two_or_more_races_2000_2010 = some_other_race * wt_pop) %>%
   mutate(total_hh_2000_2010 = total_hh * wt_hh) %>%
   mutate(non_hispanic_white_hh_2000_2010 = non_hispanic_white_hh * wt_hh) %>%
-  
+  mutate(non_hispanic_black_hh_2000_2010 = non_hispanic_black_hh * wt_hh) %>%
+  mutate(non_hispanic_pacific_hh_2000_2010 = non_hispanic_pacific_hh * wt_hh) %>%
+  mutate(non_hispanic_asian_hh_2000_2010 = non_hispanic_asian_hh * wt_hh) %>%
+  mutate(non_hispanic_indigenous_hh_2000_2010 = non_hispanoc_indigenous_hh * wt_hh) %>%
+  mutate(hispanic_or_latino_hh_2000_2010 = hispanic_or_latino_hh * wt_hh) %>%
+  mutate(some_other_race_hh_2000_2010 = some_other_race_hh * wt_hh) %>%
+  mutate(two_or_more_races_hh_2000_2010 = two_or_more_races_hh * wt_hh)
 ##srtuff
 #group and divide
 weights_bypop_2000_to_2010_grouped <- total_weights_bypop_2000_to_2010 %>%
