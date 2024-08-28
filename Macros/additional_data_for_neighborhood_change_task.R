@@ -59,6 +59,7 @@ dc_bachelors <-
           state = "DC",
           geometry = FALSE)
 sum(dc_bachelors$estimate) #124860  -> number seems low but also not accounting for children
+# write.csv(dc_bachelors, "dc_bachelors_data.csv")
 dc_bachelors_18 <- 
   get_acs(geography = "tract",
           variable =  "S1501_C02_015E",
@@ -84,6 +85,7 @@ percent_bachelors_over_25_2022 <- get_acs(geography = "tract",
          percent_bachelors = bachelors_or_more/over_25) 
 sum(percent_bachelors_over_25_2022$bachelors_or_more)
 sum(percent_bachelors_over_25_2022$over_25)
+# write.csv(percent_bachelors_over_25_2022, "age_college_22_data.csv")
 #303532/484596 = 6263609 thats right
 percent_bachelors_over_25_2012 <- get_acs(geography = "tract",
                                           variables = c("B15003_022", "B15003_023", "B15003_024", "B15003_025", "B07001_006","B07001_007", "B07001_008",
@@ -101,6 +103,7 @@ percent_bachelors_over_25_2012 <- get_acs(geography = "tract",
          percent_bachelors = bachelors_or_more/over_25) 
 sum(percent_bachelors_over_25_2012$bachelors_or_more)
 sum(percent_bachelors_over_25_2012$over_25)
+
 #213749/417432 .5120571
 #for the 2000 census the degree data is broken down by gender
 #P037015 = male bachelor's, P037016 male masters, P037017 = male professional school, P037018	 = male phd
@@ -374,7 +377,32 @@ race_2000 <- get_decennial(geography = "tract",
   rename(total = P003001, white_alone = P003003, black_alone = P003004, indigenous_alone = P003005,
          asian_alone = P003006, pacific = P003007, some_other_race = P003008, two_or_more_races = P003009,
          hispanic_or_latino = P004002)
-#all poc divided by total pop 
+#race by household
+race_household_22 <- get_acs(geography = "tract",
+                   variables = c("B11001H_001", "B11001_001", "B11001D_001", "B11001E_001", "B11001B_001",
+                                 "B11001C_001", "B11001F_001", "B11001G_001", "B11001I_001"
+                                  ), state = "DC",
+                   year = 2022,) %>%
+  pivot_wider(id_cols = c(GEOID, NAME),
+              names_from = variable,
+              values_from = estimate)%>%
+  rename(total = B11001_001, non_hispanic_white = B11001H_001,
+         non_hispanic_black = B11001B_001, non_hispanoc_indigenous = B11001C_001,
+         non_hispanic_asian = B11001D_001, non_hispanic_pacific = B11001E_001,
+         some_other_race = B11001F_001, two_or_more_races = B11001G_001, hispanic_or_latino = B11001I_001)
+
+race_household_12 <- get_acs(geography = "tract",
+                             variables = c("B11001H_001", "B11001_001", "B11001D_001", "B11001E_001", "B11001B_001",
+                                           "B11001C_001", "B11001F_001", "B11001G_001", "B11001I_001"
+                             ), state = "DC",
+                             year = 2012,) %>%
+  pivot_wider(id_cols = c(GEOID, NAME),
+              names_from = variable,
+              values_from = estimate)%>%
+  rename(total = B11001_001, non_hispanic_white = B11001H_001,
+         non_hispanic_black = B11001B_001, non_hispanoc_indigenous = B11001C_001,
+         non_hispanic_asian = B11001D_001, non_hispanic_pacific = B11001E_001,
+         some_other_race = B11001F_001, two_or_more_races = B11001G_001, hispanic_or_latino = B11001I_001)
 
 ####################################################################################################################
 ####################################################################################################################
@@ -569,11 +597,17 @@ unit_crosswalk_2000_2020_grouped <- unit_crosswalk_2000_2020 %>%
   group_by(tr2020ge) %>%
   summarise(cw_units_2000_2020 = sum(units_2000_2020, na.rm = TRUE)) %>%
   ungroup()
+#crosswalk 2012 to 2020
+unit_crosswalk_2012_2020 <- left_join(total_units_2012, Crosswalk_2010_to_2020, by = "GEOID")
+unit_crosswalk_2012_2020 <- unit_crosswalk_2012_2020 %>%
+  mutate(units_2012_2020 = estimate * wt_hu)
+unit_crosswalk_2012_2020 <- unit_crosswalk_2012_2020 %>%
+  group_by(tr2020ge) %>%
+  summarise(cw_units_2012_2020 = sum(units_2012_2020, na.rm = TRUE)) %>%
+  ungroup()
 #median income
 
 
-#race
-#race 2000 to 2010
-
 #race by household
+
 
