@@ -693,7 +693,7 @@ unit_crosswalk_2012_2020 <- unit_crosswalk_2012_2020 %>%
   group_by(tr2020ge) %>%
   summarise(cw_units_2012_2020 = sum(units_2012_2020, na.rm = TRUE)) %>%
   ungroup()
-#median income
+#median income 2000-2010
 median_income_crosswalk_2000_2010 <- left_join(dc_median_income_2000, Crosswalk_2000_to_2010, by = "GEOID")
 median_income_crosswalk_2000_2010 <- left_join(median_income_crosswalk_2000_2010, total_households_2000 , by = "GEOID")
 median_income_crosswalk_2000_2010 <- median_income_crosswalk_2000_2010 %>% rename(households = value.y, median_income = value.x)
@@ -705,14 +705,33 @@ median_income_crosswalk_2000_2010 <- median_income_crosswalk_2000_2010 %>%
   mutate(aggregate_income_2000_2010 = aggregate_income * wt_hh)
 #group
 median_income_crosswalk_2000_2010_grouped <- median_income_crosswalk_2000_2010 %>%
-  group_by(tr2000ge) %>%
+  group_by(tr2010ge) %>%
   summarise(cw_aggregate_income_2000_2010 = sum(aggregate_income_2000_2010, na.rm = TRUE),
             cw_households_2000_2010 = sum(households)) %>%
   ungroup()%>%
   mutate(median_income_2000_2010 = cw_aggregate_income_2000_2010 / cw_households_2000_2010)
-  
+#median income crosswalked from 2000 to 2020 via 2010 #should I be using new totals? I maybe should redo without plugging 
+#in the 2010 housing totals
+median_income_crosswalk_2000_2020 <- left_join(median_income_crosswalk_2000_2010_grouped, Crosswalk_2010_to_2020)
+median_income_crosswalk_2000_2020 <- left_join(median_income_crosswalk_2000_2020, total_households_12)
+median_income_crosswalk_2000_2020 <- median_income_crosswalk_2000_2020 %>% mutate(aggregate_income = median_income_2000_2010 * estimate)
+median_income_crosswalk_2000_2020 <- median_income_crosswalk_2000_2020 %>%
+  mutate(aggregate_income_2000_2020 = aggregate_income * wt_hh)
+#group and divide
+median_income_crosswalk_2000_2020_grouped <- median_income_crosswalk_2000_2020 %>%
+  group_by(tr2020ge) %>%
+  summarise(cw_aggregate_income_2000_2020)
 
-
+#without new totals from 2010
+median_income_crosswalk_2000_2020_alt <- left_join(median_income_crosswalk_2000_2010_grouped, Crosswalk_2010_to_2020)
+median_income_crosswalk_2000_2020_alt <- median_income_crosswalk_2000_2020_alt %>%
+  mutate(aggregate_2000_2020 = cw_aggregate_income_2000_2010 * wt_hh)
+median_income_crosswalk_2000_2020_alt_grouped <- median_income_crosswalk_2000_2020_alt %>%
+  group_by(tr2020ge) %>%
+  summarise(cw_aggregate_2000_2020 = sum(aggregate_2000_2020, na.rm = TRUE),
+            cw_households_2000_2020 = sum(cw_households_2000_2010, na.rm = TRUE)) %>%
+  ungroup() %>%
+  mutate(median_income_2000_2020 = cw_aggregate_2000_2020/cw_households_2000_2020)
 
 
 #race by household
