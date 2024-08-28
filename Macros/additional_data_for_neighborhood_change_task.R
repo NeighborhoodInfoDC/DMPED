@@ -243,6 +243,25 @@ total_housing_units_2000 <-
           year = 2000,
           state = "DC",
           geometry = FALSE)
+#households
+total_households_22<- 
+  get_acs(geography = "tract",
+          variables =  "B03002_001",
+          year = 2022,
+          state = "DC",
+          geometry = FALSE)
+total_households_12<- 
+  get_acs(geography = "tract",
+          variables =  "B03002_001",
+          year = 2012,
+          state = "DC",
+          geometry = FALSE)
+total_households_2000 <- 
+  get_decennial(geography = "tract",
+                variables =  "P003001",
+                year = 2000,
+                state = "DC",
+                geometry = FALSE)
 #homeowners
 owner_occupied_22 <- 
   get_acs(geography = "tract",
@@ -675,6 +694,25 @@ unit_crosswalk_2012_2020 <- unit_crosswalk_2012_2020 %>%
   summarise(cw_units_2012_2020 = sum(units_2012_2020, na.rm = TRUE)) %>%
   ungroup()
 #median income
+median_income_crosswalk_2000_2010 <- left_join(dc_median_income_2000, Crosswalk_2000_to_2010, by = "GEOID")
+median_income_crosswalk_2000_2010 <- left_join(median_income_crosswalk_2000_2010, total_households_2000 , by = "GEOID")
+median_income_crosswalk_2000_2010 <- median_income_crosswalk_2000_2010 %>% rename(households = value.y, median_income = value.x)
+#aggregate metrics
+median_income_crosswalk_2000_2010 <- median_income_crosswalk_2000_2010 %>% 
+  mutate(aggregate_income = median_income * households)
+#across crosswalk
+median_income_crosswalk_2000_2010 <- median_income_crosswalk_2000_2010 %>%
+  mutate(aggregate_income_2000_2010 = aggregate_income * wt_hh)
+#group
+median_income_crosswalk_2000_2010_grouped <- median_income_crosswalk_2000_2010 %>%
+  group_by(tr2000ge) %>%
+  summarise(cw_aggregate_income_2000_2010 = sum(aggregate_income_2000_2010, na.rm = TRUE),
+            cw_households_2000_2010 = sum(households)) %>%
+  ungroup()%>%
+  mutate(median_income_2000_2010 = cw_aggregate_income_2000_2010 / cw_households_2000_2010)
+  
+
+
 
 
 #race by household
