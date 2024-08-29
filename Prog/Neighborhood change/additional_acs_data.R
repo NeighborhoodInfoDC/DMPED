@@ -739,7 +739,10 @@ median_income_crosswalk_2000_2020_alt_grouped <- median_income_crosswalk_2000_20
   ungroup() %>%
   mutate(median_income_2000_2020 = cw_aggregate_2000_2020/cw_households_2000_2020)
 
+#health insurance approach
+#crosswalk the 2012 data and include that and 22
 
-#race by household
+
+
 
 
