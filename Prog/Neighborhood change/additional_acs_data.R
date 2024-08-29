@@ -24,11 +24,11 @@ dc_total_population_12 <-
           geometry = FALSE)
 sum(dc_total_population_12$estimate)
 dc_total_population_2000 <- 
-get_decennial(geography = "tract",
-              variables = "P001001",
-              year = 2000,
-              state = "DC",
-              geometry = FALSE)
+  get_decennial(geography = "tract",
+                variables = "P001001",
+                year = 2000,
+                state = "DC",
+                geometry = FALSE)
 sum(dc_total_population_2000$value)
 
 ###median income
@@ -70,12 +70,12 @@ sum(dc_bachelors_18$estimate)
 ##gathering the age data
 
 percent_bachelors_over_25_2022 <- get_acs(geography = "tract",
-                                     variables = c("B15003_022", "B15003_023", "B15003_024", "B15003_025", "B07001_006","B07001_007", "B07001_008",
-                                     "B07001_009", "B07001_010", "B07001_011", "B07001_012", "B07001_013",
-                                     "B07001_014", "B07001_015", "B07001_016" ),
-                                     year = 2022,
-                                     state = "DC",
-                                     geometry = FALSE) %>%
+                                          variables = c("B15003_022", "B15003_023", "B15003_024", "B15003_025", "B07001_006","B07001_007", "B07001_008",
+                                                        "B07001_009", "B07001_010", "B07001_011", "B07001_012", "B07001_013",
+                                                        "B07001_014", "B07001_015", "B07001_016" ),
+                                          year = 2022,
+                                          state = "DC",
+                                          geometry = FALSE) %>%
   pivot_wider(id_cols = c(GEOID, NAME),
               names_from = variable,
               values_from = estimate) %>%
@@ -131,12 +131,12 @@ sum(percent_bachelors_over_25_2012$over_25)
 # 74203 /396648
 #age 25 and above men
 m_over_25_2000 <- get_decennial(geography = "tract",
-                                                  variables = c("P012011", "P012012", "P012013",
-                                                                "P012014", "P012015", "P012016", "P012017", "P012018", "P012019", "P012020",
-                                                                "P012021", "P012022", "P012023", "P012024","P012025"),
-                                                  year = 2000,
-                                                  state = "DC",
-                                                  geometry = FALSE) %>%
+                                variables = c("P012011", "P012012", "P012013",
+                                              "P012014", "P012015", "P012016", "P012017", "P012018", "P012019", "P012020",
+                                              "P012021", "P012022", "P012023", "P012024","P012025"),
+                                year = 2000,
+                                state = "DC",
+                                geometry = FALSE) %>%
   pivot_wider(id_cols = c(GEOID, NAME),
               names_from = variable,
               values_from = value) %>%
@@ -239,10 +239,10 @@ total_housing_units_12<-
           geometry = FALSE)
 total_housing_units_2000 <- 
   get_decennial(geography = "tract",
-          variables =  "H001001",
-          year = 2000,
-          state = "DC",
-          geometry = FALSE)
+                variables =  "H001001",
+                year = 2000,
+                state = "DC",
+                geometry = FALSE)
 #households
 total_households_22<- 
   get_acs(geography = "tract",
@@ -278,10 +278,10 @@ owner_occupied_12<-
 
 owner_occupied_2000<- 
   get_decennial(geography = "tract",
-          variables =  "H004002",
-          year = 2000,
-          state = "DC",
-          geometry = FALSE)
+                variables =  "H004002",
+                year = 2000,
+                state = "DC",
+                geometry = FALSE)
 
 # dc_homeowners <- left_join(dc_homeowners, total_housing_units, by = "GEOID")
 # dc_homeowners <- dc_homeowners %>% select(-moe.x, -moe.y, -NAME.y)
@@ -303,10 +303,10 @@ renters_12<-
           geometry = FALSE)
 renters_2000<- 
   get_decennial(geography = "tract",
-          variables =  "H004003",
-          year = 2000,
-          state = "DC",
-          geometry = FALSE)
+                variables =  "H004003",
+                year = 2000,
+                state = "DC",
+                geometry = FALSE)
 
 #better method
 mortgage_status_22 <- get_acs (
@@ -324,7 +324,7 @@ mortgage_status_22 <- get_acs (
               names_from = variable,
               values_from = estimate) %>%
   rename( with_mortgage = B25081_002, 
-         without_mortgage = B25081_009, renter_occupied = B25003_003, owner_occupied = B25003_002 ) 
+          without_mortgage = B25081_009, renter_occupied = B25003_003, owner_occupied = B25003_002 ) 
 #12
 mortgage_status_12 <- get_acs (
   geography = "tract",
@@ -348,8 +348,8 @@ mortgage_status_2000<-
   get_decennial(geography = "tract",
                 variables =  c( "H007002", #owner occupied
                                 "H007003", # renter occupied
-                               "H098018", ##units without mortgage
-                               "H098002" #units with mortgage
+                                "H098018", ##units without mortgage
+                                "H098002" #units with mortgage
                 ),
                 year = 2000,
                 state = "DC",
@@ -361,10 +361,10 @@ mortgage_status_2000<-
 
 #race data
 race_22 <- get_acs(geography = "tract",
-variables = c("B03002_001", "B03002_002", "B03002_003", "B03002_004",
-              "B03002_005", "B03002_006", "B03002_007", "B03002_008",
-              "B03002_009", "B03002_012"), state = "DC",
-year = 2022,) %>%
+                   variables = c("B03002_001", "B03002_002", "B03002_003", "B03002_004",
+                                 "B03002_005", "B03002_006", "B03002_007", "B03002_008",
+                                 "B03002_009", "B03002_012"), state = "DC",
+                   year = 2022,) %>%
   pivot_wider(id_cols = c(GEOID, NAME),
               names_from = variable,
               values_from = estimate)%>%
@@ -398,10 +398,10 @@ race_2000 <- get_decennial(geography = "tract",
          hispanic_or_latino = P004002)
 #race by household
 race_household_22 <- get_acs(geography = "tract",
-                   variables = c("B11001H_001", "B11001_001", "B11001D_001", "B11001E_001", "B11001B_001",
-                                 "B11001C_001", "B11001F_001", "B11001G_001", "B11001I_001"
-                                  ), state = "DC",
-                   year = 2022,) %>%
+                             variables = c("B11001H_001", "B11001_001", "B11001D_001", "B11001E_001", "B11001B_001",
+                                           "B11001C_001", "B11001F_001", "B11001G_001", "B11001I_001"
+                             ), state = "DC",
+                             year = 2022,) %>%
   pivot_wider(id_cols = c(GEOID, NAME),
               names_from = variable,
               values_from = estimate)%>%
@@ -424,10 +424,10 @@ race_household_12 <- get_acs(geography = "tract",
          some_other_race_hh = B11001F_001, two_or_more_races_hh = B11001G_001, hispanic_or_latino_hh = B11001I_001)
 
 race_household_2000 <- get_decennial(geography = "tract",
-                             variables = c("P026001", "P026A001", "P026B001", "P026C001", "P026D001", "P026E001",
-                             "P026F001", "P026G001", "P026H001"              
-                             ), state = "DC",
-                             year = 2000,) %>%
+                                     variables = c("P026001", "P026A001", "P026B001", "P026C001", "P026D001", "P026E001",
+                                                   "P026F001", "P026G001", "P026H001"              
+                                     ), state = "DC",
+                                     year = 2000,) %>%
   pivot_wider(id_cols = c(GEOID, NAME),
               names_from = variable,
               values_from = value)%>%
@@ -526,7 +526,7 @@ total_weights_bypop_2000_to_2020 <-  total_weights_bypop_2000_to_2020 %>%
   mutate(hispanic_hh_2000_2020 = cw_hispanic_hh_2000_2010 * wt_hh) %>%
   mutate(some_other_race_hh_2000_2020 = cw_some_other_race_hh_2000_2010 * wt_hh) %>%
   mutate(two_or_more_races_hh_2000_2020 = cw_two_or_more_races_hh_2000_2010 * wt_hh)
-  
+
 weights_bypop_2000_2020_grouped <- total_weights_bypop_2000_to_2020 %>%
   group_by(tr2020ge) %>%
   summarize(cw_pop_2000_2020 = sum(pop_2000_to_2020, na.rm = TRUE),
@@ -631,8 +631,8 @@ housing_crosswalk_2000_2010_grouped <- housing_crosswalk_2000_2010 %>%
   group_by(tr2010ge) %>%
   summarize(cw_owner_occupied_2000_2010 = sum(owner_occupied_2000_2010, na.rm = TRUE),
             cw_renter_occupied_2000_2010 = sum(renter_occupied_2000_2010, na.rm = TRUE),
-             cw_wout_mortgage_2000_2010 = sum(wout_mortgage_2000_2010, na.rm = TRUE),
-             cw_with_mortgage_2000_2010 = sum(with_mortgage_2000_2010, na.rm = TRUE)) %>%
+            cw_wout_mortgage_2000_2010 = sum(wout_mortgage_2000_2010, na.rm = TRUE),
+            cw_with_mortgage_2000_2010 = sum(with_mortgage_2000_2010, na.rm = TRUE)) %>%
   ungroup()  
 #2000 to 2020 via the above 2010            
 housing_weights_2000_2020 <- left_join(housing_crosswalk_2000_2010_grouped, Crosswalk_2010_to_2020)
