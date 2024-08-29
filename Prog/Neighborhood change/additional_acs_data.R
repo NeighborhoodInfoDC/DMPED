@@ -208,12 +208,15 @@ dc_health_insurance_22 <-
           year = 2022,
           state = "DC",
           geometry = FALSE)
+write.csv(dc_health_insurance_22, "health_insurance_22_data.csv")
 dc_health_insurance_12 <- 
   get_acs(geography = "tract",
           variables =  "B27001_001",
           year = 2012,
           state = "DC",
           geometry = FALSE)
+dc_health_insurance_12 <- dc_health_insurance_12 %>%
+  rename(health_insurance = estimate)
 
 #cant find a 2000 decennial var
 # dc_health_insurance_2000 <-
@@ -524,6 +527,7 @@ total_weights_bypop_2000_to_2020 <-  total_weights_bypop_2000_to_2020 %>%
   mutate(non_hispanic_black_hh_2000_2020 = cw_non_hispanic_black_hh_2000_2010 * wt_hh) %>%
   mutate(non_hispanic_pacific_hh_2000_2020 = cw_non_hispanic_pacific_hh_2000_2010 * wt_hh) %>%
   mutate(non_hispanic_indigenous_hh_2000_2020 = cw_non_hispanic_indigenous_hh_2000_2010 * wt_hh) %>%
+  mutate(non_hispanic_asian_hh_2000_2020 = cw_non_hispanic_asian_hh_2000_2010 * wt_hh) %>%
   mutate(hispanic_hh_2000_2020 = cw_hispanic_hh_2000_2010 * wt_hh) %>%
   mutate(some_other_race_hh_2000_2020 = cw_some_other_race_hh_2000_2010 * wt_hh) %>%
   mutate(two_or_more_races_hh_2000_2020 = cw_two_or_more_races_hh_2000_2010 * wt_hh)
@@ -546,6 +550,7 @@ weights_bypop_2000_2020_grouped <- total_weights_bypop_2000_to_2020 %>%
             cw_non_hispanic_black_hh_2000_2020 = sum(non_hispanic_black_hh_2000_2020, na.rm = TRUE),
             cw_non_hispanic_pacific_hh_2000_2020 = sum(non_hispanic_pacific_hh_2000_2020, na.rm = TRUE),
             cw_non_hispanic_indigenous_hh_2000_2020 = sum(non_hispanic_indigenous_hh_2000_2020, na.rm = TRUE),
+            cw_non_hispanic_asian_hh_2000_2020 = sum(non_hispanic_asian_hh_2000_2020, na.rm = TRUE),
             cw_hispanic_hh_2000_2020 = sum(hispanic_hh_2000_2020, na.rm = TRUE),
             cw_some_other_race_hh_2000_2020 = sum(some_other_race_hh_2000_2020, na.rm = TRUE),
             cw_two_or_more_races_hh_2000_2020 = sum(two_or_more_races_hh_2000_2020, na.rm = TRUE)) %>%
@@ -553,7 +558,7 @@ weights_bypop_2000_2020_grouped <- total_weights_bypop_2000_to_2020 %>%
 weights_bypop_2000_2020_grouped <- weights_bypop_2000_2020_grouped %>%
   mutate(percent_bachelors = cw_bachelors_or_more_2000_to_2020 / cw_over_25_2000_2020 )
 #finished export
-# write.csv(weights_bypop_2000_2020_grouped, "2000_demo_data_2.csv")
+write.csv(weights_bypop_2000_2020_grouped, "2000_demo_data_2.csv")
 
 #2012 totals crosswalked to 2020
 total_weights_bypop_2010_to_2020 <- left_join(dc_total_population_12, Crosswalk_2010_to_2020, by = "GEOID")
@@ -564,6 +569,7 @@ total_weights_bypop_2010_to_2020 <- total_weights_bypop_2010_to_2020 %>% select(
 total_weights_bypop_2010_to_2020 <- total_weights_bypop_2010_to_2020 %>% select(-percent_bachelors)
 total_weights_bypop_2010_to_2020 <- left_join(total_weights_bypop_2010_to_2020, race_12)
 total_weights_bypop_2010_to_2020 <- left_join(total_weights_bypop_2010_to_2020, race_household_12, by = "GEOID" )
+total_weights_bypop_2010_to_2020 <- left_join(total_weights_bypop_2010_to_2020, dc_health_insurance_12, by = "GEOID")
 #multiply across crosswalk
 total_weights_bypop_2010_to_2020 <- total_weights_bypop_2010_to_2020 %>%
   mutate(over_25_2010_2020 = over_25 * wt_pop) %>%
@@ -585,7 +591,9 @@ total_weights_bypop_2010_to_2020 <- total_weights_bypop_2010_to_2020 %>%
   mutate(non_hispanic_indigenous_hh_2010_2020 = non_hispanic_indigenous_hh * wt_hh)%>%
   mutate(hispanic_or_latino_hh_2010_2020 = hispanic_or_latino_hh * wt_hh) %>%
   mutate(some_other_race_hh_2010_2020 = some_other_race_hh * wt_hh) %>%
-  mutate(two_or_more_races_hh_2010_2020 = two_or_more_races_hh * wt_hh)
+  mutate(two_or_more_races_hh_2010_2020 = two_or_more_races_hh * wt_hh) %>%
+  mutate(health_insurance_2010_2020 = health_insurance * wt_pop)
+
 #group and divide
 weights_bypop_2010_2020_grouped_2 <- total_weights_bypop_2010_to_2020 %>%
   group_by(tr2020ge) %>%
@@ -608,15 +616,16 @@ weights_bypop_2010_2020_grouped_2 <- total_weights_bypop_2010_to_2020 %>%
             cw_non_hispanic_indigenous_hh_2010_2020 = sum(non_hispanic_indigenous_hh_2010_2020, na.rm = TRUE),
             cw_hispanic_hh_2010_2020 = sum(hispanic_or_latino_hh_2010_2020, na.rm = TRUE),
             cw_some_other_race_hh_2010_2020 = sum(some_other_race_hh_2010_2020, na.rm = TRUE),
-            cw_two_or_more_races_hh_2010_2020 = sum(two_or_more_races_hh_2010_2020, na.rm = TRUE)) %>%
+            cw_two_or_more_races_hh_2010_2020 = sum(two_or_more_races_hh_2010_2020, na.rm = TRUE),
+            cw_health_insurance_2010_2020 = sum (health_insurance_2010_2020, na.rm= TRUE)) %>%
   ungroup() 
 weights_bypop_2010_2020_grouped_2 <- weights_bypop_2010_2020_grouped_2 %>%
   mutate(percent_bachelors = cw_bachelors_or_more_2010_2020 /cw_over_25_2010_2020) 
 
 #finished export
-# write.csv(weights_bypop_2010_2020_grouped, "2012_demo_data_2.csv")
+write.csv(weights_bypop_2010_2020_grouped_2, "2012_demo_data_2.csv")
 #write.csv(race_22, "2022_race_demo_data.csv")
-# write.csv(race_household_22, "2022_race_household.csv")
+write.csv(race_household_22, "2022_race_household.csv")
 #health insurance
 #will return to this shortly
 
@@ -714,7 +723,7 @@ median_income_crosswalk_2000_2010_grouped <- median_income_crosswalk_2000_2010 %
   ungroup()%>%
   mutate(median_income_2000_2010 = cw_aggregate_income_2000_2010 / cw_households_2000_2010)
 #median income crosswalked from 2000 to 2020 via 2010 #should I be using new totals? I maybe should redo without plugging 
-#in the 2010 housing totals
+#in the 2010 housing totals #use this one 
 median_income_crosswalk_2000_2020 <- left_join(median_income_crosswalk_2000_2010_grouped, Crosswalk_2010_to_2020)
 median_income_crosswalk_2000_2020 <- left_join(median_income_crosswalk_2000_2020, total_households_12)
 median_income_crosswalk_2000_2020 <- median_income_crosswalk_2000_2020 %>% mutate(aggregate_income = median_income_2000_2010 * estimate)
