@@ -720,7 +720,10 @@ median_income_crosswalk_2000_2020 <- median_income_crosswalk_2000_2020 %>%
 #group and divide
 median_income_crosswalk_2000_2020_grouped <- median_income_crosswalk_2000_2020 %>%
   group_by(tr2020ge) %>%
-  summarise(cw_aggregate_income_2000_2020)
+  summarise(cw_aggregate_income_2000_2020 = sum(aggregate_income_2000_2020, na.rm = TRUE),
+            cw_households_2000_2020 = sum(cw_households_2000_2010, na.rm = TRUE)) %>%
+  ungroup() %>%
+  mutate(income = cw_aggregate_income_2000_2020/cw_households_2000_2020)
 
 #without new totals from 2010
 median_income_crosswalk_2000_2020_alt <- left_join(median_income_crosswalk_2000_2010_grouped, Crosswalk_2010_to_2020)
