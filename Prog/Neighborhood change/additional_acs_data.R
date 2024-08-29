@@ -59,6 +59,7 @@ dc_bachelors <-
           state = "DC",
           geometry = FALSE)
 sum(dc_bachelors$estimate) #124860  -> number seems low but also not accounting for children
+#finished export
 # write.csv(dc_bachelors, "dc_bachelors_data.csv")
 dc_bachelors_18 <- 
   get_acs(geography = "tract",
@@ -551,6 +552,7 @@ weights_bypop_2000_2020_grouped <- total_weights_bypop_2000_to_2020 %>%
   ungroup() 
 weights_bypop_2000_2020_grouped <- weights_bypop_2000_2020_grouped %>%
   mutate(percent_bachelors = cw_bachelors_or_more_2000_to_2020 / cw_over_25_2000_2020 )
+#finished export
 # write.csv(weights_bypop_2000_2020_grouped, "2000_demo_data_2.csv")
 
 #2012 totals crosswalked to 2020
@@ -611,6 +613,7 @@ weights_bypop_2010_2020_grouped_2 <- total_weights_bypop_2010_to_2020 %>%
 weights_bypop_2010_2020_grouped_2 <- weights_bypop_2010_2020_grouped_2 %>%
   mutate(percent_bachelors = cw_bachelors_or_more_2010_2020 /cw_over_25_2010_2020) 
 
+#finished export
 # write.csv(weights_bypop_2010_2020_grouped, "2012_demo_data_2.csv")
 #write.csv(race_22, "2022_race_demo_data.csv")
 # write.csv(race_household_22, "2022_race_household.csv")
