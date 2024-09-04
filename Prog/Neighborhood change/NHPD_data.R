@@ -8,10 +8,15 @@ library(readxl)
 library(lubridate)
 library(tidycensus)
 ###IMPORTANT DEDUPLICATE ALL
-NHPD_DC_Sub <- read_excel("C:/Users/slieberman/Downloads/NHPD_Subsidies_DC.xlsx")
-NHPD_DC_Prop <- read_excel("C:/Users/slieberman/Downloads/NHPD_Properties_DC.xlsx")
-View(NHPD_Properties_Only_Export)
+DC_Active_properties <- read_csv("C:/Users/slieberman/Downloads/DC_Active_properties.csv")
+DC_active_subsidies <- read_csv("C:/Users/slieberman/Downloads/DC_active_subsidies.csv")
+#sumcheck
+
 #flag for inactive / inconclusive properties
-DC_NHPD_data <- left_join(NHPD_DC_Prop, NHPD_DC_Sub, by = "NHPD Property ID")
-
-
+DC_NHPD_data <- left_join(DC_Active_properties, DC_active_subsidies, by = "NHPD Property ID")
+sum(DC_NHPD_data$`Assisted Units`, na.rm = TRUE)
+sum(DC_active_subsidies$`Assisted Units`, na.rm = TRUE)
+###
+DC_NHPD_data_tract_grouped <- DC_NHPD_data %>%
+  group_by(`Census Tract`) %>%
+  summarise(Assisted_Units_per_tract = sum(`Assisted Units`, na.rm = TRUE))
