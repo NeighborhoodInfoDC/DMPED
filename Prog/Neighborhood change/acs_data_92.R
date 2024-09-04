@@ -265,7 +265,7 @@ reweighted_2000_2020_rents_grouped <- reweighted_2000_2010_rents %>%
             agg_rents_2020 = sum(aggregate_2020, na.rm = TRUE)) %>%
   ungroup() %>%
   mutate(median_rent_2020 = agg_rents_2020/total_units_2020)
-
+r
 #home value
 reweighted_2000_2010_values <- 
   left_join(consolidated_2000_value_unit_weights_grouped, total_2010_weights)
@@ -282,6 +282,13 @@ reweighted_2000_2010_values_grouped <- reweighted_2000_2010_values %>%
   mutate(median_value_2020 =  agg_value_2020/total_units_2020)
 
 #realized I named variables poorly
+
+home_values_2000_2020 <- reweighted_2000_2010_values_grouped
+home_values_2000_2020 <- home_values_2000_2020 %>% 
+  rename(cw_total_units_2000_2020 = total_units_2020, cw_agg_value_2000_2020 = agg_value_2020, cw_median_value_2000_2020 = median_value_2020)
+reweighted_2000_2020_rents_grouped <- reweighted_2000_2020_rents_grouped %>% 
+  rename(cw_median_rent_200_2020 = median_rent_2020)
+reweighted_2000_2020_rents_grouped <- reweighted_2000_2020_rents_grouped %>% select(tr2020ge, cw_median_rent_200_2020)
 #will change
 #done besides that!!!!
 

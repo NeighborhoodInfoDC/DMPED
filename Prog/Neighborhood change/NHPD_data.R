@@ -8,9 +8,10 @@ library(readxl)
 library(lubridate)
 library(tidycensus)
 ###IMPORTANT DEDUPLICATE ALL
-NHPD_Subsidies_Only_Export <- read_excel("C:/Users/slieberman/Downloads/NHPD Subsidies Only Export.xlsx")
-NHPD_Properties_Only_Export <- read_excel("C:/Users/slieberman/Downloads/NHPD Properties Only Export.xlsx")
+NHPD_DC_Sub <- read_excel("C:/Users/slieberman/Downloads/NHPD_Subsidies_DC.xlsx")
+NHPD_DC_Prop <- read_excel("C:/Users/slieberman/Downloads/NHPD_Properties_DC.xlsx")
 View(NHPD_Properties_Only_Export)
 #flag for inactive / inconclusive properties
-compiled_NHPD_data <- left_join(NHPD_Properties_Only_Export, NHPD_Subsidies_Only_Export, by = "NHPD Property ID")
+DC_NHPD_data <- left_join(NHPD_DC_Prop, NHPD_DC_Sub, by = "NHPD Property ID")
+
 
