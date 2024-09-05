@@ -39,3 +39,31 @@ vacancy <-DCUSPS %>%
 
 write.csv(vacancy, 'C:/Users/Ysu/Downloads/vanacy.csv')
 
+tractboundary_20 <- get_acs(geography = "tract", 
+                            variables = c("B01003_001"),
+                            state = "DC",
+                            geometry = TRUE,
+                            year = 2022)
+neighborhood = "W:/Libraries/OCTO/Maps/Neighborhood_Clusters.shp"
+neighborhood_sf <- read_sf(dsn= neighborhood, layer= basename(strsplit(neighborhood, "\\.")[[1]])[1])
+
+st_crs(neighborhood_sf) <- st_crs(tractboundary_20)
+
+tractboundary_20_2 <- tractboundary_20 %>% 
+  st_centroid() %>% 
+  st_join(neighborhood_sf) %>% 
+  st_drop_geometry() %>% 
+  select(GEOID, NBH_NAMES)
+
+vacancy20 <- vacancy %>% 
+  filter(year==2022) %>% 
+  mutate(GEOID=as.character(geoid))
+
+tractboundary_20 <- tractboundary_20 %>% 
+  left_join(tractboundary_20_2, by=c("GEOID")) %>% 
+  left_join(vacancy20, by=c("GEOID"))
+
+ggplot() +
+  geom_sf(data =tractboundary_20, aes( fill = vacancyrate))+
+  scale_fill_viridis_c(option = "B")+
+  coord_sf(datum = NA)
