@@ -59,6 +59,11 @@ vacancy20 <- vacancy %>%
   filter(year==2022) %>% 
   mutate(GEOID=as.character(geoid))
 
+test <- vacancy20 %>% 
+  mutate(state="DC") %>% 
+  group_by(state) %>% 
+  mutate(totalunits=sum(total_residential)) #the total addresses are 406406, larger than DC total units
+
 tractboundary_20 <- tractboundary_20 %>% 
   left_join(tractboundary_20_2, by=c("GEOID")) %>% 
   left_join(vacancy20, by=c("GEOID"))
