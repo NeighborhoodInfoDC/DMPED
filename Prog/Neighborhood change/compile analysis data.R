@@ -208,5 +208,14 @@ renters_2000<-
   mutate(renter_2000=value)
 
 housing_2000 <- total_housing_units_2000 %>% 
-  left_join(total_housing_units_2000, by=c("GEOID"))
+  left_join(owner_occupied_2000, by=c("GEOID")) %>% 
+  left_join(renters_2000, by=c("GEOID"))
+
+housing_2012 <- total_housing_units_2012%>% 
+  left_join(owner_occupied_2012,by=c("GEOID")) %>% 
+  left_join(renters_2012,by=c("GEOID"))
+
+housing_2022 <- total_housing_units_2022%>% 
+  left_join(owner_occupied_2022,by=c("GEOID")) %>% 
+  left_join(renters_2022,by=c("GEOID"))
  
