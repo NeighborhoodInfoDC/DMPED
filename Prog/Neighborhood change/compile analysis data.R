@@ -22,7 +22,10 @@ Crosswalk_2000_to_2010 <- read_csv("C:/Users/Ysu/Box/Greater DC/Projects/DMPED H
 # Crosswalk_2020_to_2010 <- read_csv("C:/Users/Ysu/Box/Greater DC/Projects/DMPED Housing Assessment 2024/Task 2 - Nbrhd Change and Displacement Risk Assessment/Data collection/Raw/tract crosswalks/nhgis_tr2020_tr2010_11.csv")
 Crosswalk_2010_to_2020 <- read_csv("C:/Users/Ysu/Box/Greater DC/Projects/DMPED Housing Assessment 2024/Task 2 - Nbrhd Change and Displacement Risk Assessment/Data collection/Raw/tract crosswalks/nhgis_tr2010_tr2020_11.csv") %>% 
 mutate(GEOID=as.character(tr2010ge))
+v22 <- load_variables(2022, "acs5", cache = TRUE)
+v2000 <- load_variables(2000, "decennial", cache = TRUE)
 
+##########################HOME VALUE AND RENT####################################
 dc_median_home_value_2022 <- 
   get_acs(geography = "tract",
           variables = "B25107_001",
@@ -139,22 +142,25 @@ master_housingvalue <- consolidated_2000_2010_2020 %>%
   left_join(dc_median_rent_2022,by=c("GEOID")) %>% 
   select(GEOID, medianhome_2000_2020,rent_2000_2020, medianhome_2012_2020, rent_2012_2020,rent_2022, medianhome_2022 )
 
-#housing units 
+##########################HOUSING UNITS ####################################
+
 
 total_housing_units_2022<- 
   get_acs(geography = "tract",
-          variables =  "B25002_002",
+          variables =  "B25002_001",
           year = 2022,
           state = "DC",
           geometry = FALSE) %>% 
   mutate(housing_2022=estimate)
+
 total_housing_units_2012<- 
   get_acs(geography = "tract",
-          variables =  "B25002_002",
+          variables =  "B25002_001",
           year = 2012,
           state = "DC",
           geometry = FALSE)%>% 
   mutate(housing_2012=estimate)
+
 total_housing_units_2000 <- 
   get_decennial(geography = "tract",
                 variables =  "H001001",
@@ -219,3 +225,45 @@ housing_2022 <- total_housing_units_2022%>%
   left_join(owner_occupied_2022,by=c("GEOID")) %>% 
   left_join(renters_2022,by=c("GEOID"))
  
+
+consolidated_2000_2010_housing <-Crosswalk_2000_to_2010 %>% 
+  left_join(housing_2000, by=c("GEOID")) %>% 
+  mutate(housing2000_subpart=housing_2000*wt_hu,
+         renter2000_subpart=renter_2000*wt_renthu,
+         owner2000_subpart=owner_2000*wt_ownhu) %>% 
+  group_by(tr2010ge) %>% 
+  summarize(housing_2000_2010 = sum(housing2000_subpart, na.rm= TRUE),
+            renter_2000_2010 = sum(renter2000_subpart, na.rm= TRUE),
+            owner_2000_2010= sum(owner2000_subpart, na.rm= TRUE)) 
+
+# Crosswalk 2000 to 2020
+
+consolidated_2000_2010_2020_housing <- Crosswalk_2010_to_2020 %>% 
+  left_join(consolidated_2000_2010_housing, by=c("tr2010ge")) %>% 
+  mutate(housing2000_subpart=housing_2000_2010*wt_hu,
+         renter2000_subpart=renter_2000_2010*wt_renthu,
+         owner2000_subpart=owner_2000_2010*wt_ownhu) %>% 
+  group_by(tr2020ge) %>% 
+  summarize(housing_2000_2020 = sum(housing2000_subpart, na.rm= TRUE),
+            renter_2000_2020 = sum(renter2000_subpart, na.rm= TRUE),
+            owner_2000_2020=sum(owner2000_subpart, na.rm= TRUE)) 
+
+consolidated_2010_2020_housing <-Crosswalk_2010_to_2020 %>% 
+  left_join(housing_2012, by=c("GEOID")) %>% 
+  mutate(housing2012_subpart=housing_2012*wt_hu,
+         renter2012_subpart=renter_2012*wt_renthu,
+         owner2012_subpart=owner_2012*wt_ownhu) %>% 
+  group_by(tr2020ge) %>% 
+  summarize(housing_2012_2020 = sum(housing2012_subpart, na.rm= TRUE),
+            renter_2012_2020 = sum(renter2012_subpart, na.rm= TRUE),
+            owner_2012_2020= sum(owner2012_subpart, na.rm= TRUE)) 
+
+master_housingunits <- consolidated_2000_2010_2020_housing %>% 
+  left_join(consolidated_2010_2020_housing, by=c("tr2020ge")) %>% 
+  mutate(GEOID=as.character(tr2020ge)) %>% 
+  left_join(housing_2022,by=c("GEOID")) %>% 
+  select(GEOID, housing_2000_2020, renter_2000_2020, owner_2000_2020, housing_2012_2020, renter_2012_2020, owner_2012_2020
+         , housing_2022, owner_2022,renter_2022)
+
+housingmarket <- master_housingunits %>% 
+  left_join(master_housingvalue)
