@@ -23,6 +23,8 @@ Crosswalk_2000_to_2010 <- read_csv("C:/Users/Ysu/Box/Greater DC/Projects/DMPED H
 Crosswalk_2010_to_2020 <- read_csv("C:/Users/Ysu/Box/Greater DC/Projects/DMPED Housing Assessment 2024/Task 2 - Nbrhd Change and Displacement Risk Assessment/Data collection/Raw/tract crosswalks/nhgis_tr2010_tr2020_11.csv") %>% 
 mutate(GEOID=as.character(tr2010ge))
 v22 <- load_variables(2022, "acs5", cache = TRUE)
+subject22 <- load_variables(2022, "acs5/subject", cache = TRUE)
+subject12 <- load_variables(2012, "acs5/subject", cache = TRUE)
 v2000 <- load_variables(2000, "decennial", cache = TRUE)
 
 ##########################HOME VALUE AND RENT####################################
@@ -265,5 +267,96 @@ master_housingunits <- consolidated_2000_2010_2020_housing %>%
   select(GEOID, housing_2000_2020, renter_2000_2020, owner_2000_2020, housing_2012_2020, renter_2012_2020, owner_2012_2020
          , housing_2022, owner_2022,renter_2022)
 
+#####################JOINING ALL HOUSING STUFF TOGETHER####################################################
 housingmarket <- master_housingunits %>% 
-  left_join(master_housingvalue)
+  left_join(master_housingvalue,by=c("GEOID"))
+
+vacancy <- read.csv("C:/Users/Ysu/Box/Greater DC/Projects/DMPED Housing Assessment 2024/Task 2 - Nbrhd Change and Displacement Risk Assessment/Data collection/Clean/vanacy.csv") %>% 
+  select(-X) %>% 
+  mutate(GEOID=as.character(geoid)) %>% 
+  select(-geoid, -total_residential)%>% 
+  filter(year==2000|year==2012|year==2022) %>% 
+  mutate(year=paste0("vacancy_", as.character(year))) %>% 
+  spread(key=year,value=vacancyrate) 
+
+housingmarket <- housingmarket %>% 
+  left_join(vacancy,by=c("GEOID"))
+
+write.csv(housingmarket,"C:/Users/Ysu/Box/Greater DC/Projects/DMPED Housing Assessment 2024/Task 2 - Nbrhd Change and Displacement Risk Assessment/Data collection/Clean/housingmarket.csv")
+
+
+#####################LOW INCOME POPULATION####################################################
+
+#HUD INCOME LIMIT 60% for 2 person household in 2022 is 68400, S1901_C01_007 gives $50,000 to $74,999
+lowincome_2022<- 
+  get_acs(geography = "tract",
+          variables =  c("S1901_C01_002","S1901_C01_003","S1901_C01_004","S1901_C01_005","S1901_C01_006","S1901_C01_007"),
+          year = 2022,
+          state = "DC",
+          geometry = FALSE)%>% 
+  pivot_wider(id_cols = c(GEOID, NAME),
+              names_from = variable,
+              values_from = c(estimate, moe))%>%
+  replace(is.na(.), 0) %>% 
+  mutate(lowincome_2022=as.numeric(estimate_S1901_C01_002)+as.numeric(estimate_S1901_C01_003)+as.numeric(estimate_S1901_C01_004)+as.numeric(estimate_S1901_C01_005)+as.numeric(estimate_S1901_C01_006)+as.numeric(estimate_S1901_C01_007)) %>% 
+  select(GEOID, lowincome_2022)
+
+#HUD INCOME LIMIT 60% for 2 person household in 2012 is 51600, S1901_C01_006 gives $35,000 to $49,999
+lowincome_2012<- 
+  get_acs(geography = "tract",
+          variables =  c("S1901_C01_002","S1901_C01_003","S1901_C01_004","S1901_C01_005","S1901_C01_006"),
+          year = 2012,
+          state = "DC",
+          geometry = FALSE)%>% 
+  pivot_wider(id_cols = c(GEOID, NAME),
+              names_from = variable,
+              values_from = c(estimate, moe))%>%
+  replace(is.na(.), 0) %>% 
+  mutate(lowincome_2012=as.numeric(estimate_S1901_C01_002)+as.numeric(estimate_S1901_C01_003)+as.numeric(estimate_S1901_C01_004)+as.numeric(estimate_S1901_C01_005)+as.numeric(estimate_S1901_C01_006)) %>% 
+  select(GEOID, lowincome_2012)
+
+#HUD INCOME LIMIT 60% for 2 person household in 2000 is 38700, P052008 gives $35,000 to $39,999
+#https://api.census.gov/data/2000/dec/sf3/variables.html
+lowincome_2000<- get_decennial(geography = "tract",
+                variables =  c("P052002","P052003","P052004","P052005","P052006","P052007","P052008"),
+                year = 2000,
+                state = "DC",
+                geometry = FALSE)%>% 
+  pivot_wider(id_cols = c(GEOID, NAME),
+              names_from = variable,
+              values_from = c(value)) %>% 
+  replace(is.na(.), 0) %>% 
+  mutate(lowincome_2000=as.numeric(P052002)+as.numeric(P052003)+as.numeric(P052004)+as.numeric(P052005)+as.numeric(P052006)+as.numeric(P052007)+as.numeric(P052008)) %>% 
+  select(GEOID, lowincome_2000)
+
+
+#crosswalk 2000-2010
+consolidated_2000_2010_lowincome <-Crosswalk_2000_to_2010 %>% 
+  left_join(lowincome_2000, by=c("GEOID")) %>% 
+  mutate(lowincome_2000_subpart=lowincome_2000*wt_pop) %>% 
+  group_by(tr2010ge) %>% 
+  summarize(lowincome_2000_2010 = sum(lowincome_2000_subpart, na.rm= TRUE)) 
+
+# Crosswalk 2000 to 2020
+
+consolidated_2000_2010_2020_lowincome <- Crosswalk_2010_to_2020 %>% 
+  left_join(consolidated_2000_2010_lowincome, by=c("tr2010ge")) %>% 
+  mutate(lowincome_2000_subpart=lowincome_2000_2010*wt_pop) %>% 
+  group_by(tr2020ge) %>% 
+  summarize(lowincome_2000_2020 = sum(lowincome_2000_subpart, na.rm= TRUE)) 
+
+# Crosswalk 2012 to 2020
+consolidated_2010_2020_lowincome <-Crosswalk_2010_to_2020 %>% 
+  left_join(lowincome_2012, by=c("GEOID")) %>% 
+  mutate(lowincome2012_subpart=lowincome_2012*wt_pop) %>% 
+  group_by(tr2020ge) %>% 
+  summarize(lowincome_2012_2020 = sum(lowincome2012_subpart, na.rm= TRUE)) 
+
+lowincomepop <- consolidated_2000_2010_2020_lowincome %>% 
+  left_join(consolidated_2010_2020_lowincome,by=c("tr2020ge")) %>% 
+  mutate(GEOID=as.character(tr2020ge)) %>% 
+  left_join(lowincome_2022,by=c("GEOID"))
+
+write.csv(lowincomepop,"C:/Users/Ysu/Box/Greater DC/Projects/DMPED Housing Assessment 2024/Task 2 - Nbrhd Change and Displacement Risk Assessment/Data collection/Clean/lowincome_pop.csv")
+
+
