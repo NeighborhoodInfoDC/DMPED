@@ -29,6 +29,7 @@ DC_NHPD_data_tract_grouped_HOME <- DC_NHPD_data %>%
   summarise(Assisted_Units_per_tract = sum(`Assisted Units`, na.rm = TRUE))
 DC_NHPD_data_tract_grouped_HOME <- DC_NHPD_data_tract_grouped_HOME %>%
   rename(HOME_grant_units = Assisted_Units_per_tract)
+
 DC_NHPD_data_tract_grouped_Section_8 <- DC_NHPD_data %>%
   filter(`Subsidy Name` == "Section 8") %>%
   group_by(`Census Tract`) %>%
@@ -54,18 +55,42 @@ DC_NHPD_data_tract_grouped_LIHTC <- DC_NHPD_data %>%
   filter(`Subsidy Name` == "LIHTC") %>%
   group_by(`Census Tract`) %>%
   summarise(Assisted_Units_per_tract = sum(`Assisted Units`, na.rm = TRUE))
+DC_NHPD_data_tract_grouped_LIHTC  <- DC_NHPD_data_tract_grouped_LIHTC  %>%
+  rename(LIHTC_units = Assisted_Units_per_tract)
+
 DC_NHPD_data_tract_grouped_Project_Based_Vouchers <- DC_NHPD_data %>%
   filter(`Subsidy Name` == "Project Based Vouchers") %>%
   group_by(`Census Tract`) %>%
   summarise(Assisted_Units_per_tract = sum(`Assisted Units`, na.rm = TRUE))
+DC_NHPD_data_tract_grouped_Project_Based_Vouchers <- DC_NHPD_data_tract_grouped_Project_Based_Vouchers%>%
+  rename(Project_Based_Voucher_units = Assisted_Units_per_tract)
+
 DC_NHPD_data_tract_grouped_Section_202 <- DC_NHPD_data %>%
   filter(`Subsidy Name` == "Section 202") %>%
   group_by(`Census Tract`) %>%
   summarise(Assisted_Units_per_tract = sum(`Assisted Units`, na.rm = TRUE))
+DC_NHPD_data_tract_grouped_Section_202 <- DC_NHPD_data_tract_grouped_Section_202%>%
+  rename(Section_202_units = Assisted_Units_per_tract)
+
 DC_NHPD_data_tract_grouped_Mod_Rehab <- DC_NHPD_data %>%
   filter(`Subsidy Name` == "Mod Rehab") %>%
   group_by(`Census Tract`) %>%
   summarise(Assisted_Units_per_tract = sum(`Assisted Units`, na.rm = TRUE))
+DC_NHPD_data_tract_grouped_Mod_Rehab <- DC_NHPD_data_tract_grouped_Mod_Rehab%>%
+  rename(Mod_Rehab_units = Assisted_Units_per_tract)
+
+###compiling
+view(colnames(DC_NHPD_data_tract_grouped))
+     
+
+  left_join(DC_NHPD_data_tract_grouped_HOME, by = "Census Tract" ) %>%
+  left_join(DC_NHPD_data_tract_grouped_HUD_INSURED, by = "Census Tract" ) %>%
+  left_join(DC_NHPD_data_tract_grouped_LIHTC, by = "Census Tract" ) %>%
+  left_join(DC_NHPD_data_tract_grouped_Mod_Rehab, by = "Census Tract" ) %>%
+  left_join(DC_NHPD_data_tract_grouped_Project_Based_Vouchers, by = "Census Tract" ) %>%
+  left_join(DC_NHPD_data_tract_grouped_public_housing, by = "Census Tract" ) %>%
+  left_join(DC_NHPD_data_tract_grouped_Section_202, by = "Census Tract" ) %>%
+  left_join(DC_NHPD_data_tract_grouped_Section_8, by = "Census Tract" ) 
 
 write.csv(DC_NHPD_data, "DC_NHPD_data.csv")
 write.csv(DC_NHPD_data_tract_grouped, "DC_NHPD_tracts.csv")
