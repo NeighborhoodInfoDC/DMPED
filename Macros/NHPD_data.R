@@ -56,5 +56,4 @@ DC_NHPD_data_tract_grouped_Mod_Rehab <- DC_NHPD_data %>%
   group_by(`Census Tract`) %>%
   summarise(Assisted_Units_per_tract = sum(`Assisted Units`, na.rm = TRUE))
 
-###Pull in old data
-#fin
+###Pull in old data __ pasting below
