@@ -94,6 +94,6 @@ DC_NHPD_data_tract_grouped_types <- DC_NHPD_data_tract_grouped%>%
   left_join(DC_NHPD_data_tract_grouped_Section_8, by = "Census Tract" ) 
 
 write.csv(DC_NHPD_data, "DC_NHPD_data.csv")
-write.csv(DC_NHPD_data_tract_grouped, "DC_NHPD_tracts.csv")
+write.csv(DC_NHPD_data_tract_grouped_types, "DC_NHPD_tracts.csv")
 
 ###Pull in old data __ pasting below
