@@ -80,9 +80,10 @@ DC_NHPD_data_tract_grouped_Mod_Rehab <- DC_NHPD_data_tract_grouped_Mod_Rehab%>%
   rename(Mod_Rehab_units = Assisted_Units_per_tract)
 
 ###compiling
-view(colnames(DC_NHPD_data_tract_grouped))
-     
 
+DC_NHPD_data_tract_grouped <- rowid_to_column(DC_NHPD_data_tract_grouped, "ID")
+
+DC_NHPD_data_tract_grouped_types <- DC_NHPD_data_tract_grouped%>%     
   left_join(DC_NHPD_data_tract_grouped_HOME, by = "Census Tract" ) %>%
   left_join(DC_NHPD_data_tract_grouped_HUD_INSURED, by = "Census Tract" ) %>%
   left_join(DC_NHPD_data_tract_grouped_LIHTC, by = "Census Tract" ) %>%
