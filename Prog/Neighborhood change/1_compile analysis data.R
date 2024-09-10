@@ -359,4 +359,21 @@ lowincomepop <- consolidated_2000_2010_2020_lowincome %>%
 
 write.csv(lowincomepop,"C:/Users/Ysu/Box/Greater DC/Projects/DMPED Housing Assessment 2024/Task 2 - Nbrhd Change and Displacement Risk Assessment/Data collection/Clean/lowincome_pop.csv")
 
+#########################distance to downtown#####################################
+
+name <- c('downtown')
+lat <- c(38.8955556)
+lon <- c(-077.0320000)
+downtown_point <- data.frame(name, lat, lon)
+
+dt_sf = st_as_sf(downtown_point, coords = c("lon", "lat"), 
+                 crs = 4326, agr = "constant")
+plot(dt_sf)
+
+dt_halfmile <-st_buffer(dt_sf,dist=0.0036) %>% 
+  st_sf() %>% 
+  st_cast("POLYGON")
+
+plot(dt_halfmile)
+
 
