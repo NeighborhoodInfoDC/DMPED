@@ -51,3 +51,9 @@ tractboundary_20 <- tractboundary_20 %>%
 #merge analysis data with shapefile
 map_file <- merge(analysismaster,tractboundary_20, by=c("GEOID")) %>% 
   st_as_sf()
+
+######Change in vulnerable population
+
+changeinblack <- map_file %>% 
+  select(GEOID,non_hispanic_black_hh_2000_2020,non_hispanic_black_hh_2012_2020,non_hispanic_black_hh_2022, total_hh_2000_2020, total_hh_2012_2020,total_hh_2022,NBH_NAMES) %>% 
+  
