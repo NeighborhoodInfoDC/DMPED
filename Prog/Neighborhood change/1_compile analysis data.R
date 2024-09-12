@@ -313,7 +313,7 @@ lowincome_2022<-
 #HUD INCOME LIMIT 60% for 2 person household in 2012 is 51600, B19001A_011 gives $50,000 to $59,999
 lowincome_2012<- 
   get_acs(geography = "tract",
-          variables =  c("B19001A_002","B19001A_003","B19001A_004","B19001A_005","B19001A_006","B19001A_007","B19001A_008","B19001A_009","B19001A_010","B19001A_011"),
+          variables =  c("B19001_002","B19001_003","B19001_004","B19001_005","B19001_006","B19001_007","B19001_008","B19001_009","B19001_010","B19001_011"),
           year = 2012,
           state = "DC",
           geometry = FALSE)%>% 
@@ -321,12 +321,22 @@ lowincome_2012<-
               names_from = variable,
               values_from = c(estimate, moe))%>%
   replace(is.na(.), 0) %>% 
-  mutate(lowincome_2012=as.numeric(estimate_B19001A_002)+as.numeric(estimate_B19001A_003)+as.numeric(estimate_B19001A_004)+as.numeric(estimate_B19001A_005)+as.numeric(estimate_B19001A_006)+as.numeric(estimate_B19001A_007)
-         +as.numeric(estimate_B19001A_008)
-         +as.numeric(estimate_B19001A_009)
-         +as.numeric(estimate_B19001A_010)
-         +as.numeric(estimate_B19001A_011)*0.16)%>% 
+  mutate(lowincome_2012=as.numeric(estimate_B19001_002)+as.numeric(estimate_B19001_003)+as.numeric(estimate_B19001_004)+as.numeric(estimate_B19001_005)+as.numeric(estimate_B19001_006)+as.numeric(estimate_B19001_007)
+         +as.numeric(estimate_B19001_008)
+         +as.numeric(estimate_B19001_009)
+         +as.numeric(estimate_B19001_010)
+         +as.numeric(estimate_B19001_011)*0.16)%>% 
   select(GEOID, lowincome_2012)
+
+test3 <- lowincome_2012 %>% 
+  mutate(total="total") %>% 
+  group_by(total) %>% 
+  summarize(lowincome=sum(lowincome_2012))
+
+test4 <-consolidated_2010_2020_lowincome %>% 
+  mutate(total="total") %>% 
+  group_by(total) %>% 
+  summarize(lowincome=sum(lowincome_2012_2020))
 
 #HUD INCOME LIMIT 60% for 2 person household in 2000 is 38700, P052008 gives $35,000 to $39,999
 #https://api.census.gov/data/2000/dec/sf3/variables.html
@@ -394,3 +404,47 @@ dt_halfmile <- dt_sf %>%
 dt_onemile <- dt_sf %>% 
   st_buffer(1609) %>% ## buffer by a mile
   plot()
+
+tractboundary_20 <- get_acs(geography = "tract", 
+                            variables = c("B01003_001"),
+                            state = "DC",
+                            geometry = TRUE,
+                            year = 2022)
+
+#attach neighborhood cluster name to tract
+
+tractpoint <-tractboundary_20 %>% 
+  st_centroid() 
+st_crs(dt_halfmile) <- st_crs(tractboundary_20 )
+
+tract_inhalfmile <- dt_halfmile %>% 
+  st_intersection(tractpoint) %>% 
+  mutate(inbuffer_a =1) %>% 
+  st_intersection(placedata) %>% 
+  select(GEOID,inbuffer_a) %>% 
+  st_drop_geometry() %>% 
+  select(GEOID, inbuffer_a)
+
+
+tract_inhalfmile <- tractpoint %>% 
+  st_covered_by(dt_halfmile) %>% 
+  mutate(inbuffer_a =1) %>% 
+  st_intersection(placedata) %>% 
+  select(GEOID,inbuffer_a) %>% 
+  st_drop_geometry() %>% 
+  select(GEOID, inbuffer_a)
+
+test <- sf::st_intersection(tractpoint, dt_halfmile)
+
+plot (tractboundary_halfmile)
+
+dt_halfmile %>%
+  ggplot() +
+  geom_sf(aes(
+    # Color in states by the chip_pct variable
+    fill ="#ec008b"
+  )) + 
+  geom_sf(
+    data = tractboundary_20,
+    fill = NA
+  )  
