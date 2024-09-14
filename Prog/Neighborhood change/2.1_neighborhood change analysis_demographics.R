@@ -23,9 +23,12 @@ lowincome <- read_csv("C:/Users/Ysu/Box/Greater DC/Projects/DMPED Housing Assess
 
 raceethnicity <- read_csv("C:/Users/Ysu/Box/Greater DC/Projects/DMPED Housing Assessment 2024/Task 2 - Nbrhd Change and Displacement Risk Assessment/Data collection/Clean/race_ethnicity.csv")
 
+distance <- read_csv("C:/Users/Ysu/Box/Greater DC/Projects/DMPED Housing Assessment 2024/Task 2 - Nbrhd Change and Displacement Risk Assessment/Data collection/Clean/distance_downtown.csv")
+
 analysismaster <- housingmarket %>% 
   left_join(lowincome, by=c("GEOID")) %>% 
-  left_join(raceethnicity, by=c("GEOID"))
+  left_join(raceethnicity, by=c("GEOID")) %>% 
+  left_join(distance, by=c("GEOID") )
 
 tractboundary_20 <- get_acs(geography = "tract", 
                             variables = c("B01003_001"),

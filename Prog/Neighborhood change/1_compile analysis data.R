@@ -26,7 +26,7 @@ v22 <- load_variables(2022, "acs5", cache = TRUE)
 v12 <- load_variables(2012, "acs5", cache = TRUE)
 subject22 <- load_variables(2022, "acs5/subject", cache = TRUE)
 subject12 <- load_variables(2012, "acs5/subject", cache = TRUE)
-v2000 <- load_variables(2000, "decennial", cache = TRUE)
+v2000 <- load_variables(2000, "sf3", cache = TRUE)
 
 ##########################HOME VALUE AND RENT####################################
 dc_median_home_value_2022 <- 
@@ -47,11 +47,19 @@ dc_median_home_value_2012 <-
 #pull in total home counts dc
 dc_median_home_value_2000 <- 
   get_decennial(geography = "tract",
-                variables = c("H076001"),
+                variables = c("H076001"),  
                 year = 2000,
                 state = "DC",
                 geometry = FALSE) %>% 
   mutate(medianhome_2000=value)
+# 
+# test <- 
+#   get_decennial(geography = "tract",
+#                 variables = c("H085001"),  
+#                 year = 2000,
+#                 state = "DC",
+#                 geometry = FALSE) %>% 
+#   mutate(medianhome_2000=value)
 
 #median rents 2000 - 2022
 
@@ -383,68 +391,27 @@ lowincomepop <- consolidated_2000_2010_2020_lowincome %>%
 write.csv(lowincomepop,"C:/Users/Ysu/Box/Greater DC/Projects/DMPED Housing Assessment 2024/Task 2 - Nbrhd Change and Displacement Risk Assessment/Data collection/Clean/lowincome_pop.csv")
 
 #########################distance to downtown#####################################
+# Define downtown
+downtown_point <- data.frame(
+  name = "downtown",
+  lat = 38.89556,
+  lon = -77.032
+)
 
-name <- c('downtown')
-lat <- c(38.8955556)
-lon <- c(-077.0320000)
-downtown_point <- data.frame(name, lat, lon)
+# Convert the data frame to sf object
+downtown_sf <- st_as_sf(downtown_point, coords = c("lon", "lat"), crs = 4326)
 
-dt_sf = st_as_sf(downtown_point, coords = c("lon", "lat"), 
-                 crs = 4326, agr = "constant") %>%
-  st_transform(5070) ## project to a coordinate system, in meters
+# Use CRS 3857
+downtown_sf_proj <- st_transform(downtown_sf, crs = 3857)
 
-dt_onemile <- dt_sf %>% 
-  st_buffer(1609) %>% ## buffer by a mile
-  plot()
+# Create half-mile buffer
+dt_halfmile <- st_buffer(downtown_sf_proj, dist = set_units(0.5, "mi"))
 
-dt_halfmile <- dt_sf %>% 
-  st_buffer(805) %>% ## buffer by half mile
-  plot()
-
-dt_onemile <- dt_sf %>% 
-  st_buffer(1609) %>% ## buffer by a mile
-  plot()
-
-tractboundary_20 <- get_acs(geography = "tract", 
-                            variables = c("B01003_001"),
-                            state = "DC",
-                            geometry = TRUE,
-                            year = 2022)
-
-#attach neighborhood cluster name to tract
-
-tractpoint <-tractboundary_20 %>% 
-  st_centroid() 
-st_crs(dt_halfmile) <- st_crs(tractboundary_20 )
-
-tract_inhalfmile <- dt_halfmile %>% 
-  st_intersection(tractpoint) %>% 
-  mutate(inbuffer_a =1) %>% 
-  st_intersection(placedata) %>% 
-  select(GEOID,inbuffer_a) %>% 
-  st_drop_geometry() %>% 
-  select(GEOID, inbuffer_a)
+tracts_distance <- tractboundary_20 %>%
+  st_transform(crs = st_crs(downtown_sf)) %>%
+  mutate(distance_to_downtown_miles = as.numeric(set_units(st_distance(geometry, downtown_sf), "mi"))) %>%
+  select(GEOID, distance_to_downtown_miles) %>% 
+  st_drop_geometry()
 
 
-tract_inhalfmile <- tractpoint %>% 
-  st_covered_by(dt_halfmile) %>% 
-  mutate(inbuffer_a =1) %>% 
-  st_intersection(placedata) %>% 
-  select(GEOID,inbuffer_a) %>% 
-  st_drop_geometry() %>% 
-  select(GEOID, inbuffer_a)
-
-test <- sf::st_intersection(tractpoint, dt_halfmile)
-
-plot (tractboundary_halfmile)
-
-dt_halfmile %>%
-  ggplot() +
-  geom_sf(aes(
-    # Color in states by the chip_pct variable
-    fill ="#ec008b"
-  )) + 
-  geom_sf(
-    data = tractboundary_20,
-    fill = NA
-  )  
+write.csv(tracts_distance,"C:/Users/Ysu/Box/Greater DC/Projects/DMPED Housing Assessment 2024/Task 2 - Nbrhd Change and Displacement Risk Assessment/Data collection/Clean/distance_downtown.csv")

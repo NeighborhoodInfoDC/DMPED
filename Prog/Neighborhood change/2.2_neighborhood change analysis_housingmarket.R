@@ -23,9 +23,12 @@ lowincome <- read_csv("C:/Users/Ysu/Box/Greater DC/Projects/DMPED Housing Assess
 
 raceethnicity <- read_csv("C:/Users/Ysu/Box/Greater DC/Projects/DMPED Housing Assessment 2024/Task 2 - Nbrhd Change and Displacement Risk Assessment/Data collection/Clean/race_ethnicity.csv")
 
+distance <- read_csv("C:/Users/Ysu/Box/Greater DC/Projects/DMPED Housing Assessment 2024/Task 2 - Nbrhd Change and Displacement Risk Assessment/Data collection/Clean/distance_downtown.csv")
+
 analysismaster <- housingmarket %>% 
   left_join(lowincome, by=c("GEOID")) %>% 
-  left_join(raceethnicity, by=c("GEOID"))
+  left_join(raceethnicity, by=c("GEOID")) %>% 
+  left_join(distance, by=c("GEOID") )
 
 tractboundary_20 <- get_acs(geography = "tract", 
                             variables = c("B01003_001"),
@@ -162,140 +165,3 @@ changeoverall %>%
   theme(plot.margin = margin(r = 20))
 
 
-###################################change in vulnerable 2000-2012
-changeinblack <- map_file %>% 
-  # select(GEOID,non_hispanic_black_hh_2000_2020,non_hispanic_black_hh_2012_2020,non_hispanic_black_hh_2022, total_hh_2000_2020, total_hh_2012_2020,total_hh_2022,NBH_NAMES) %>% 
-  mutate(pct_black_2000=non_hispanic_black_hh_2000_2020/total_hh_2000_2020,
-         pct_black_2012=non_hispanic_black_hh_2012_2020/total_hh_2012_2020,
-         pct_black_2022=non_hispanic_black_hh_2022/total_hh_2022) %>% 
-  select(GEOID, NBH_NAMES, total_hh_2022, pct_black_2000, pct_black_2012,pct_black_2022) %>% 
-  mutate(changeinblack=pct_black_2012-pct_black_2000) %>% 
-  filter(changeinblack<0)
-
-changeinlowincome <- map_file %>% 
-  # select(GEOID,lowincome_2000_2020,lowincome_2012_2020,lowincome_2022, total_hh_2000_2020, total_hh_2012_2020,total_hh_2022,NBH_NAMES) %>% 
-  mutate(pct_lowincome_2000=lowincome_2000_2020/total_hh_2000_2020,
-         pct_lowincome_2012=lowincome_2012_2020/total_hh_2012_2020,
-         pct_lowincome_2022=lowincome_2022/total_hh_2022) %>% 
-  # select(GEOID, NBH_NAMES, total_hh_2022, pct_lowincome_2000, pct_lowincome_2012,pct_lowincome_2022,lowincome_2022,lowincome_2012_2020) %>% 
-  mutate(pctchg_lowincome=pct_lowincome_2012-pct_lowincome_2000,
-         change_lowincome=lowincome_2012_2020-lowincome_2000_2020) %>% 
-  st_centroid() %>% 
-  filter(change_lowincome<0)
-
-changeinblack %>%
-  ggplot() +
-  geom_sf(aes(
-    # Color in states by the chip_pct variable
-    fill = changeinblack
-  )) +
-  scale_fill_steps(
-    # Convert legend from decimal to percentages
-    labels = scales::percent_format(),
-    # Make legend title more readable
-    name = "change in black %",
-    # Show top and bottom limits on legend
-    show.limits = TRUE,
-    # Roughly set number of bins. Won't be exact as R uses algorithms under the
-    # hood for pretty looking breaks.
-    n.breaks = 4
-  )+
-  geom_sf(
-    data = changeinlowincome,
-    # Size bubbles by number of trucks at each station
-    aes(size =-change_lowincome),
-    color = palette_urbn_main["red"],
-    # Adjust transparency for readability
-    alpha = 0.7
-  )  +
-  coord_sf(datum = NA)+
-  # geom_label(
-  #   data = town_labels,
-  #   aes(x = X, y = Y, label = NAME),
-  #   size = 3,
-  #   label.padding = unit(.1, "lines"), alpha = .7
-  # )+
-  theme(
-    panel.grid.major = element_line(colour = "transparent", size = 0),
-    axis.title = element_blank(),
-    axis.line.y = element_blank(),
-    plot.caption = element_text(hjust = 0, size = 16),
-    plot.title = element_text(size = 18),
-    legend.title=element_text(size=14), 
-    legend.text = element_text(size = 14)
-    
-  )+
-  guides(color = guide_legend(override.aes = list(size=5)))+
-  labs(title = paste0("Neighborhood change 2000-2012"),
-       subtitle= "loss of lowincome and black households",
-       caption = "Source: ACS 5 year estiamtes 2012, Census 2000")
-
-
-
-###################################change in vulnerable 2000-2022
-changeinblack <- map_file %>% 
-  # select(GEOID,non_hispanic_black_hh_2000_2020,non_hispanic_black_hh_2012_2020,non_hispanic_black_hh_2022, total_hh_2000_2020, total_hh_2012_2020,total_hh_2022,NBH_NAMES) %>% 
-  mutate(pct_black_2000=non_hispanic_black_hh_2000_2020/total_hh_2000_2020,
-         pct_black_2012=non_hispanic_black_hh_2012_2020/total_hh_2012_2020,
-         pct_black_2022=non_hispanic_black_hh_2022/total_hh_2022) %>% 
-  # select(GEOID, NBH_NAMES, total_hh_2022, pct_black_2000, pct_black_2012,pct_black_2022) %>% 
-  mutate(changeinblack=pct_black_2022-pct_black_2000) %>% 
-  filter(changeinblack<0)
-
-changeinlowincome <- map_file %>% 
-  # select(GEOID,lowincome_2000_2020,lowincome_2012_2020,lowincome_2022, total_hh_2000_2020, total_hh_2012_2020,total_hh_2022,NBH_NAMES) %>% 
-  mutate(pct_lowincome_2000=lowincome_2000_2020/total_hh_2000_2020,
-         pct_lowincome_2012=lowincome_2012_2020/total_hh_2012_2020,
-         pct_lowincome_2022=lowincome_2022/total_hh_2022) %>% 
-  # select(GEOID, NBH_NAMES, total_hh_2022, pct_lowincome_2000, pct_lowincome_2012,pct_lowincome_2022,lowincome_2022,lowincome_2012_2020) %>% 
-  mutate(pctchg_lowincome=pct_lowincome_2022-pct_lowincome_2000,
-         change_lowincome=lowincome_2022-lowincome_2000_2020) %>% 
-  st_centroid() %>% 
-  filter(change_lowincome<0)
-
-changeinblack %>%
-  ggplot() +
-  geom_sf(aes(
-    # Color in states by the chip_pct variable
-    fill = changeinblack
-  )) +
-  scale_fill_steps(
-    # Convert legend from decimal to percentages
-    labels = scales::percent_format(),
-    # Make legend title more readable
-    name = "change in black %",
-    # Show top and bottom limits on legend
-    show.limits = TRUE,
-    # Roughly set number of bins. Won't be exact as R uses algorithms under the
-    # hood for pretty looking breaks.
-    n.breaks = 4
-  )+
-  geom_sf(
-    data = changeinlowincome,
-    # Size bubbles by number of trucks at each station
-    aes(size =-change_lowincome),
-    color = palette_urbn_main["red"],
-    # Adjust transparency for readability
-    alpha = 0.7
-  )  +
-  coord_sf(datum = NA)+
-  # geom_label(
-  #   data = town_labels,
-  #   aes(x = X, y = Y, label = NAME),
-  #   size = 3,
-  #   label.padding = unit(.1, "lines"), alpha = .7
-  # )+
-  theme(
-    panel.grid.major = element_line(colour = "transparent", size = 0),
-    axis.title = element_blank(),
-    axis.line.y = element_blank(),
-    plot.caption = element_text(hjust = 0, size = 16),
-    plot.title = element_text(size = 18),
-    legend.title=element_text(size=14), 
-    legend.text = element_text(size = 14)
-    
-  )+
-  guides(color = guide_legend(override.aes = list(size=5)))+
-  labs(title = paste0("Neighborhood change 2000-2022"),
-       subtitle= "loss of lowincome and black households",
-       caption = "Source: ACS 5 year estiamtes 2022, Census 2000")

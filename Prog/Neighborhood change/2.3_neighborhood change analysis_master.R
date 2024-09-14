@@ -65,10 +65,11 @@ tractboundary_20 <- tractboundary_20 %>%
 map_file <- merge(analysismaster,tractboundary_20, by=c("GEOID")) %>% 
   st_as_sf()
 
-######Change in vulnerable population 2012-2022
+droptract <- c("11001000201", "11001009511", "11001980000", "11001006804")
 
-changeinblack <- map_file %>% 
-  # select(GEOID,non_hispanic_black_hh_2000_2020,non_hispanic_black_hh_2012_2020,non_hispanic_black_hh_2022, total_hh_2000_2020, total_hh_2012_2020,total_hh_2022,NBH_NAMES) %>% 
+######test treshold for which tracts to drop in the analysis 
+pop <- map_file %>% 
+  select(GEOID,total_hh_2012_2020,total_hh_2000_2020, total_hh_2022,medianhome_2000_2020, NBH_NAMES) %>% 
   mutate(pct_black_2000=non_hispanic_black_hh_2000_2020/total_hh_2000_2020,
          pct_black_2012=non_hispanic_black_hh_2012_2020/total_hh_2012_2020,
          pct_black_2022=non_hispanic_black_hh_2022/total_hh_2022) %>% 
