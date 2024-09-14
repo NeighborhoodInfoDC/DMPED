@@ -68,100 +68,46 @@ tractboundary_20 <- tractboundary_20 %>%
 map_file <- merge(analysismaster,tractboundary_20, by=c("GEOID")) %>% 
   st_as_sf()
 
-######Change in vulnerable population 2012-2022
+droptract <- c("11001000201", "11001009511", "11001980000", "11001006804", "11001010900")
 
-changeinblack <- map_file %>% 
-  # select(GEOID,non_hispanic_black_hh_2000_2020,non_hispanic_black_hh_2012_2020,non_hispanic_black_hh_2022, total_hh_2000_2020, total_hh_2012_2020,total_hh_2022,NBH_NAMES) %>% 
-  mutate(pct_black_2000=non_hispanic_black_hh_2000_2020/total_hh_2000_2020,
-         pct_black_2012=non_hispanic_black_hh_2012_2020/total_hh_2012_2020,
-         pct_black_2022=non_hispanic_black_hh_2022/total_hh_2022) %>% 
-  # select(GEOID, NBH_NAMES, total_hh_2022, pct_black_2000, pct_black_2012,pct_black_2022) %>% 
-  mutate(changeinblack=pct_black_2022-pct_black_2012) %>% 
-  filter(changeinblack<0)
+######housing market evaluation
 
-changeinlowincome <- map_file %>% 
-  # select(GEOID,lowincome_2000_2020,lowincome_2012_2020,lowincome_2022, total_hh_2000_2020, total_hh_2012_2020,total_hh_2022,NBH_NAMES) %>% 
-  mutate(pct_lowincome_2000=lowincome_2000_2020/total_hh_2000_2020,
-         pct_lowincome_2012=lowincome_2012_2020/total_hh_2012_2020,
-         pct_lowincome_2022=lowincome_2022/total_hh_2022) %>% 
-  # select(GEOID, NBH_NAMES, total_hh_2022, pct_lowincome_2000, pct_lowincome_2012,pct_lowincome_2022,lowincome_2022,lowincome_2012_2020) %>% 
-  mutate(pctchg_lowincome=pct_lowincome_2022-pct_lowincome_2012,
-         change_lowincome=lowincome_2022-lowincome_2012_2020) %>% 
-st_centroid() %>% 
-  filter(change_lowincome<0)
+outlier <- map_file %>% 
+  filter(GEOID=="11001004100") %>% 
+  mutate(quintile_2000=5,
+         quintile_2012=5,
+         quintile_2022=5)
 
-changeinblack %>%
-  ggplot() +
-  geom_sf(aes(
-    # Color in states by the chip_pct variable
-    fill = changeinblack
-  )) +
-  scale_fill_steps(
-    # Convert legend from decimal to percentages
-    labels = scales::percent_format(),
-    # Make legend title more readable
-    name = "change in black %",
-    # Show top and bottom limits on legend
-    show.limits = TRUE,
-    # Roughly set number of bins. Won't be exact as R uses algorithms under the
-    # hood for pretty looking breaks.
-    n.breaks = 4
-  )+
-  geom_sf(
-    data = changeinlowincome,
-    # Size bubbles by number of trucks at each station
-    aes(size =-change_lowincome),
-    color = palette_urbn_main["red"],
-    # Adjust transparency for readability
-    alpha = 0.7
-  )  +
-  coord_sf(datum = NA)+
-  # geom_label(
-  #   data = town_labels,
-  #   aes(x = X, y = Y, label = NAME),
-  #   size = 3,
-  #   label.padding = unit(.1, "lines"), alpha = .7
-  # )+
-  theme(
-    panel.grid.major = element_line(colour = "transparent", size = 0),
-    axis.title = element_blank(),
-    axis.line.y = element_blank(),
-    plot.caption = element_text(hjust = 0, size = 16),
-    plot.title = element_text(size = 18),
-    legend.title=element_text(size=14), 
-    legend.text = element_text(size = 14)
-    
-  )+
-  guides(color = guide_legend(override.aes = list(size=5)))+
-  labs(title = paste0("Neighborhood change 2012-2022"),
-       subtitle= "loss of lowincome and black households",
-       caption = "Source: ACS 5 year estiamtes, 2012; 2022")
+housingmarket <- map_file %>% 
+  mutate(medianhome_2000_2020=ifelse(medianhome_2000_2020==0, NA, medianhome_2000_2020),
+         medianhome_2012_2020=ifelse(medianhome_2012_2020==0, NA, medianhome_2012_2020)) %>% 
+  filter(GEOID !="11001004100") %>% 
+  mutate(quintile_2000=cut(medianhome_2000_2020,5, label = FALSE),
+         quintile_2012=cut(medianhome_2012_2020,5, label = FALSE),
+         quintile_2022=cut(medianhome_2022,5, label = FALSE)) %>% 
+  rbind(outlier) %>% 
+  mutate(homevaluecat_2000=case_when(quintile_2000==1|quintile_2000==2 ~ "low",
+                                     quintile_2000==3 ~ "moderate",
+                                     quintile_2000==4|quintile_2000==5 ~ "high"),
+         homevaluecat_2012=case_when(quintile_2012==1|quintile_2012==2 ~ "low",
+                                     quintile_2012==3 ~ "moderate",
+                                     quintile_2012==4|quintile_2012==5 ~ "high"),
+         homevaluecat_2022=case_when(quintile_2022==1|quintile_2022==2 ~ "low",
+                                     quintile_2022==3 ~ "moderate",
+                                     quintile_2022==4|quintile_2022==5 ~ "high")) %>% 
+  select(GEOID,medianhome_2000_2020,medianhome_2012_2020,medianhome_2022, quintile_2000,homevaluecat_2000, homevaluecat_2012,homevaluecat_2022, NBH_NAMES) %>% 
+  mutate(housing_market=case_when(homevaluecat_2000 %in% c("low", "moderate") & homevaluecat_2022 %in% c("moderate","high")~ "growing",
+                                  homevaluecat_2000 %in% c("high", "moderate") & homevaluecat_2022 %in% c("moderate","low")~ "declining",
+                                  homevaluecat_2000 %in% c("high") & homevaluecat_2022 %in% c("high")~ "established",
+                                  homevaluecat_2000 %in% c("low") & homevaluecat_2022 %in% c("low")~ "stagnant",
+                                  TRUE ~ "other (might be dynamic)" )) 
 
-changeoverall <- map_file %>% 
-  mutate(pct_black_2000=non_hispanic_black_hh_2000_2020/total_hh_2000_2020,
-         pct_black_2012=non_hispanic_black_hh_2012_2020/total_hh_2012_2020,
-         pct_black_2022=non_hispanic_black_hh_2022/total_hh_2022,
-         pct_lowincome_2000=lowincome_2000_2020/total_hh_2000_2020,
-         pct_lowincome_2012=lowincome_2012_2020/total_hh_2012_2020,
-         pct_lowincome_2022=lowincome_2022/total_hh_2022) %>% 
-  mutate(changeinblack=pct_black_2022-pct_black_2012,
-         pctchg_lowincome=pct_lowincome_2022-pct_lowincome_2012,
-         change_lowincome=lowincome_2022-lowincome_2012_2020) %>% 
-  mutate(location=ifelse(Ward=="Ward 7"|Ward=="Ward 8","East of River","West of River"))
-
-changeoverall %>% 
-  ggplot(mapping = aes(x = changeinblack, y = pctchg_lowincome)) +
-  ggplot2::geom_point(mapping = aes(size = total_hh_2022,color = location), alpha = 0.5) +
-  scale_x_continuous(
-                     limits = c(-0.5, 0.5)) +
-  scale_y_continuous(
-                     limits = c(-0.5, 0.5)) +
-  scale_radius(range = c(3, 15),
-               breaks = c(250, 1000, 2000), 
-               labels = scales::comma) +
-  labs(x = "Household income",
-       y = "Homeownership rate") +
-  scatter_grid() +
-  theme(plot.margin = margin(r = 20))
+test <- housingmarket %>% 
+  select(GEOID, NBH_NAMES,housing_market,homevaluecat_2000,homevaluecat_2012, homevaluecat_2022)
 
 
+test <- housingmarket %>% 
+  group_by(homevaluecat_2000) %>% 
+  count()
+  
+  
