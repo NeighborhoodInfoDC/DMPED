@@ -66,6 +66,7 @@ tractboundary_20 <- tractboundary_20 %>%
 
 #merge analysis data with shapefile
 map_file <- merge(analysismaster,tractboundary_20, by=c("GEOID")) %>% 
+  filter(!GEOID %in% c("11001000201", "11001009511", "11001980000", "11001006804", "11001010900")) %>% 
   st_as_sf()
 
 ######Change in vulnerable population 2012-2022
@@ -79,6 +80,19 @@ changeinblack <- map_file %>%
   mutate(changeinblack=pct_black_2022-pct_black_2012) %>% 
   filter(changeinblack<0)
 
+changeinblack <- map_file %>% 
+  # select(GEOID,non_hispanic_black_hh_2000_2020,non_hispanic_black_hh_2012_2020,non_hispanic_black_hh_2022, total_hh_2000_2020, total_hh_2012_2020,total_hh_2022,NBH_NAMES) %>% 
+  mutate(pct_black_2000=non_hispanic_black_hh_2000_2020/total_hh_2000_2020,
+         pct_black_2012=non_hispanic_black_hh_2012_2020/total_hh_2012_2020,
+         pct_black_2022=non_hispanic_black_hh_2022/total_hh_2022) %>% 
+  # select(GEOID, NBH_NAMES, total_hh_2022, pct_black_2000, pct_black_2012,pct_black_2022) %>% 
+  mutate(changeinblack=pct_black_2022-pct_black_2012) %>% 
+  mutate(total="total") %>% 
+  group_by(total) %>% 
+  summarize(median=median(changeinblack))
+
+  filter(changeinblack<0)
+
 changeinlowincome <- map_file %>% 
   # select(GEOID,lowincome_2000_2020,lowincome_2012_2020,lowincome_2022, total_hh_2000_2020, total_hh_2012_2020,total_hh_2022,NBH_NAMES) %>% 
   mutate(pct_lowincome_2000=lowincome_2000_2020/total_hh_2000_2020,
@@ -87,8 +101,8 @@ changeinlowincome <- map_file %>%
   # select(GEOID, NBH_NAMES, total_hh_2022, pct_lowincome_2000, pct_lowincome_2012,pct_lowincome_2022,lowincome_2022,lowincome_2012_2020) %>% 
   mutate(pctchg_lowincome=pct_lowincome_2022-pct_lowincome_2012,
          change_lowincome=lowincome_2022-lowincome_2012_2020) %>% 
-st_centroid() %>% 
-  filter(change_lowincome<0)
+  st_centroid() %>% 
+  filter(pctchg_lowincome<0)
 
 changeinblack %>%
   ggplot() +

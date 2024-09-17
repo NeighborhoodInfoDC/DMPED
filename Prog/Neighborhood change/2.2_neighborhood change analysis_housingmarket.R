@@ -64,11 +64,13 @@ tractboundary_20 <- tractboundary_20 %>%
   left_join(tractboundary_20_2, by=c("GEOID")) %>% 
   left_join(tractboundary_20_3, by=c("GEOID")) 
 
-#merge analysis data with shapefile
-map_file <- merge(analysismaster,tractboundary_20, by=c("GEOID")) %>% 
-  st_as_sf()
 
 droptract <- c("11001000201", "11001009511", "11001980000", "11001006804", "11001010900")
+
+#merge analysis data with shapefile
+map_file <- merge(analysismaster,tractboundary_20, by=c("GEOID")) %>% 
+  filter(!GEOID %in% c("11001000201", "11001009511", "11001980000", "11001006804", "11001010900")) %>% 
+  st_as_sf()
 
 ######housing market evaluation
 
@@ -82,9 +84,9 @@ housingmarket <- map_file %>%
   mutate(medianhome_2000_2020=ifelse(medianhome_2000_2020==0, NA, medianhome_2000_2020),
          medianhome_2012_2020=ifelse(medianhome_2012_2020==0, NA, medianhome_2012_2020)) %>% 
   filter(GEOID !="11001004100") %>% 
-  mutate(quintile_2000=cut(medianhome_2000_2020,5, label = FALSE),
-         quintile_2012=cut(medianhome_2012_2020,5, label = FALSE),
-         quintile_2022=cut(medianhome_2022,5, label = FALSE)) %>% 
+  mutate(quintile_2000=ntile(medianhome_2000_2020,5),
+         quintile_2012=ntile(medianhome_2012_2020,5),
+         quintile_2022=ntile(medianhome_2022,5)) %>% 
   rbind(outlier) %>% 
   mutate(homevaluecat_2000=case_when(quintile_2000==1|quintile_2000==2 ~ "low",
                                      quintile_2000==3 ~ "moderate",
@@ -95,7 +97,10 @@ housingmarket <- map_file %>%
          homevaluecat_2022=case_when(quintile_2022==1|quintile_2022==2 ~ "low",
                                      quintile_2022==3 ~ "moderate",
                                      quintile_2022==4|quintile_2022==5 ~ "high")) %>% 
-  select(GEOID,medianhome_2000_2020,medianhome_2012_2020,medianhome_2022, quintile_2000,homevaluecat_2000, homevaluecat_2012,homevaluecat_2022, NBH_NAMES) %>% 
+  mutate(nominal_00_12=medianhome_2012_2020-medianhome_2000_2020*1.3,
+         nominal_12_22=medianhome_2022-medianhome_2012_2020*1.29,
+         nominal_00_22=medianhome_2022-medianhome_2000_2020*1.7) %>% 
+  select(GEOID,total_hh_2022,medianhome_2000_2020,medianhome_2012_2020,medianhome_2022, quintile_2000,homevaluecat_2000, homevaluecat_2012,homevaluecat_2022, nominal_00_12, nominal_00_22,nominal_12_22,NBH_NAMES) %>% 
   mutate(housing_market=case_when(homevaluecat_2000 %in% c("low", "moderate") & homevaluecat_2022 %in% c("moderate","high")~ "growing",
                                   homevaluecat_2000 %in% c("high", "moderate") & homevaluecat_2022 %in% c("moderate","low")~ "declining",
                                   homevaluecat_2000 %in% c("high") & homevaluecat_2022 %in% c("high")~ "established",
@@ -103,11 +108,25 @@ housingmarket <- map_file %>%
                                   TRUE ~ "other (might be dynamic)" )) 
 
 test <- housingmarket %>% 
-  select(GEOID, NBH_NAMES,housing_market,homevaluecat_2000,homevaluecat_2012, homevaluecat_2022)
+  select(GEOID, total_hh_2022,NBH_NAMES,housing_market,homevaluecat_2000,homevaluecat_2012, homevaluecat_2022, medianhome_2000_2020,medianhome_2022,nominal_00_22) %>% 
+  filter(housing_market=="other (might be dynamic)") %>% 
+  mutate(GEOID=as.character(GEOID)) %>% 
+  left_join(dc_median_home_value_2021, by=c("GEOID"))
 
+dc_median_home_value_2021 <- 
+  get_acs(geography = "tract",
+          variables = "B25107_001",
+          year = 2021,
+          state = "DC",
+          geometry = FALSE) %>% 
+  mutate(medianhome_2021=estimate)
 
 test <- housingmarket %>% 
   group_by(homevaluecat_2000) %>% 
+  count()
+
+test <- housingmarket %>% 
+  group_by(housing_market) %>% 
   count()
   
   
