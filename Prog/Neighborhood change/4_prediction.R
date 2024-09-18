@@ -32,11 +32,17 @@ vacancy <- read_csv("C:/Users/Ysu/Box/Greater DC/Projects/DMPED Housing Assessme
   mutate(year=paste0("vacancy_", as.character(year))) %>% 
   spread(key=year,value=vacancyrate) 
 
+lowincjobs <- read_csv("C:/Users/Ysu/Box/Greater DC/Projects/DMPED Housing Assessment 2024/Task 2 - Nbrhd Change and Displacement Risk Assessment/Data collection/Clean/lowincome_jobs.csv")
+
+HUDsubsidy <- read_csv("C:/Users/Ysu/Box/Greater DC/Projects/DMPED Housing Assessment 2024/Task 2 - Nbrhd Change and Displacement Risk Assessment/Data collection/Clean/HUD_subsidy.csv")
+
 predictionmaster <- housingmarket %>% 
   left_join(lowincome, by=c("GEOID")) %>% 
   left_join(raceethnicity, by=c("GEOID")) %>% 
   left_join(distance, by=c("GEOID")) %>% 
   left_join(vacancy, by=c("GEOID")) %>% 
+  left_join(lowincjobs, by=c("GEOID")) %>% 
+  left_join(HUDsubsidy, by=c("GEOID")) %>% 
   left_join(neighborhoodtype, by=c("GEOID")) %>% 
   mutate(displacement=ifelse(neighborhoodtype=="exlusive growth with displacement risk",1,0))
 
