@@ -180,22 +180,27 @@ master2 <- map_file %>%
   mutate(neighborhoodtype=case_when(lowmod_housing_2000=="yes" & overallincreasevalue_2012_2022=="yes" & vulnerable=="nolossvulnerable" ~ "stable growing",
                                     lowmod_housing_2000=="yes" & overallincreasevalue_2012_2022=="yes" & vulnerable=="lossvulnerable" ~ "exlusive growth with displacement risk",
                                     lowmod_housing_2000=="no" & overalldecreasevalue_2012_2022=="yes" ~ "decreasing neighborhood",
-                                    continuedhigh=="yes" ~ "established opportunity",
+                                    continuedhigh=="yes" & vulnerable=="lossvulnerable" ~ "established opportunity with displacement risk",
+                                    continuedhigh=="yes" & vulnerable=="nolossvulnerable" ~ "established opportunity",
                                     TRUE~ "stagnant or dynamic")) %>% 
   mutate(`neighborhood category` = factor(neighborhoodtype,
                                     levels = c("stable growing",
                                                "exlusive growth with displacement risk",
                                                "decreasing neighborhood",
                                                "established opportunity",
+                                               "established opportunity with displacement risk",
                                                "stagnant or dynamic"
                                     ))) 
 
-urban_colors5 <- c("#73bfe2", "#f5cbdf","#fce39e", "#1696d2","#dcedd9")
+displacementarea <- master2 %>% 
+  filter(neighborhoodtype=="exlusive growth with displacement risk"|neighborhoodtype=="established opportunity with displacement risk")
+
+urban_colors6 <- c("#73bfe2", "#f5cbdf","#fce39e", "#1696d2" ,"#e9807d","#dcedd9")
                    
 
 ggplot() +
   geom_sf(data =master2, aes( fill = `neighborhood category`))+
-  scale_fill_manual(name="neighborhoodchange type", values = urban_colors5, guide = guide_legend(override.aes = list(linetype = "blank", 
+  scale_fill_manual(name="neighborhoodchange type", values = urban_colors6, guide = guide_legend(override.aes = list(linetype = "blank", 
                                                                                                                   shape = NA)))+ 
   # geom_sf(BBCF, mapping = aes(), fill=NA,lwd =  0.5, color="#fdbf11",show.legend = "line")+
   # geom_sf(cog_all, mapping = aes(), fill=NA,lwd =  1, color="#ec008b",show.legend = "line")+
@@ -221,8 +226,10 @@ ggplot() +
   guides(color = guide_legend(override.aes = list(size=5)))+
   geom_sf(data = tractboundary_20, fill = "transparent", color="#adabac")+
   coord_sf(datum = NA)+
+  geom_sf(data = displacementarea, fill = "transparent", color="#ec008b")+
+  coord_sf(datum = NA)+
   labs(title = paste0("Neighborhood Change in DC"),
-       subtitle= "Potential displacement area highlighted in yellow",
+       subtitle= "Potential displacement area highlighted in red",
        caption = "Source: Census 2000, ACS 5-year estimates 2008-2012, 2018-2022")
 
 
@@ -238,3 +245,14 @@ neighborhood_type <- master2 %>%
   st_drop_geometry()
 
 write.csv(neighborhood_type,"C:/Users/Ysu/Box/Greater DC/Projects/DMPED Housing Assessment 2024/Task 2 - Nbrhd Change and Displacement Risk Assessment/Data collection/Clean/neighborhoodchangetype.csv")
+
+master3 <- master2 %>% 
+  st_drop_geometry()
+write.csv(master3,"C:/Users/Ysu/Box/Greater DC/Projects/DMPED Housing Assessment 2024/Task 2 - Nbrhd Change and Displacement Risk Assessment/Data collection/Clean/neighborhoodchange_masterdata.csv")
+
+
+test <- master2 %>% 
+  filter(neighborhoodtype=="stagnant or dynamic") %>% 
+  # select(GEOID, NBH_NAMES, pct_lowincome_2000,pct_black_2000,total_hh_2000_2020, vulnerable,lowinc_2012_2022, lossblk_2012_2022) %>% 
+  group_by(vulnerable) %>% 
+  count()
