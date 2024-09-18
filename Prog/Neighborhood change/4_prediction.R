@@ -53,15 +53,9 @@ predictionmaster <- housingmarket %>%
   mutate(displacement=ifelse(neighborhoodtype=="exlusive growth with displacement risk",1,0))
 
 logit <- glm(displacement ~ vacancy_2012 + distance_to_downtown_miles + medianhome_2012_2020
-             +lowincome_2012_2020 + non_hispanic_black_hh_2012_2020, family=binomial(link="logit"), data=predictionmaster) 
+             +lowincome_2012_2020 + non_hispanic_black_hh_2012_2020 + pct_college_2012_2020, family=binomial(link="logit"), data=predictionmaster) 
 
 summary(logit)
 
 
-
-  
-  analysismaster <- housingmarket %>% 
-  left_join(lowincome, by=c("GEOID")) %>% 
-  left_join(raceethnicity, by=c("GEOID")) %>% 
-  left_join(distance, by=c("GEOID") )
 
