@@ -32,18 +32,24 @@ vacancy <- read_csv("C:/Users/Ysu/Box/Greater DC/Projects/DMPED Housing Assessme
   mutate(year=paste0("vacancy_", as.character(year))) %>% 
   spread(key=year,value=vacancyrate) 
 
+distance <- read_csv("C:/Users/Ysu/Box/Greater DC/Projects/DMPED Housing Assessment 2024/Task 2 - Nbrhd Change and Displacement Risk Assessment/Data collection/Clean/distance_downtown.csv")
+
 lowincjobs <- read_csv("C:/Users/Ysu/Box/Greater DC/Projects/DMPED Housing Assessment 2024/Task 2 - Nbrhd Change and Displacement Risk Assessment/Data collection/Clean/lowincome_jobs.csv")
 
 HUDsubsidy <- read_csv("C:/Users/Ysu/Box/Greater DC/Projects/DMPED Housing Assessment 2024/Task 2 - Nbrhd Change and Displacement Risk Assessment/Data collection/Clean/HUD_subsidy.csv")
+
+college <- read_csv("C:/Users/Ysu/Box/Greater DC/Projects/DMPED Housing Assessment 2024/Task 2 - Nbrhd Change and Displacement Risk Assessment/Data collection/Clean/college.csv")
 
 predictionmaster <- housingmarket %>% 
   left_join(lowincome, by=c("GEOID")) %>% 
   left_join(raceethnicity, by=c("GEOID")) %>% 
   left_join(distance, by=c("GEOID")) %>% 
-  left_join(vacancy, by=c("GEOID")) %>% 
+  # left_join(vacancy, by=c("GEOID")) %>% 
   left_join(lowincjobs, by=c("GEOID")) %>% 
   left_join(HUDsubsidy, by=c("GEOID")) %>% 
+  left_join(college, by=c("GEOID")) %>% 
   left_join(neighborhoodtype, by=c("GEOID")) %>% 
+  filter(!GEOID %in% c("11001000201", "11001009511", "11001980000", "11001006804", "11001010900")) %>% 
   mutate(displacement=ifelse(neighborhoodtype=="exlusive growth with displacement risk",1,0))
 
 logit <- glm(displacement ~ vacancy_2012 + distance_to_downtown_miles + medianhome_2012_2020
