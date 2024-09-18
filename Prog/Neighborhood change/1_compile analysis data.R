@@ -413,5 +413,153 @@ tracts_distance <- tractboundary_20 %>%
   select(GEOID, distance_to_downtown_miles) %>% 
   st_drop_geometry()
 
-
 write.csv(tracts_distance,"C:/Users/Ysu/Box/Greater DC/Projects/DMPED Housing Assessment 2024/Task 2 - Nbrhd Change and Displacement Risk Assessment/Data collection/Clean/distance_downtown.csv")
+
+
+### college degree
+#percent bachelor's degree -> do we want % of total pop, % of >18 pop or % of >= 25 pop?
+
+percent_bachelors_over_25_2022 <- get_acs(geography = "tract",
+                                          variables = c("B15003_022", "B15003_023", "B15003_024", "B15003_025", "B07001_006","B07001_007", "B07001_008",
+                                                        "B07001_009", "B07001_010", "B07001_011", "B07001_012", "B07001_013",
+                                                        "B07001_014", "B07001_015", "B07001_016" ),
+                                          year = 2022,
+                                          state = "DC",
+                                          geometry = FALSE) %>%
+  pivot_wider(id_cols = c(GEOID, NAME),
+              names_from = variable,
+              values_from = estimate) %>%
+  mutate(over_25 = B07001_006 +  B07001_007 + B07001_008 + B07001_009 + B07001_010 + B07001_011 
+         + B07001_012  + B07001_013  + B07001_014  + B07001_015  + B07001_016, #AGGREGATING THE 25 AND UP AGE CATEGORIES
+         bachelors_or_more = B15003_022 + B15003_023 + B15003_024 + B15003_025,
+         percent_bachelors = bachelors_or_more/over_25) 
+sum(percent_bachelors_over_25_2022$bachelors_or_more)
+sum(percent_bachelors_over_25_2022$over_25)
+# write.csv(percent_bachelors_over_25_2022, "age_college_22_data.csv")
+#303532/484596 = 6263609 thats right
+percent_bachelors_over_25_2012 <- get_acs(geography = "tract",
+                                          variables = c("B15003_022", "B15003_023", "B15003_024", "B15003_025", "B07001_006","B07001_007", "B07001_008",
+                                                        "B07001_009", "B07001_010", "B07001_011", "B07001_012", "B07001_013",
+                                                        "B07001_014", "B07001_015", "B07001_016" ),
+                                          year = 2012,
+                                          state = "DC",
+                                          geometry = FALSE) %>%
+  pivot_wider(id_cols = c(GEOID, NAME),
+              names_from = variable,
+              values_from = estimate) %>%
+  mutate(over_25 = B07001_006 +  B07001_007 + B07001_008 + B07001_009 + B07001_010 + B07001_011 
+         + B07001_012  + B07001_013  + B07001_014  + B07001_015  + B07001_016, #AGGREGATING THE 25 AND UP AGE CATEGORIES
+         bachelors_or_more = B15003_022 + B15003_023 + B15003_024 + B15003_025,
+         percent_bachelors = bachelors_or_more/over_25) 
+sum(percent_bachelors_over_25_2012$bachelors_or_more)
+sum(percent_bachelors_over_25_2012$over_25)
+
+#age 25 and above men
+m_over_25_2000 <- get_decennial(geography = "tract",
+                                variables = c("P012011", "P012012", "P012013",
+                                              "P012014", "P012015", "P012016", "P012017", "P012018", "P012019", "P012020",
+                                              "P012021", "P012022", "P012023", "P012024","P012025"),
+                                year = 2000,
+                                state = "DC",
+                                geometry = FALSE) %>%
+  pivot_wider(id_cols = c(GEOID, NAME),
+              names_from = variable,
+              values_from = value) %>%
+  mutate(m_over_25 = P012011 + P012012 + P012013 + P012014 + P012015 + P012016 + P012017 + P012018 + P012019 + P012020 +
+           P012021 + P012022 + P012023 + P012024 + P012025)
+#bachelors men 2000
+m_percent_bachelors_over_25_2000 <- get_decennial(geography = "tract",
+                                                  variables = c("P037015", "P037016", "P037017", "P037018"),
+                                                  year = 2000,
+                                                  state = "DC",
+                                                  geometry = FALSE) %>%
+  pivot_wider(id_cols = c(GEOID, NAME),
+              names_from = variable,
+              values_from = value) %>%
+  mutate(m_bachelors_or_more = P037015 + P037016 + P037017 + P037018)
+#joining together
+m_percent_bachelors_over_25_2000 <- left_join(m_percent_bachelors_over_25_2000, m_over_25_2000, by = "GEOID")
+m_percent_bachelors_over_25_2000 <- m_percent_bachelors_over_25_2000 %>%
+  select(-NAME.y)
+sum(m_percent_bachelors_over_25_2000$m_bachelors_or_more)
+sum(m_percent_bachelors_over_25_2000$m_over_25)
+# 74203/178393 #thats right
+
+#women over 25 2000
+w_over_25_2000 <- get_decennial(geography = "tract",
+                                variables = c("P012035", "P012036", "P012037", "P012038", "P012039",
+                                              "P012040", "P012041", "P012042", "P012043", "P012044",
+                                              "P012045", "P012046", "P012047", "P012048", "P012049"),
+                                year = 2000,
+                                state = "DC",
+                                geometry = FALSE) %>%
+  pivot_wider(id_cols = c(GEOID, NAME),
+              names_from = variable,
+              values_from = value) %>%
+  mutate(w_over_25 = P012035 + P012036 + P012037 + P012038 + P012039 + P012040 + P012041 + 
+           P012042 + P012043 + P012044 + P012045 + P012046 + P012047 + P012048 + P012049)
+
+#women bachelors 2000
+w_percent_bachelors_over_25_2000 <- get_decennial(geography = "tract",
+                                                  variables = c("P037032", "P037033", "P037034", "P037035"),
+                                                  year = 2000,
+                                                  state = "DC",
+                                                  geometry = FALSE) %>%
+  pivot_wider(id_cols = c(GEOID, NAME),
+              names_from = variable,
+              values_from = value) %>%
+  mutate(w_bachelors_or_more = P037032 + P037033 + P037034 + P037035)
+#joining
+w_percent_bachelors_over_25_2000 <- left_join(w_percent_bachelors_over_25_2000, w_over_25_2000, by = "GEOID")
+w_percent_bachelors_over_25_2000 <- w_percent_bachelors_over_25_2000 %>% select(-NAME.x)
+#alltogether
+percent_bachelors_over_25_2000 <-
+  left_join(m_percent_bachelors_over_25_2000, w_percent_bachelors_over_25_2000, by = "GEOID")
+percent_bachelors_over_25_2000 <- percent_bachelors_over_25_2000 %>%
+  mutate(over_25 = m_over_25 + w_over_25) %>%
+  mutate(bachelors_or_more = m_bachelors_or_more + w_bachelors_or_more)
+
+sum(percent_bachelors_over_25_2000$over_25)
+sum(percent_bachelors_over_25_2000$bachelors_or_more)
+
+
+#crosswalk 2000-2010
+consolidated_2000_2010_college <-Crosswalk_2000_to_2010 %>% 
+  left_join(percent_bachelors_over_25_2000, by=c("GEOID")) %>% 
+  mutate(college_2000_subpart=bachelors_or_more*wt_pop,
+         age25_2000_subpart=over_25*wt_pop) %>% 
+  group_by(tr2010ge) %>% 
+  summarize(college_2000_2010 = sum(college_2000_subpart, na.rm= TRUE),
+            age25_2000_2010=sum(age25_2000_subpart, na.rm= TRUE)) 
+
+# Crosswalk 2000 to 2020
+
+consolidated_2000_2010_2020_college <- Crosswalk_2010_to_2020 %>% 
+  left_join(consolidated_2000_2010_college, by=c("tr2010ge")) %>% 
+  mutate(college_2000_subpart=college_2000_2010*wt_pop,
+         age25_2000_subpart= age25_2000_2010*wt_pop) %>% 
+  group_by(tr2020ge) %>% 
+  summarize(college_2000_2020 = sum(college_2000_subpart, na.rm= TRUE),
+            age25_2000_2020= sum(age25_2000_subpart, na.rm= TRUE)) %>% 
+  mutate(pct_college_2000_2020=college_2000_2020/age25_2000_2020) %>% 
+  select(tr2020ge,pct_college_2000_2020)
+
+# Crosswalk 2012 to 2020
+consolidated_2010_2020_college <-Crosswalk_2010_to_2020 %>% 
+  left_join(percent_bachelors_over_25_2012, by=c("GEOID")) %>% 
+  mutate(college_2012_subpart=bachelors_or_more*wt_pop,
+         age25_2012_subpart=over_25*wt_pop) %>% 
+  group_by(tr2020ge) %>% 
+  summarize(college_2012_2020 = sum(college_2012_subpart, na.rm= TRUE),
+            age25_2012_2020= sum(age25_2012_subpart, na.rm= TRUE)) %>% 
+  mutate(pct_college_2012_2020=college_2012_2020/age25_2012_2020) %>% 
+  select(tr2020ge,pct_college_2012_2020)
+
+college <- consolidated_2000_2010_2020_college %>% 
+  left_join(consolidated_2010_2020_college,by=c("tr2020ge")) %>% 
+  mutate(GEOID=as.character(tr2020ge)) %>% 
+  left_join(percent_bachelors_over_25_2022,by=c("GEOID")) %>% 
+  mutate(pct_college_2022=bachelors_or_more/over_25) %>% 
+  select(GEOID,pct_college_2000_2020,pct_college_2012_2020,pct_college_2022)
+
+write.csv(college,"C:/Users/Ysu/Box/Greater DC/Projects/DMPED Housing Assessment 2024/Task 2 - Nbrhd Change and Displacement Risk Assessment/Data collection/Clean/college.csv")
