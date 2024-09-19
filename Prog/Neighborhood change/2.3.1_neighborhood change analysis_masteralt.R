@@ -16,9 +16,9 @@ master4 <- map_file %>%
          homevaluecat_2022=case_when(quintile_2022==1|quintile_2022==2 ~ "low",
                                      quintile_2022==3 ~ "moderate",
                                      quintile_2022==4|quintile_2022==5 ~ "high")) %>% 
-  mutate(nominal_00_12=rent_2012_2020-rent_2000_2020*1.3,
-         nominal_12_22=rent_2022-rent_2012_2020*1.29,
-         nominal_00_22=rent_2022-rent_2000_2020*1.7) %>% 
+  mutate(nominal_00_12=rent_2012_2020-rent_2000_2020*1.336,
+         nominal_12_22=rent_2022-rent_2012_2020*1.227,
+         nominal_00_22=rent_2022-rent_2000_2020*1.64) %>%  #based on sas macro dollar adjust, using less shelter series
   # select(GEOID,total_hh_2022,medianhome_2000_2020,medianhome_2012_2020,medianhome_2022, quintile_2000,homevaluecat_2000, homevaluecat_2012,homevaluecat_2022, nominal_00_12, nominal_00_22,nominal_12_22,NBH_NAMES) %>% 
   # mutate(housing_market=case_when(homevaluecat_2000 %in% c("low", "moderate") & homevaluecat_2022 %in% c("moderate","high")~ "growing",
   #                                 homevaluecat_2000 %in% c("high", "moderate") & homevaluecat_2022 %in% c("moderate","low")~ "declining",

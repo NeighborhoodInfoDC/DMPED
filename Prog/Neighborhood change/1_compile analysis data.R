@@ -565,3 +565,33 @@ college <- consolidated_2000_2010_2020_college %>%
   select(GEOID,pct_college_2000_2020,pct_college_2012_2020,pct_college_2022)
 
 write.csv(college,"C:/Users/Ysu/Box/Greater DC/Projects/DMPED Housing Assessment 2024/Task 2 - Nbrhd Change and Displacement Risk Assessment/Data collection/Clean/college.csv")
+
+######## new method for rent level calculation
+
+dc_rent_2022 <- 
+  get_acs(geography = "county",
+          variables = "B25113_001",
+          year = 2022,
+          state = "DC",
+          geometry = FALSE) %>% 
+  mutate(medianrent_2022=estimate) #1817
+
+dc_rent_2012 <- 
+  get_acs(geography = "county",
+          variables = "B25113_001",
+          year = 2012,
+          state = "DC",
+          geometry = FALSE) %>% 
+  mutate(medianrent_2012=estimate) #1200
+
+dc_rent_2022_detail <- 
+  get_acs(geography = "county",
+          variables = c("B25063_003","B25063_004","B25063_005","B25063_006","B25063_007","B25063_008",
+                        "B25063_009","B25063_010","B25063_011","B25063_012","B25063_013","B25063_014",
+                        "B25063_015","B25063_016","B25063_017","B25063_018","B25063_019","B25063_020",
+                        "B25063_021","B25063_022","B25063_023","B25063_024","B25063_025","B25063_026"),
+          year = 2022,
+          state = "DC",
+          geometry = FALSE) %>% 
+  mutate(medianrent_2022=estimate)
+

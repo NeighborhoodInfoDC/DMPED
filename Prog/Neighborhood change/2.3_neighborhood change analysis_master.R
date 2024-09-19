@@ -102,8 +102,8 @@ master <- map_file %>%
          homevaluecat_2022=case_when(quintile_2022==1|quintile_2022==2 ~ "low",
                                      quintile_2022==3 ~ "moderate",
                                      quintile_2022==4|quintile_2022==5 ~ "high")) %>% 
-  mutate(nominal_00_12=medianhome_2012_2020-medianhome_2000_2020*1.3,
-         nominal_12_22=medianhome_2022-medianhome_2012_2020*1.29,
+  mutate(nominal_00_12=medianhome_2012_2020-medianhome_2000_2020*1.127,
+         nominal_12_22=medianhome_2022-medianhome_2012_2020*1.275,
          nominal_00_22=medianhome_2022-medianhome_2000_2020*1.7) %>% 
   # select(GEOID,total_hh_2022,medianhome_2000_2020,medianhome_2012_2020,medianhome_2022, quintile_2000,homevaluecat_2000, homevaluecat_2012,homevaluecat_2022, nominal_00_12, nominal_00_22,nominal_12_22,NBH_NAMES) %>% 
   mutate(housing_market=case_when(homevaluecat_2000 %in% c("low", "moderate") & homevaluecat_2022 %in% c("moderate","high")~ "growing",
@@ -144,8 +144,8 @@ master2 <- map_file %>%
          homevaluecat_2022=case_when(quintile_2022==1|quintile_2022==2 ~ "low",
                                      quintile_2022==3 ~ "moderate",
                                      quintile_2022==4|quintile_2022==5 ~ "high")) %>% 
-  mutate(nominal_00_12=medianhome_2012_2020-medianhome_2000_2020*1.3,
-         nominal_12_22=medianhome_2022-medianhome_2012_2020*1.29,
+  mutate(nominal_00_12=medianhome_2012_2020-medianhome_2000_2020*1.127,
+         nominal_12_22=medianhome_2022-medianhome_2012_2020*1.275,
          nominal_00_22=medianhome_2022-medianhome_2000_2020*1.7) %>% 
   # select(GEOID,total_hh_2022,medianhome_2000_2020,medianhome_2012_2020,medianhome_2022, quintile_2000,homevaluecat_2000, homevaluecat_2012,homevaluecat_2022, nominal_00_12, nominal_00_22,nominal_12_22,NBH_NAMES) %>% 
   # mutate(housing_market=case_when(homevaluecat_2000 %in% c("low", "moderate") & homevaluecat_2022 %in% c("moderate","high")~ "growing",
