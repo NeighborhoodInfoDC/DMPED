@@ -44,6 +44,8 @@ dc_median_home_value_2012 <-
           state = "DC",
           geometry = FALSE) %>% 
   mutate(medianhome_2012=estimate)
+
+test <- dc_median_home_value_2012
 #pull in total home counts dc
 dc_median_home_value_2000 <- 
   get_decennial(geography = "tract",
