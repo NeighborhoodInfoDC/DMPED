@@ -24,7 +24,7 @@ se01_12 <- read.csv("C:/Users/Ysu/Box/Greater DC/Projects/DMPED Housing Assessme
   group_by(GEOID) %>% 
   summarize(total_se01CE01_12=sum(CE01),
             total_se01CE02_12=sum(CE02)) %>% 
-  select(GEOID,total_se01CE01_12,total_se01CE02_12 ) 
+  select(GEOID,total_se01CE01_12,total_se01CE02_12,total_se01CE03_12 ) 
 
 se02_12 <- read.csv("C:/Users/Ysu/Box/Greater DC/Projects/DMPED Housing Assessment 2024/Task 2 - Nbrhd Change and Displacement Risk Assessment/Data collection/Raw/LEHD/dc_wac_SE02_JT00_2012.csv") %>% 
   mutate(block=as.character(w_geocode)) %>% 
