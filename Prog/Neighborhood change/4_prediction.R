@@ -12,10 +12,10 @@ library(sp)
 library(ipumsr)
 library(survey)
 library(srvyr)
-library(dummies)
+# library(dummies)
 library(dplyr)
 library(Hmisc)
-library(Haven)
+library(haven)
 library(tidy)
 library(caret)
 library(boot)
@@ -97,37 +97,33 @@ predictionmaster <- housingmarket %>%
          pct_black_2022=non_hispanic_black_hh_2022/total_hh_2022) 
 
 
-logit <- glm(displacement ~ vacancy_2012 + distance_to_downtown_miles + medianhome_2012_2020
-             + pct_lowincome_2012+ pct_black_2012 + pct_college_2012_2020 + pct_lowincjob_2012 + pct_hcv_2012, family=binomial(link="logit"), data=predictionmaster) 
-
-summary(logit)
-plot(logit)
+# logit <- glm(displacement ~ vacancy_2012 + distance_to_downtown_miles + medianhome_2012_2020
+#              + pct_lowincome_2012+ pct_black_2012 + pct_college_2012_2020 + pct_lowincjob_2012 + pct_hcv_2012, family=binomial(link="logit"), data=predictionmaster) 
+# 
+# summary(logit)
+# plot(logit)
 
 write.csv(predictionmaster,"C:/Users/Ysu/Box/Greater DC/Projects/DMPED Housing Assessment 2024/Task 2 - Nbrhd Change and Displacement Risk Assessment/Data collection/Clean/prediction_data.csv")
 
-mod1 <- glm(displacement ~ vacancy_2012 + distance_to_downtown_miles + medianhome_2012_2020
-            + pct_lowincome_2012+ pct_black_2012 + pct_college_2012_2020 + pct_lowincjob_2012 + pct_hcv_2012, data=predictionmaster)
-summary(mod1)
-
-
-
 logit <- glm(displacement ~ vacancy_2012 + distance_to_downtown_miles + medianhome_2012_2020
              + pct_lowincome_2012+ pct_black_2012 + pct_college_2012_2020 + pct_lowincjob_2012 + pct_hcv_2012, family=binomial(link="logit"), data=predictionmaster) 
+
+baseline <- glm(displacement ~ vacancy_2012 + distance_to_downtown_miles + medianhome_2012_2020
+                + pct_black_2012 + pct_lowincjob_2012 + pct_hcv_2012, family=binomial(link="logit"), data=predictionmaster) 
+
 
 # Define a function for logistic regression that will be used by cv.glm
 logit_fn <- function(data, indices) {
   # Create a logistic regression model on the sampled data
-  model <- glm(isplacement ~ vacancy_2012 + distance_to_downtown_miles + medianhome_2012_2020
-               + pct_lowincome_2012+ pct_black_2012 + pct_college_2012_2020 + pct_lowincjob_2012 + pct_hcv_2012, data = data[indices, ], family=binomial(link="logit"))
+  model <- glm(displacement ~  vacancy_2012 + distance_to_downtown_miles + medianhome_2012_2020
+               + pct_black_2012 + pct_lowincjob_2012 , data = data[indices, ], family=binomial(link="logit"))
   return(model)
 }
 
 # Perform 10-fold cross-validation
 cv_results <- cv.glm(predictionmaster, logit, K = 10)
-
 # Print the cross-validation results
 cv_results$delta  # These are the cross-validation errors
-
 cv_results$delta[1]
 
 # # Misclassification error calculation
@@ -192,13 +188,13 @@ predictionmaster2 <- predictionmaster %>%
          hcv=pct_hcv_2022)
 
 logit <- glm(displacement ~ vacancy + distance + homevalue
-             + lowinc + black + college + lowincjob + hcv, family=binomial(link="logit"), data=predictionmaster1) 
+             + black  + lowincjob + hcv, family=binomial(link="logit"), data=predictionmaster1) 
 
-stargazer(logit, type = "html", out = "C:/Users/Ysu/Desktop/DMPED maps/regression_test_results.html",
-          title = "Regression test resuls")
+# stargazer(logit, type = "html", out = "C:/Users/Ysu/Desktop/DMPED maps/regression_test_results.html",
+#           title = "Regression test resuls")
 
-logit2 <- glm(displacement ~  distance + homevalue
-              + lowinc + black + lowincjob, family=binomial(link="logit"), data=predictionmaster1) 
+logit2 <- glm(displacement ~ vacancy + distance + homevalue
+              + black  + lowincjob , family=binomial(link="logit"), data=predictionmaster1) 
 
 AIC(logit, logit2)
 anova(logit, logit2, test = "Chisq")
@@ -221,3 +217,14 @@ Testresult <- predictionmaster2 %>%
 
 
 write.csv(Testresult,"C:/Users/Ysu/Box/Greater DC/Projects/DMPED Housing Assessment 2024/Task 2 - Nbrhd Change and Displacement Risk Assessment/Data collection/Clean/Prediction_v1.csv")
+
+predicteddisplacementmap <- predictionmaster2 %>% 
+  select(GEOID, displacement, predicted_probs,predicted_class) %>% 
+  left_join(master5, by=c("GEOID")) %>% 
+    mutate(predictiontype=case_when(displacement==1 & predicted_class==1 ~ "continued displacement risk",
+                                    displacement==0 & predicted_class==1 ~ "upcoming displacement risk",
+                                    displacement==1 & predicted_class==0 ~ "decreased displacement risk",
+                                    displacement==0 & predicted_class==0 ~ "no displacement risk")) %>% 
+    group_by(predictiontype) %>% 
+    count()
+
