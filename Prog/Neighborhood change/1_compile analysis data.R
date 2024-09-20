@@ -576,15 +576,41 @@ dc_rent_2022 <-
           geometry = FALSE) %>% 
   mutate(medianrent_2022=estimate) #1817
 
-dc_rent_2012 <- 
+dc_rent_2012_county <- 
   get_acs(geography = "county",
-          variables = "B25113_001",
+          variables = c("B25063_003","B25063_004","B25063_005","B25063_006","B25063_007","B25063_008",
+          "B25063_009","B25063_010","B25063_011","B25063_012","B25063_013","B25063_014",
+          "B25063_015","B25063_016","B25063_017","B25063_018","B25063_019","B25063_020",
+          "B25063_021","B25063_022","B25063_023"),
           year = 2012,
           state = "DC",
           geometry = FALSE) %>% 
-  mutate(medianrent_2012=estimate) #1200
+  mutate(cumulative_estimate = cumsum(estimate))
 
-dc_rent_2022_detail <- 
+total_renter12 <- sum(dc_rent_2012_county$estimate)
+
+rent_2012 <- dc_rent_2012_county %>%
+  mutate(cumulative_proportion = cumulative_estimate / total_renter12)
+
+# B25063_016  $700 to $749 21% ~ 20%
+# B25063_019  $900 to $999 38% ~ 40%
+# B25063_021  $1,250 to $1,499 67% ~ 60%
+# B25063_022  $1,500 to $1,999 83% ~ 80%
+# B25063_023  $2,000 or more 100% ~ 100%
+dc_rent_2012_cat <- 
+  get_acs(geography = "tract",
+          variables = c("B25063_003","B25063_004","B25063_005","B25063_006","B25063_007","B25063_008",
+                        "B25063_009","B25063_010","B25063_011","B25063_012","B25063_013","B25063_014",
+                        "B25063_015","B25063_016","B25063_017","B25063_018","B25063_019","B25063_020",
+                        "B25063_021","B25063_022","B25063_023"),
+          year = 2012,
+          state = "DC",
+          geometry = FALSE) %>% 
+  mutate()
+
+
+
+dc_rent_2022_county <- 
   get_acs(geography = "county",
           variables = c("B25063_003","B25063_004","B25063_005","B25063_006","B25063_007","B25063_008",
                         "B25063_009","B25063_010","B25063_011","B25063_012","B25063_013","B25063_014",
@@ -593,5 +619,30 @@ dc_rent_2022_detail <-
           year = 2022,
           state = "DC",
           geometry = FALSE) %>% 
-  mutate(medianrent_2022=estimate)
+  mutate(cumulative_estimate = cumsum(estimate))
+
+total_renter <- sum(dc_rent_2022_county$estimate)
+
+rent_2022 <- dc_rent_2022_county %>%
+  mutate(cumulative_proportion = cumulative_estimate / total_renter)
+#DC 2022
+#B25063_019	$900 to $999  16% ~ 20%
+#B25063_021	$1,250 to $1,499  36% ~ 40%
+#B25063_022 $1,500 to $1,999 58% ~ 60%
+#B25063_024 $2,500 to $2,999 85% ~ 80%
+#B25063_026 $3,500 or more 100% ~ 100%
+
+dc_rent_2022_cat <- 
+  get_acs(geography = "tract",
+          variables = c("B25063_003","B25063_004","B25063_005","B25063_006","B25063_007","B25063_008",
+                        "B25063_009","B25063_010","B25063_011","B25063_012","B25063_013","B25063_014",
+                        "B25063_015","B25063_016","B25063_017","B25063_018","B25063_019","B25063_020",
+                        "B25063_021","B25063_022","B25063_023","B25063_024","B25063_025","B25063_026"),
+          year = 2022,
+          state = "DC",
+          geometry = FALSE) %>% 
+  mutate()
+
+
+
 

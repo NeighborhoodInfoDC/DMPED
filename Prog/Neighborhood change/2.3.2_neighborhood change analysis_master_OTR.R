@@ -169,7 +169,7 @@ master5 <- map_file %>%
                                     TRUE~ "dynamic")) %>% 
   mutate(`neighborhood category` = factor(neighborhoodtype,
                                           levels = c("stable growing",
-                                                     "exlusive growth with displacement risk",
+                                                     "exclusive growth with displacement risk",
                                                      "decreasing neighborhood",
                                                      "established opportunity",
                                                      "established opportunity with displacement risk",
@@ -187,7 +187,7 @@ test4 <- master5 %>%
 select(GEOID, Ward, NBH_NAMES, total_hh_2022, total_hh_2000_2020,homevaluecat_2022,pct_black_2000, pct_black_2012, pct_black_2022, vulnerable,pctchange_2012_2022_blk)
 
 displacementarea <- master5 %>% 
-  filter(neighborhoodtype=="exlusive growth with displacement risk"|neighborhoodtype=="established opportunity with displacement risk")
+  filter(neighborhoodtype=="exclusive growth with displacement risk"|neighborhoodtype=="established opportunity with displacement risk")
 
 urban_colors7 <- c("#73bfe2", "#f5cbdf","#fce39e", "#1696d2" ,"#e9807d","#fdd870","#dcedd9")
 
