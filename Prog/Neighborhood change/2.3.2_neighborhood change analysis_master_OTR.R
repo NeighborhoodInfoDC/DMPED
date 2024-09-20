@@ -243,3 +243,11 @@ summary <- master5 %>%
   st_drop_geometry()
 
 write.csv(summary, "C:/Users/Ysu/Box/Greater DC/Projects/DMPED Housing Assessment 2024/Task 2 - Nbrhd Change and Displacement Risk Assessment/Data collection/Clean/summary_bytype.csv")
+
+type <- master5 %>% 
+  select(GEOID, neighborhoodtype) %>% 
+  st_drop_geometry()
+
+
+write.csv(type, "C:/Users/Ysu/Box/Greater DC/Projects/DMPED Housing Assessment 2024/Task 2 - Nbrhd Change and Displacement Risk Assessment/Data collection/Clean/neighborhoodtype_homevalueOTR.csv")
+

@@ -109,3 +109,9 @@ ggplot() +
 master4 <- master4 %>% 
   st_drop_geometry()
 write.csv(master4,"C:/Users/Ysu/Box/Greater DC/Projects/DMPED Housing Assessment 2024/Task 2 - Nbrhd Change and Displacement Risk Assessment/Data collection/Clean/neighborhoodchange_masterdata_rentvaluemethod.csv")
+
+master7 <- master5 %>% 
+  select(GEOID, NBH_NAMES, NAME.y, Ward) %>% 
+  st_drop_geometry()
+
+write.csv(master7,"C:/Users/Ysu/Box/Greater DC/Projects/DMPED Housing Assessment 2024/Task 2 - Nbrhd Change and Displacement Risk Assessment/Data collection/Clean/neighborhood_tract.csv")
