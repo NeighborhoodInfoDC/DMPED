@@ -606,9 +606,15 @@ dc_rent_2012_cat <-
           year = 2012,
           state = "DC",
           geometry = FALSE) %>% 
-  mutate()
-
-
+  pivot_wider(id_cols = c(GEOID, NAME),
+              names_from = variable,
+              values_from = estimate) %>%
+  mutate(totalrenterhh_2012= rowSums(select(., starts_with("B25063_")), na.rm = TRUE)) %>% 
+  mutate(rentcat_20percent_2012=rowSums(select(., B25063_003: B25063_016),  na.rm = TRUE),
+         rentcat_40percent_2012=rowSums(select(., B25063_017: B25063_019),  na.rm = TRUE),
+         rentcat_60percent_2012=rowSums(select(., B25063_020: B25063_021),  na.rm = TRUE),
+         rentcat_80percent_2012=rowSums(select(., B25063_022),  na.rm = TRUE),
+         rentcat_100percent_2012=rowSums(select(., B25063_023),  na.rm = TRUE))
 
 dc_rent_2022_county <- 
   get_acs(geography = "county",
@@ -641,8 +647,132 @@ dc_rent_2022_cat <-
           year = 2022,
           state = "DC",
           geometry = FALSE) %>% 
-  mutate()
+  pivot_wider(id_cols = c(GEOID, NAME),
+              names_from = variable,
+              values_from = estimate) %>%
+  mutate(totalrenterhh_2022= rowSums(select(., starts_with("B25063_")), na.rm = TRUE)) %>% 
+  mutate(rentcat_20percent_2022=rowSums(select(., B25063_003: B25063_019),  na.rm = TRUE),
+         rentcat_40percent_2022=rowSums(select(., B25063_020: B25063_021),  na.rm = TRUE),
+         rentcat_60percent_2022=rowSums(select(., B25063_022),  na.rm = TRUE),
+         rentcat_80percent_2022=rowSums(select(., B25063_023:B25063_024),  na.rm = TRUE),
+         rentcat_100percent_2022=rowSums(select(., B25063_025:B25063_026),  na.rm = TRUE))
+
+#crosswalk 2010 renter counts by category to 2020 geography
+consolidated_2012_2020_rentcat <-Crosswalk_2010_to_2020 %>% 
+  left_join(dc_rent_2012_cat, by=c("GEOID")) %>% 
+  mutate(renthousing2012_subpart=totalrenterhh_2012*wt_renthu,
+         rentcat_20percent_subpart=rentcat_20percent_2012*wt_renthu,
+         rentcat_40percent_subpart=rentcat_40percent_2012*wt_renthu,
+         rentcat_60percent_subpart=rentcat_60percent_2012*wt_renthu,
+         rentcat_80percent_subpart=rentcat_80percent_2012*wt_renthu,
+         rentcat_100percent_subpart=rentcat_100percent_2012*wt_renthu) %>% 
+  group_by(tr2020ge) %>% 
+  summarise(totalrenterhh_2012_2020 = sum(renthousing2012_subpart, na.rm= TRUE),
+            rentcat_20percent_2012_2020 = sum(rentcat_20percent_subpart, na.rm= TRUE),
+            rentcat_40percent_2012_2020 = sum(rentcat_40percent_subpart, na.rm= TRUE),
+            rentcat_60percent_2012_2020 = sum(rentcat_60percent_subpart, na.rm= TRUE),
+            rentcat_80percent_2012_2020 = sum(rentcat_80percent_subpart, na.rm= TRUE),
+            rentcat_100percent_2012_2020 = sum(rentcat_100percent_subpart, na.rm= TRUE)) 
 
 
+dc_rent_2000_county <-
+  get_decennial(geography = "county",
+                variable = c("H054003","H054004","H054005","H054006","H054007","H054008","H054009","H054010",
+                             "H054011","H054012","H054013","H054014","H054015","H054016","H054017","H054018",
+                             "H054019","H054020","H054021","H054022","H054023"),
+                year = 2000,
+                state = "DC",
+                geometry = FALSE) %>% 
+  mutate(cumulative_estimate = cumsum(value))
+
+total_renter <- sum(dc_rent_2000_county$value)
+
+rent_2000 <- dc_rent_2000_county %>%
+  mutate(cumulative_proportion = cumulative_estimate / total_renter)
+#DC 2022
+#H054009	$350 to $399  22% ~ 20%
+#H054012 $500 to $549  45% ~ 40%
+#H054014 $600 to $649 60% ~ 60%
+#H054018 $800 to $899 82% ~ 80%
+#H054023 $2,000 or more 100% ~ 100%
+
+dc_rent_2000_cat <- 
+  get_decennial(geography = "tract",
+                variable = c("H054003","H054004","H054005","H054006","H054007","H054008","H054009","H054010",
+                             "H054011","H054012","H054013","H054014","H054015","H054016","H054017","H054018",
+                             "H054019","H054020","H054021","H054022","H054023"),
+                year = 2000,
+                state = "DC",
+                geometry = FALSE) %>% 
+  pivot_wider(id_cols = c(GEOID, NAME),
+              names_from = variable,
+              values_from = value) %>%
+  mutate(totalrenterhh_2000= rowSums(select(., starts_with("H054")), na.rm = TRUE)) %>% 
+  mutate(rentcat_20percent_2000=rowSums(select(., H054003: H054009),  na.rm = TRUE),
+         rentcat_40percent_2000=rowSums(select(., H054010: H054012),  na.rm = TRUE),
+         rentcat_60percent_2000=rowSums(select(., H054013: H054014),  na.rm = TRUE),
+         rentcat_80percent_2000=rowSums(select(., H054015: H054018),  na.rm = TRUE),
+         rentcat_100percent_2000=rowSums(select(., H054019: H054023),  na.rm = TRUE))
+
+#crosswalk 2000-2010
+consolidated_2000_2010_rent <-Crosswalk_2000_to_2010 %>% 
+  left_join(dc_rent_2000_cat, by=c("GEOID")) %>% 
+  mutate(renthousing2000_subpart=totalrenterhh_2000*wt_renthu,
+         rentcat_20percent_subpart=rentcat_20percent_2000*wt_renthu,
+         rentcat_40percent_subpart=rentcat_40percent_2000*wt_renthu,
+         rentcat_60percent_subpart=rentcat_60percent_2000*wt_renthu,
+         rentcat_80percent_subpart=rentcat_80percent_2000*wt_renthu,
+         rentcat_100percent_subpart=rentcat_100percent_2000*wt_renthu) %>% 
+  group_by(tr2010ge) %>% 
+  summarise(renthousing_2000_2010 = sum(renthousing2000_subpart, na.rm= TRUE),
+            rentcat_20percent_2000_2010 = sum(rentcat_20percent_subpart, na.rm= TRUE),
+            rentcat_40percent_2000_2010 = sum(rentcat_40percent_subpart, na.rm= TRUE),
+            rentcat_60percent_2000_2010 = sum(rentcat_60percent_subpart, na.rm= TRUE),
+            rentcat_80percent_2000_2010 = sum(rentcat_80percent_subpart, na.rm= TRUE),
+            rentcat_100percent_2000_2010 = sum(rentcat_100percent_subpart, na.rm= TRUE)) 
+
+# Crosswalk 2000 to 2020
+
+consolidated_2000_2010_2020_rent <- Crosswalk_2010_to_2020 %>% 
+  left_join(consolidated_2000_2010_rent, by=c("tr2010ge")) %>% 
+  mutate(renthousing2000_subpart=renthousing_2000_2010*wt_renthu,
+         rentcat_20percent_2000_2010_subpart = rentcat_20percent_2000_2010*wt_renthu,
+         rentcat_40percent_2000_2010_subpart = rentcat_40percent_2000_2010*wt_renthu,
+         rentcat_60percent_2000_2010_subpart = rentcat_60percent_2000_2010*wt_renthu,
+         rentcat_80percent_2000_2010_subpart = rentcat_80percent_2000_2010*wt_renthu,
+         rentcat_100percent_2000_2010_subpart = rentcat_100percent_2000_2010*wt_renthu,
+) %>% 
+  group_by(tr2020ge) %>% 
+  summarise(totalrenterhh_2000_2020 = sum(renthousing2000_subpart, na.rm= TRUE),
+            rentcat_20percent_2000_2020 = sum(rentcat_20percent_2000_2010_subpart, na.rm= TRUE),
+            rentcat_40percent_2000_2020 = sum(rentcat_40percent_2000_2010_subpart, na.rm= TRUE),
+            rentcat_60percent_2000_2020 = sum(rentcat_60percent_2000_2010_subpart, na.rm= TRUE),
+            rentcat_80percent_2000_2020 = sum(rentcat_80percent_2000_2010_subpart, na.rm= TRUE),
+            rentcat_100percent_2000_2020 = sum(rentcat_100percent_2000_2010_subpart, na.rm= TRUE)) 
+
+renvaluedata <- consolidated_2012_2020_rentcat %>% 
+  left_join(consolidated_2000_2010_2020_rent, by=c("tr2020ge")) %>% 
+  mutate(GEOID=as.character(tr2020ge)) %>% 
+  left_join(dc_rent_2022_cat,by=c("GEOID")) %>% 
+  mutate(pct_2012_low=(rentcat_20percent_2012_2020+rentcat_40percent_2012_2020)/totalrenterhh_2012_2020,
+         pct_2012_moderate=(rentcat_20percent_2012_2020+rentcat_40percent_2012_2020+rentcat_60percent_2012_2020)/totalrenterhh_2012_2020,
+         pct_2012_high=(rentcat_20percent_2012_2020+rentcat_40percent_2012_2020+rentcat_60percent_2012_2020+rentcat_80percent_2012_2020+rentcat_100percent_2012_2020)/totalrenterhh_2012_2020) %>% 
+  mutate(homevaluecat_2012=case_when(pct_2012_low>0.5 ~ "low",
+                                     pct_2012_moderate>0.5 ~ "moderate",
+                                     TRUE ~ "high")) %>%
+  mutate(pct_2000_low=(rentcat_20percent_2000_2020+rentcat_40percent_2000_2020)/totalrenterhh_2000_2020,
+         pct_2000_moderate=(rentcat_20percent_2000_2020+rentcat_40percent_2000_2020+rentcat_60percent_2000_2020)/totalrenterhh_2000_2020,
+         pct_2000_high=(rentcat_20percent_2000_2020+rentcat_40percent_2000_2020+rentcat_60percent_2000_2020+rentcat_80percent_2000_2020+rentcat_100percent_2000_2020)/totalrenterhh_2000_2020) %>% 
+  mutate(homevaluecat_2000=case_when(pct_2000_low>0.5 ~ "low",
+                                     pct_2000_moderate>0.5 ~ "moderate",
+                                     TRUE ~ "high")) %>%
+  mutate(pct_2022_low=(rentcat_20percent_2022+rentcat_40percent_2022)/totalrenterhh_2022,
+         pct_2022_moderate=(rentcat_20percent_2022+rentcat_40percent_2022+rentcat_60percent_2022)/totalrenterhh_2022,
+         pct_2022_high=(rentcat_20percent_2022+rentcat_40percent_2022+rentcat_60percent_2022+rentcat_80percent_2022+rentcat_100percent_2022)/totalrenterhh_2022) %>% 
+  mutate(homevaluecat_2022=case_when(pct_2022_low>0.5 ~ "low",
+                                     pct_2022_moderate>0.5 ~ "moderate",
+                                     TRUE ~ "high")) %>%
+  select(GEOID, pct_2000_low, pct_2000_moderate,pct_2000_high, homevaluecat_2000, pct_2012_low, pct_2012_moderate,pct_2012_high, homevaluecat_2012,pct_2022_low, pct_2022_moderate,pct_2022_high, homevaluecat_2022)
 
 
+write.csv(renvaluedata,"C:/Users/Ysu/Box/Greater DC/Projects/DMPED Housing Assessment 2024/Task 2 - Nbrhd Change and Displacement Risk Assessment/Data collection/Clean/rentvalue_cat.csv")

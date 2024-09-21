@@ -37,8 +37,6 @@ distance <- read_csv("C:/Users/Ysu/Box/Greater DC/Projects/DMPED Housing Assessm
 
 college <- read_csv("C:/Users/Ysu/Box/Greater DC/Projects/DMPED Housing Assessment 2024/Task 2 - Nbrhd Change and Displacement Risk Assessment/Data collection/Clean/college.csv")
 
-
-
 analysismaster <- housingmarket %>% 
   left_join(lowincome, by=c("GEOID")) %>% 
   left_join(raceethnicity, by=c("GEOID")) %>% 
@@ -177,14 +175,11 @@ master5 <- map_file %>%
                                                      "dynamic"
                                           ))) 
 
-test3 <- master5 %>% 
+sumtract_OTR <- master5 %>% 
   group_by(neighborhoodtype) %>% 
-  count()
-
-test4 <- master5 %>% 
-  filter(neighborhoodtype=="stable growing") %>% 
-  # select(GEOID, NBH_NAMES, homevaluecat_2000, homevaluecat_2012, homevaluecat_2022,overalldecreasevalue_2012_2022,pct_black_2000, vulnerable,pctchange_2012_2022_blk)
-select(GEOID, Ward, NBH_NAMES, total_hh_2022, total_hh_2000_2020,homevaluecat_2022,pct_black_2000, pct_black_2012, pct_black_2022, vulnerable,pctchange_2012_2022_blk)
+  count() %>% 
+  rename(Homevalue_method=n) %>% 
+  st_drop_geometry()
 
 displacementarea <- master5 %>% 
   filter(neighborhoodtype=="exclusive growth with displacement risk"|neighborhoodtype=="established opportunity with displacement risk")

@@ -165,6 +165,9 @@ M = cor(corrdata)
 corrplot(M, order = 'AOE') # after 'AOE' reorder
 corrplot(M, order = 'hclust', addrect = 2)
 
+correlationmatrix <- as.data.frame(M)
+
+write.csv(correlationmatrix, "C:/Users/Ysu/Box/Greater DC/Projects/DMPED Housing Assessment 2024/Task 2 - Nbrhd Change and Displacement Risk Assessment/Data collection/Clean/corr_matrix.csv")
 #################predict
 
 predictionmaster1 <- predictionmaster %>% 
@@ -215,16 +218,64 @@ Testresult <- predictionmaster2 %>%
   left_join(neighborhoodname, by=c("GEOID")) %>% 
   select(GEOID, NBH_NAMES,Ward, NAME.y, displacement, predicted_probs,predicted_class )
 
-
 write.csv(Testresult,"C:/Users/Ysu/Box/Greater DC/Projects/DMPED Housing Assessment 2024/Task 2 - Nbrhd Change and Displacement Risk Assessment/Data collection/Clean/Prediction_v1.csv")
 
-predicteddisplacementmap <- predictionmaster2 %>% 
-  select(GEOID, displacement, predicted_probs,predicted_class) %>% 
-  left_join(master5, by=c("GEOID")) %>% 
+predicteddisplacementmap <- master5 %>% 
+  left_join(predictionmaster2, by=c("GEOID")) %>% 
+  # select(GEOID, displacement, predicted_probs,predicted_class) %>% 
     mutate(predictiontype=case_when(displacement==1 & predicted_class==1 ~ "continued displacement risk",
                                     displacement==0 & predicted_class==1 ~ "upcoming displacement risk",
                                     displacement==1 & predicted_class==0 ~ "decreased displacement risk",
                                     displacement==0 & predicted_class==0 ~ "no displacement risk")) %>% 
-    group_by(predictiontype) %>% 
-    count()
+    # group_by(predictiontype) %>% 
+    # count()
 
+upcomingdisplacement <- predicteddisplacementmap %>% 
+  filter(predictiontype=="upcoming displacement risk") 
+
+
+urban_colors7 <- c("#73bfe2", "#f5cbdf","#fce39e", "#1696d2" ,"#e9807d","#fdd870","#dcedd9")
+
+ggplot() +
+  geom_sf(data =predicteddisplacementmap, aes( fill = `neighborhood category`))+
+  scale_fill_manual(name="neighborhoodchange type", values = urban_colors7, guide = guide_legend(override.aes = list(linetype = "blank", 
+                                                                                                                     shape = NA)))+ 
+  # geom_sf(BBCF, mapping = aes(), fill=NA,lwd =  0.5, color="#fdbf11",show.legend = "line")+
+  # geom_sf(cog_all, mapping = aes(), fill=NA,lwd =  1, color="#ec008b",show.legend = "line")+
+  # scale_color_manual(values = 'transparent', guide = guide_legend(override.aes = list(linetype = "solid"))) +
+  geom_sf(water_sf, mapping=aes(), fill="#dcdbdb", color="#dcdbdb", size=0.05)+
+  coord_sf(datum = NA)+
+  # theme(
+  #   panel.grid.major = element_line(colour = "transparent", linewidth = 0),
+  #   axis.title = element_blank(),
+  #   axis.line.y = element_blank(),
+  #   plot.caption = element_text(hjust = 0, linewidth = 16),
+  #   plot.title = element_text(linewidth = 18),
+  #   legend.title=element_text(linewidth=14),
+  #   legend.text = element_text(linewidth = 14)
+  # 
+  # )+
+  guides(color = guide_legend(override.aes = list(size=5)))+
+  geom_sf(data = tractboundary_20, fill = "transparent", color="#adabac")+
+  coord_sf(datum = NA)+
+  geom_sf(data = upcomingdisplacement, fill = "transparent", color="#ec008b")+
+  coord_sf(datum = NA)+
+  labs(title = paste0("Neighborhood Change in DC based on OTR sales data"),
+       subtitle= "Increased displacement risk area highlighted in red",
+       caption = "Source: Census 2000, ACS 5-year estimates 2008-2012, 2018-2022")
+
+
+# Predict probabilities of "am" being 1 (manual transmission)
+predicted_probs <- predict(logit, predictionmaster1, type = "response")
+print(predicted_probs)
+# Convert probabilities to predicted class (0 or 1) based on a threshold of 0.5
+predicted_class <- ifelse(predicted_probs > 0.5, 1, 0)
+
+predictionmaster1$predicted_probs <- predicted_probs
+predictionmaster1$predicted_class <- predicted_class
+
+Testresult <- predictionmaster1 %>% 
+  left_join(neighborhoodname, by=c("GEOID")) %>% 
+  select(GEOID, NBH_NAMES,Ward, NAME.y, displacement, predicted_probs,predicted_class )
+
+write.csv(Testresult,"C:/Users/Ysu/Box/Greater DC/Projects/DMPED Housing Assessment 2024/Task 2 - Nbrhd Change and Displacement Risk Assessment/Data collection/Clean/Prediction_v1_accuracy.csv")

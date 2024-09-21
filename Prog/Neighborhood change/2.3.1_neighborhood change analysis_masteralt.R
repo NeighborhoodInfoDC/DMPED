@@ -1,21 +1,99 @@
+library(tidyverse)
+library(DescTools)
+library(purrr)
+library(tidycensus)
+library(mapview)
+library(stringr)
+library(educationdata)
+library(sf)
+library(readxl)
+library(urbnthemes)
+library(sp)
+library(ipumsr)
+library(survey)
+library(srvyr)
+library(dummies)
+library(dplyr)
+library(Hmisc)
+census_api_key("05de4dca638d81abd2dc60d0d28e3781183e185e", install = TRUE)
 
-master4 <- map_file %>% 
-  mutate(rent_2000_2020=ifelse(rent_2000_2020==0, NA, rent_2000_2020),
-         rent_2012_2020=ifelse(rent_2012_2020==0, NA, rent_2012_2020)) %>% 
-  # filter(GEOID !="11001004100") %>% 
-  mutate(quintile_2000=ntile(rent_2000_2020,5),
-         quintile_2012=ntile(rent_2012_2020,5),
-         quintile_2022=ntile(rent_2022,5)) %>% 
-  # rbind(outlier) %>% 
-  mutate(homevaluecat_2000=case_when(quintile_2000==1|quintile_2000==2 ~ "low",
-                                     quintile_2000==3 ~ "moderate",
-                                     quintile_2000==4|quintile_2000==5 ~ "high"),
-         homevaluecat_2012=case_when(quintile_2012==1|quintile_2012==2 ~ "low",
-                                     quintile_2012==3 ~ "moderate",
-                                     quintile_2012==4|quintile_2012==5 ~ "high"),
-         homevaluecat_2022=case_when(quintile_2022==1|quintile_2022==2 ~ "low",
-                                     quintile_2022==3 ~ "moderate",
-                                     quintile_2022==4|quintile_2022==5 ~ "high")) %>% 
+housingmarket <- read_csv("C:/Users/Ysu/Box/Greater DC/Projects/DMPED Housing Assessment 2024/Task 2 - Nbrhd Change and Displacement Risk Assessment/Data collection/Clean/housingmarket.csv") 
+
+lowincome <- read_csv("C:/Users/Ysu/Box/Greater DC/Projects/DMPED Housing Assessment 2024/Task 2 - Nbrhd Change and Displacement Risk Assessment/Data collection/Clean/lowincome_pop.csv")
+
+raceethnicity <- read_csv("C:/Users/Ysu/Box/Greater DC/Projects/DMPED Housing Assessment 2024/Task 2 - Nbrhd Change and Displacement Risk Assessment/Data collection/Clean/race_ethnicity.csv")
+
+distance <- read_csv("C:/Users/Ysu/Box/Greater DC/Projects/DMPED Housing Assessment 2024/Task 2 - Nbrhd Change and Displacement Risk Assessment/Data collection/Clean/distance_downtown.csv")
+
+newrentdata <- read_csv("C:/Users/Ysu/Box/Greater DC/Projects/DMPED Housing Assessment 2024/Task 2 - Nbrhd Change and Displacement Risk Assessment/Data collection/Clean/rentvalue_cat.csv") %>% 
+  mutate(GEOID=as.numeric(GEOID))
+
+analysismaster <- housingmarket %>% 
+  left_join(lowincome, by=c("GEOID")) %>% 
+  left_join(raceethnicity, by=c("GEOID")) %>% 
+  left_join(distance, by=c("GEOID") )
+
+tractboundary_20 <- get_acs(geography = "tract", 
+                            variables = c("B01003_001"),
+                            state = "DC",
+                            geometry = TRUE,
+                            year = 2022)
+
+neighborhood = "W:/Libraries/OCTO/Maps/Neighborhood_Clusters.shp"
+neighborhood_sf <- read_sf(dsn= neighborhood, layer= basename(strsplit(neighborhood, "\\.")[[1]])[1])
+
+watershp = "W:/Libraries/General/Maps/Waterbodies.shp"
+water_sf <- read_sf(dsn= watershp, layer= basename(strsplit(watershp, "\\.")[[1]])[1])
+
+wards = "W:/Libraries/OCTO/Maps/Wards_from_2022.shp"
+wards_sf <- read_sf(dsn= wards , layer= basename(strsplit(wards, "\\.")[[1]])[1])
+
+#attach neighborhood cluster name to tract
+st_crs(neighborhood_sf) <- st_crs(tractboundary_20)
+st_crs(wards_sf) <- st_crs(tractboundary_20)
+
+tractboundary_20_2 <- tractboundary_20 %>% 
+  st_centroid() %>% 
+  st_join(neighborhood_sf) %>% 
+  st_drop_geometry() %>% 
+  select(GEOID, NBH_NAMES)
+
+tractboundary_20_3 <- tractboundary_20 %>% 
+  st_centroid() %>% 
+  st_join(wards_sf) %>% 
+  st_drop_geometry() %>% 
+  select(GEOID.x, NAME.y) %>% 
+  rename(GEOID=GEOID.x,
+         Ward=NAME.y)
+
+tractboundary_20 <- tractboundary_20 %>% 
+  left_join(tractboundary_20_2, by=c("GEOID")) %>% 
+  left_join(tractboundary_20_3, by=c("GEOID")) 
+
+#merge analysis data with shapefile
+map_file <- merge(analysismaster,tractboundary_20, by=c("GEOID")) %>% 
+  # filter(!GEOID %in% c("11001000201", "11001009511", "11001980000", "11001006804")) %>% #drop low pop tracts
+  filter(!GEOID %in% c("11001010603", "11001980000", "11001007201", "11001010601", "11001000201")) %>% #drop low pop tracts
+  filter(!GEOID %in% c("11001001702")) %>% #drop Joint Base Anacostia-Bolling
+  st_as_sf() 
+
+
+master_rent <- map_file %>% 
+  # mutate(rent_2000_2020=ifelse(rent_2000_2020==0, NA, rent_2000_2020),
+  #        rent_2012_2020=ifelse(rent_2012_2020==0, NA, rent_2012_2020)) %>% 
+  # mutate(quintile_2000=ntile(rent_2000_2020,5),
+  #        quintile_2012=ntile(rent_2012_2020,5),
+  #        quintile_2022=ntile(rent_2022,5)) %>% 
+  left_join(newrentdata,by=c("GEOID")) %>%  #merge in the new rent category data based on categories in ACS
+  # mutate(homevaluecat_2000=case_when(quintile_2000==1|quintile_2000==2 ~ "low",
+  #                                    quintile_2000==3 ~ "moderate",
+  #                                    quintile_2000==4|quintile_2000==5 ~ "high"),
+  #        homevaluecat_2012=case_when(quintile_2012==1|quintile_2012==2 ~ "low",
+  #                                    quintile_2012==3 ~ "moderate",
+  #                                    quintile_2012==4|quintile_2012==5 ~ "high"),
+  #        homevaluecat_2022=case_when(quintile_2022==1|quintile_2022==2 ~ "low",
+  #                                    quintile_2022==3 ~ "moderate",
+  #                                    quintile_2022==4|quintile_2022==5 ~ "high")) %>% 
   mutate(nominal_00_12=rent_2012_2020-rent_2000_2020*1.336,
          nominal_12_22=rent_2022-rent_2012_2020*1.227,
          nominal_00_22=rent_2022-rent_2000_2020*1.64) %>%  #based on sas macro dollar adjust, using less shelter series
@@ -50,30 +128,41 @@ master4 <- map_file %>%
   mutate(continuedhigh=ifelse(homevaluecat_2000=="high" & homevaluecat_2012=="high" & homevaluecat_2022=="high", "yes", "no")) %>% 
   mutate(continuedlow= ifelse(homevaluecat_2000=="low" & homevaluecat_2012=="low" & homevaluecat_2022=="low", "yes", "no")) %>% 
   mutate(neighborhoodtype=case_when(lowmod_housing_2000=="yes" & overallincreasevalue_2012_2022=="yes" & vulnerable=="nolossvulnerable" ~ "stable growing",
-                                    lowmod_housing_2000=="yes" & overallincreasevalue_2012_2022=="yes" & vulnerable=="lossvulnerable" ~ "exlusive growth with displacement risk",
+                                    lowmod_housing_2000=="yes" & overallincreasevalue_2012_2022=="yes" & vulnerable=="lossvulnerable" ~ "exclusive growth with displacement risk",
                                     lowmod_housing_2000=="no" & overalldecreasevalue_2012_2022=="yes" ~ "decreasing neighborhood",
                                     continuedhigh=="yes" & vulnerable=="lossvulnerable" ~ "established opportunity with displacement risk",
                                     continuedhigh=="yes" & vulnerable=="nolossvulnerable" ~ "established opportunity",
-                                    TRUE~ "stagnant or dynamic")) %>% 
+                                    continuedlow=="yes" ~ "stagnant",
+                                    TRUE~ "dynamic")) %>% 
   mutate(`neighborhood category` = factor(neighborhoodtype,
                                           levels = c("stable growing",
-                                                     "exlusive growth with displacement risk",
+                                                     "exclusive growth with displacement risk",
                                                      "decreasing neighborhood",
                                                      "established opportunity",
                                                      "established opportunity with displacement risk",
-                                                     "stagnant or dynamic"
+                                                     "stagnant",
+                                                     "dynamic"
                                           )))
 
 
-displacementarea <- master4 %>% 
-  filter(neighborhoodtype=="exlusive growth with displacement risk"|neighborhoodtype=="established opportunity with displacement risk")
+test3 <- master_rent %>% 
+  filter(neighborhoodtype=="exclusive growth with displacement risk")
+  # select(neighborhoodtype) %>%  #no exclusive growth this time
+  select(GEOID, lowmod_housing_2000,nominal_12_22, homevaluecat_2022, overallincreasevalue_2012_2022, vulnerable) %>% 
+  filter(lowmod_housing_2000=="yes", overallincreasevalue_2012_2022=="yes")
+  group_by(neighborhoodtype) %>% 
+  count()
 
-urban_colors6 <- c("#73bfe2", "#f5cbdf","#fce39e", "#1696d2" ,"#e9807d","#dcedd9")
+
+displacementarea <- master_rent %>% 
+  filter(neighborhoodtype=="exclusive growth with displacement risk"|neighborhoodtype=="established opportunity with displacement risk")
+
+urban_colors7 <- c("#73bfe2", "#f5cbdf","#fce39e", "#1696d2" ,"#e9807d","#fdd870","#dcedd9")
 
 
 ggplot() +
-  geom_sf(data =master4, aes( fill = `neighborhood category`))+
-  scale_fill_manual(name="neighborhoodchange type", values = urban_colors6, guide = guide_legend(override.aes = list(linetype = "blank", 
+  geom_sf(data =master_rent, aes( fill = `neighborhood category`))+
+  scale_fill_manual(name="neighborhoodchange type", values = urban_colors7, guide = guide_legend(override.aes = list(linetype = "blank", 
                                                                                                                      shape = NA)))+ 
   # geom_sf(BBCF, mapping = aes(), fill=NA,lwd =  0.5, color="#fdbf11",show.legend = "line")+
   # geom_sf(cog_all, mapping = aes(), fill=NA,lwd =  1, color="#ec008b",show.legend = "line")+
@@ -101,10 +190,19 @@ ggplot() +
   coord_sf(datum = NA)+
   geom_sf(data = displacementarea, fill = "transparent", color="#ec008b")+
   coord_sf(datum = NA)+
-  labs(title = paste0("Neighborhood Change in DC based on rent value"),
+  labs(title = paste0("Neighborhood Change in DC based on rent level"),
        subtitle= "Potential displacement area highlighted in red",
        caption = "Source: Census 2000, ACS 5-year estimates 2008-2012, 2018-2022")
 
+master_rent2 <- master_rent %>% 
+  st_drop_geometry()
+write.csv(master_rent2,"C:/Users/Ysu/Box/Greater DC/Projects/DMPED Housing Assessment 2024/Task 2 - Nbrhd Change and Displacement Risk Assessment/Data collection/Clean/neighborhoodchange_masterdata_rentvaluemethod_cat.csv")
+
+sumtract_rent <- master_rent %>% 
+  group_by(neighborhoodtype) %>% 
+  count() %>% 
+  rename(Rentcat_method=n) %>% 
+  st_drop_geometry()
 
 master4 <- master4 %>% 
   st_drop_geometry()
