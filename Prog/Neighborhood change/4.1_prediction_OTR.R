@@ -16,7 +16,6 @@ library(srvyr)
 library(dplyr)
 library(Hmisc)
 library(haven)
-library(tidy)
 library(caret)
 library(boot)
 library(corrplot)
@@ -60,7 +59,8 @@ lowincome <- read_csv("C:/Users/Ysu/Box/Greater DC/Projects/DMPED Housing Assess
 
 raceethnicity <- read_csv("C:/Users/Ysu/Box/Greater DC/Projects/DMPED Housing Assessment 2024/Task 2 - Nbrhd Change and Displacement Risk Assessment/Data collection/Clean/race_ethnicity.csv")
 
-neighborhoodtype_OTR <- read_csv("C:/Users/Ysu/Box/Greater DC/Projects/DMPED Housing Assessment 2024/Task 2 - Nbrhd Change and Displacement Risk Assessment/Data collection/Clean/neighborhoodtype_homevalueOTR.csv")
+neighborhoodtype_OTR <- read_csv("C:/Users/Ysu/Box/Greater DC/Projects/DMPED Housing Assessment 2024/Task 2 - Nbrhd Change and Displacement Risk Assessment/Data collection/Clean/neighborhoodtype_homevalueOTR.csv") %>% 
+  select(GEOID, neighborhoodtype, NBH_NAMES)
 
 vacancy <- read_csv("C:/Users/Ysu/Box/Greater DC/Projects/DMPED Housing Assessment 2024/Task 2 - Nbrhd Change and Displacement Risk Assessment/Data collection/Clean/vacancy.csv") %>% 
   mutate(GEOID=geoid) %>% 
@@ -271,8 +271,6 @@ Testresult <- predictionmaster2 %>%
 
 write.csv(Testresult,"C:/Users/Ysu/Box/Greater DC/Projects/DMPED Housing Assessment 2024/Task 2 - Nbrhd Change and Displacement Risk Assessment/Data collection/Clean/Prediction_v1_OTR.csv")
 
-
-
 predicteddisplacementmap <- master5 %>% 
   left_join(predictionmaster2, by=c("GEOID")) %>% 
   # select(GEOID, displacement, predicted_probs,predicted_class) %>% 
@@ -282,7 +280,16 @@ predicteddisplacementmap <- master5 %>%
                                     displacement==0 & predicted_class==0 ~ "no displacement risk")) %>% 
     # group_by(predictiontype) %>% 
     # count()
+predict_map <- predicteddisplacementmap %>% 
+  select(GEOID, neighborhoodtype.x, displacement, predictiontype, NBH_NAMES.x, total_hh_2022.x, pct_black_2022) %>% 
+  rename(NBH_NAMES=NBH_NAMES.x,
+         total_hh_2022=total_hh_2022.x,
+         neighborhoodtype=neighborhoodtype.x)
   
+write.csv(predict_map,"C:/Users/Ysu/Box/Greater DC/Projects/DMPED Housing Assessment 2024/Task 2 - Nbrhd Change and Displacement Risk Assessment/Data collection/Clean/Prediction_map_shiny.csv")
+
+  
+
 newtype <- predicteddisplacementmap %>% 
   # select(displacement, predicted_class, predictiontype,neighborhoodtype.x) %>% 
   # filter(predictiontype=="continued displacement risk")

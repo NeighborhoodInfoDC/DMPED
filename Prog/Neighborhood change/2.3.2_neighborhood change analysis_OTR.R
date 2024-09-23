@@ -88,7 +88,7 @@ droptract <- analysismaster %>%
 #merge analysis data with shapefile
 map_file <- merge(analysismaster,tractboundary_20, by=c("GEOID")) %>% 
   # filter(!GEOID %in% c("11001000201", "11001009511", "11001980000", "11001006804")) %>% #drop low pop tracts
-  filter(!GEOID %in% c("11001010603", "11001980000", "11001007201", "11001010601", "11001000201",""11001006804"")) %>% #drop low pop tracts
+  filter(!GEOID %in% c("11001010603", "11001980000", "11001007201", "11001010601", "11001000201","11001006804")) %>% #drop low pop tracts
   filter(!GEOID %in% c("11001001702","11001007301","11001010900")) %>% #drop Joint Base Anacostia-Bolling
   st_as_sf() 
 # 
