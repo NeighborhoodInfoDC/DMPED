@@ -54,16 +54,6 @@ dc_median_home_value_2000 <-
                 state = "DC",
                 geometry = FALSE) %>% 
   mutate(medianhome_2000=value)
-# 
-# test <- 
-#   get_decennial(geography = "tract",
-#                 variables = c("H085001"),  
-#                 year = 2000,
-#                 state = "DC",
-#                 geometry = FALSE) %>% 
-#   mutate(medianhome_2000=value)
-
-#median rents 2000 - 2022
 
 dc_median_rent_2000 <-
   get_decennial(geography = "tract",

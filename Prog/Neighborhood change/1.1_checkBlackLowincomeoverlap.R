@@ -77,9 +77,23 @@ consolidated_2010_2020_lowincome <-Crosswalk_2010_to_2020 %>%
   group_by(tr2020ge) %>% 
   summarise(lowincomeblack_2012_2020 = sum(lowincome2012_subpart, na.rm= TRUE)) 
 
-lowincomepop <- consolidated_2000_2010_2020_lowincome %>% 
-  left_join(consolidated_2010_2020_lowincome,by=c("tr2020ge")) %>% 
+lowincomeblack <- consolidated_2010_2020_lowincome %>% 
   mutate(GEOID=as.character(tr2020ge)) %>% 
-  left_join(lowincome_2022,by=c("GEOID"))
+  left_join(lowincomeblack_2022,by=c("GEOID"))
+
+write.csv(lowincomeblack,"C:/Users/Ysu/Box/Greater DC/Projects/DMPED Housing Assessment 2024/Task 2 - Nbrhd Change and Displacement Risk Assessment/Data collection/Clean/lowincomeblack_pop.csv" )
 
 lowincome <- read.csv("C:/Users/Ysu/Box/Greater DC/Projects/DMPED Housing Assessment 2024/Task 2 - Nbrhd Change and Displacement Risk Assessment/Data collection/Clean/lowincome_pop.csv")
+
+lowincblacksummary <- lowincome %>% 
+  mutate(GEOID=as.character(GEOID)) %>% 
+  left_join(lowincomeblack) %>% 
+  mutate(total="total") %>% 
+  group_by(total) %>% 
+  summarise(lowincome_2022=sum(lowincome_2022),
+            lowincome_2012_2020=sum(lowincome_2012_2020),
+            lowincomeblack_2012_2020=sum(lowincomeblack_2012_2020),
+            lowincomeblack_2022=sum(lowincomeblack_2022))
+
+write.csv(lowincblacksummary,"C:/Users/Ysu/Box/Greater DC/Projects/DMPED Housing Assessment 2024/Task 2 - Nbrhd Change and Displacement Risk Assessment/Data collection/Clean/lowincblacksummary.csv" )
+
