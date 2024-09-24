@@ -277,14 +277,15 @@ predicteddisplacementmap <- master5 %>%
     mutate(predictiontype=case_when(displacement==1 & predicted_class==1 ~ "continued displacement risk",
                                     displacement==0 & predicted_class==1 ~ "upcoming displacement risk",
                                     displacement==1 & predicted_class==0 ~ "decreased displacement risk",
-                                    displacement==0 & predicted_class==0 ~ "no displacement risk")) %>% 
+                                    displacement==0 & predicted_class==0 ~ "no displacement risk")) 
     # group_by(predictiontype) %>% 
     # count()
 predict_map <- predicteddisplacementmap %>% 
   select(GEOID, neighborhoodtype.x, displacement, predictiontype, NBH_NAMES.x, total_hh_2022.x, pct_black_2022) %>% 
   rename(NBH_NAMES=NBH_NAMES.x,
          total_hh_2022=total_hh_2022.x,
-         neighborhoodtype=neighborhoodtype.x)
+         neighborhoodtype=neighborhoodtype.x) %>% 
+  st_drop_geometry()
   
 write.csv(predict_map,"C:/Users/Ysu/Box/Greater DC/Projects/DMPED Housing Assessment 2024/Task 2 - Nbrhd Change and Displacement Risk Assessment/Data collection/Clean/Prediction_map_shiny.csv")
 
@@ -339,17 +340,3 @@ ggplot() +
        caption = "Source: Census 2000, ACS 5-year estimates 2008-2012, 2018-2022")
 
 
-# Predict probabilities of "am" being 1 (manual transmission)
-predicted_probs <- predict(logit, predictionmaster1, type = "response")
-print(predicted_probs)
-# Convert probabilities to predicted class (0 or 1) based on a threshold of 0.5
-predicted_class <- ifelse(predicted_probs > 0.5, 1, 0)
-
-predictionmaster1$predicted_probs <- predicted_probs
-predictionmaster1$predicted_class <- predicted_class
-
-Testresult <- predictionmaster1 %>% 
-  left_join(neighborhoodname, by=c("GEOID")) %>% 
-  select(GEOID, NBH_NAMES,Ward, NAME.y, displacement, predicted_probs,predicted_class )
-
-write.csv(Testresult,"C:/Users/Ysu/Box/Greater DC/Projects/DMPED Housing Assessment 2024/Task 2 - Nbrhd Change and Displacement Risk Assessment/Data collection/Clean/Prediction_v1_accuracy.csv")

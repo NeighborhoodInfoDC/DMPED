@@ -168,7 +168,7 @@ master5 <- map_file %>%
   mutate(`neighborhood category` = factor(neighborhoodtype,
                                           levels = c("stable growing",
                                                      "exclusive growth with displacement risk",
-                                                     "decreasing neighborhood",
+                                                     "decreasing value neighborhood",
                                                      "established opportunity",
                                                      "established opportunity with displacement risk",
                                                      "stagnant",
@@ -234,10 +234,11 @@ summary <- master5 %>%
             pct_college=mean(pct_college_2022),
             homeprice=mean(medianhome_2022),
             rentlevel=mean(rent_2022, na.rm=TRUE),
+            vacancy=mean(vacancy_2022),
             total=sum(total)) %>% 
   mutate(pct_owner=owner_2022/totalhh_2022,
          pct_blck=black_2022/totalhh_2022 ) %>% 
-  select(neighborhoodtype,total,homeprice, rentlevel,pct_owner,pct_blck,pctchangexx,pctchangeblk,pct_college) %>% 
+  select(neighborhoodtype,total,homeprice, rentlevel,pct_owner,pct_blck,pctchangexx,pctchangeblk,pct_college,vacancy) %>% 
   st_drop_geometry()
 
 write.csv(summary, "C:/Users/Ysu/Box/Greater DC/Projects/DMPED Housing Assessment 2024/Task 2 - Nbrhd Change and Displacement Risk Assessment/Data collection/Clean/summary_bytype.csv")
