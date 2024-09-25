@@ -78,6 +78,7 @@ dc_median_rent_2012 <-
           geometry = FALSE) %>% 
   mutate(rent_2012=estimate)
 
+# Total occupied units
 total_units_2012 <-
   get_acs(geography = "tract",
           variable = "B25042_001",
@@ -86,6 +87,7 @@ total_units_2012 <-
           geometry = FALSE) %>% 
   rename(units_2012=estimate)
 
+# Total housing units [Occupied units is H002002]
 total_units_2000 <-
   get_decennial(geography = "tract",
                 variable = "H001001",
@@ -109,7 +111,7 @@ consolidated_2000_2010 <- total_units_2000 %>%
   mutate(medianvalue2000_subpart=units_2000*medianhome_2000*wt_ownhu,
          rent2000_subpart=units_2000*rent_2000*wt_renthu) %>% 
   group_by(tr2010ge) %>% 
-  summarize(total_units = sum(units_2000, na.rm = TRUE),
+  summarise(total_units = sum(units_2000, na.rm = TRUE),
             medianhome_2000_2010 = sum(medianvalue2000_subpart, na.rm= TRUE)/total_units,
             rent_2000_2010 = sum(rent2000_subpart, na.rm= TRUE)/total_units) 
   
@@ -120,7 +122,7 @@ consolidated_2000_2010_2020 <- total_units_2010 %>%
   mutate(medianvalue2000_subpart=units_2010*medianhome_2000_2010*wt_ownhu,
          rent2000_subpart=units_2010*rent_2000_2010*wt_renthu) %>% 
   group_by(tr2020ge) %>% 
-  summarize(total_units = sum(units_2010, na.rm = TRUE),
+  summarise(total_units = sum(units_2010, na.rm = TRUE),
             medianhome_2000_2020 = sum(medianvalue2000_subpart, na.rm= TRUE)/total_units,
             rent_2000_2020 = sum(rent2000_subpart, na.rm= TRUE)/total_units) 
 
@@ -132,7 +134,7 @@ consolidated_2010_2020 <- total_units_2010 %>%
   mutate(medianvalue2012_subpart=units_2010*medianhome_2012*wt_ownhu,
          rent2012_subpart=units_2010*rent_2012*wt_renthu) %>% 
   group_by(tr2020ge) %>% 
-  summarize(total_units = sum(units_2010, na.rm = TRUE),
+  summarise(total_units = sum(units_2010, na.rm = TRUE),
             medianhome_2012_2020 = sum(medianvalue2012_subpart, na.rm= TRUE)/total_units,
             rent_2012_2020 = sum(rent2012_subpart, na.rm= TRUE)/total_units) 
 
@@ -270,7 +272,7 @@ master_housingunits <- consolidated_2000_2010_2020_housing %>%
 housingmarket <- master_housingunits %>% 
   left_join(master_housingvalue,by=c("GEOID"))
 
-vacancy <- read.csv("Clean/vanacy.csv") %>% 
+vacancy <- read.csv("Clean/vacancy.csv") %>% 
   select(-X) %>% 
   mutate(GEOID=as.character(geoid)) %>% 
   select(-geoid, -total_residential)%>% 
