@@ -297,17 +297,17 @@ newtype <- predicteddisplacementmap %>%
   mutate(exclusive=ifelse(neighborhoodtype.x=="exclusive growth with displacement risk",1,0),
          established=ifelse(neighborhoodtype.x=="established opportunity with displacement risk",1,0)) %>% 
   group_by(predictiontype) %>% 
-  count()
+  # count()
   summarise(exclusive=sum(exclusive),
-            established=sum(established))
+            established=sum(established)) %>% 
+st_drop_geometry()
+
+
+write.csv(newtype,"C:/Users/Ysu/Box/Greater DC/Projects/DMPED Housing Assessment 2024/Task 2 - Nbrhd Change and Displacement Risk Assessment/Data collection/Clean/Prediction_neighborhodtype_crosstab.csv")
+
 
 upcomingdisplacement <- predicteddisplacementmap %>% 
   filter(predictiontype=="upcoming displacement risk") 
-
-test <- upcomingdisplacement %>% 
-  group_by(NBH_NAMES, Ward,neighborhoodtype.x) %>% 
-  count()
-
 
 urban_colors7 <- c("#73bfe2", "#f5cbdf","#fce39e", "#1696d2" ,"#e9807d","#fdd870","#dcedd9")
 
