@@ -1,26 +1,26 @@
-library(tidyverse)
-library(DescTools)
-library(purrr)
-library(tidycensus)
-library(mapview)
-library(stringr)
-library(educationdata)
-library(sf)
-library(readxl)
-library(urbnthemes)
-library(sp)
-library(ipumsr)
-library(survey)
-library(srvyr)
-library(dplyr)
-library(Hmisc)
-census_api_key("05de4dca638d81abd2dc60d0d28e3781183e185e", install = TRUE)
+## compile data used for neighborhood change and displacement analysis
+## Yipeng Su
+## last updated 9/25/2024
 
-Crosswalk_2000_to_2010 <- read_csv("C:/Users/Ysu/Box/Greater DC/Projects/DMPED Housing Assessment 2024/Task 2 - Nbrhd Change and Displacement Risk Assessment/Data collection/Raw/tract crosswalks/nhgis_tr2000_tr2010_11.csv") %>% 
+#load packages for this program
+if (!require("pacman")) install.packages("pacman")
+pacman::p_load(tidyverse, DescTools, purrr, tidycensus, mapview, stringr, 
+               educationdata, sf, readxl, sp, ipumsr, 
+               survey, srvyr,dplyr, Hmisc, haven)
+
+census_api_key("05de4dca638d81abd2dc60d0d28e3781183e185e", install = TRUE)
+#get your key at https://api.census.gov/data/key_signup.html
+
+#update to your Box drive directory
+setwd("C:/Users/Ysu/Box/Greater DC/Projects/DMPED Housing Assessment 2024/Task 2 - Nbrhd Change and Displacement Risk Assessment/Data collection/")
+
+Crosswalk_2000_to_2010 <- read_csv("Raw/tract crosswalks/nhgis_tr2000_tr2010_11.csv") %>% 
   mutate(GEOID = as.character(tr2000ge))
 # Crosswalk_2020_to_2010 <- read_csv("C:/Users/Ysu/Box/Greater DC/Projects/DMPED Housing Assessment 2024/Task 2 - Nbrhd Change and Displacement Risk Assessment/Data collection/Raw/tract crosswalks/nhgis_tr2020_tr2010_11.csv")
-Crosswalk_2010_to_2020 <- read_csv("C:/Users/Ysu/Box/Greater DC/Projects/DMPED Housing Assessment 2024/Task 2 - Nbrhd Change and Displacement Risk Assessment/Data collection/Raw/tract crosswalks/nhgis_tr2010_tr2020_11.csv") %>% 
+Crosswalk_2010_to_2020 <- read_csv("Raw/tract crosswalks/nhgis_tr2010_tr2020_11.csv") %>% 
 mutate(GEOID=as.character(tr2010ge))
+
+#you can use these variable tables to check the variables used for each variable and year
 v22 <- load_variables(2022, "acs5", cache = TRUE)
 v12 <- load_variables(2012, "acs5", cache = TRUE)
 subject22 <- load_variables(2022, "acs5/subject", cache = TRUE)
@@ -114,7 +114,6 @@ consolidated_2000_2010 <- total_units_2000 %>%
             rent_2000_2010 = sum(rent2000_subpart, na.rm= TRUE)/total_units) 
   
 # Crosswalk 2000 to 2020
-
 consolidated_2000_2010_2020 <- total_units_2010 %>% 
   left_join(Crosswalk_2010_to_2020, by=c("GEOID")) %>% 
   left_join(consolidated_2000_2010, by=c("tr2010ge")) %>% 
@@ -271,7 +270,7 @@ master_housingunits <- consolidated_2000_2010_2020_housing %>%
 housingmarket <- master_housingunits %>% 
   left_join(master_housingvalue,by=c("GEOID"))
 
-vacancy <- read.csv("C:/Users/Ysu/Box/Greater DC/Projects/DMPED Housing Assessment 2024/Task 2 - Nbrhd Change and Displacement Risk Assessment/Data collection/Clean/vanacy.csv") %>% 
+vacancy <- read.csv("Clean/vanacy.csv") %>% 
   select(-X) %>% 
   mutate(GEOID=as.character(geoid)) %>% 
   select(-geoid, -total_residential)%>% 

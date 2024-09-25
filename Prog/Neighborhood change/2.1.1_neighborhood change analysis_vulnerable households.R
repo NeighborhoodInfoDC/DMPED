@@ -2,13 +2,6 @@
 ## Yipeng Su
 ## last updated 9/25/2024
 
-#load packages for this program
-if (!require("pacman")) install.packages("pacman")
-pacman::p_load(tidyverse, DescTools, purrr, tidycensus, mapview, stringr, 
-               educationdata, sf, readxl, sp, ipumsr, 
-               survey, srvyr,dplyr, Hmisc, haven)
-
-
 # tracts that have lost more than 10 percent of vulnerable hh during 2000-2022
 #65 tracts 2000-2022 83 2012-2022
 method1 <-  map_file %>% 

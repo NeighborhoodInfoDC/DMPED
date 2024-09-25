@@ -1,3 +1,7 @@
+## map change in low income and black households
+## Yipeng Su
+## last updated 9/25/2024
+
 library(tidyverse)
 library(DescTools)
 library(purrr)
@@ -12,10 +16,10 @@ library(sp)
 library(ipumsr)
 library(survey)
 library(srvyr)
-library(dummies)
 library(dplyr)
 library(Hmisc)
 census_api_key("05de4dca638d81abd2dc60d0d28e3781183e185e", install = TRUE)
+#get your key at https://api.census.gov/data/key_signup.html
 
 housingmarket <- read_csv("C:/Users/Ysu/Box/Greater DC/Projects/DMPED Housing Assessment 2024/Task 2 - Nbrhd Change and Displacement Risk Assessment/Data collection/Clean/housingmarket.csv") 
 

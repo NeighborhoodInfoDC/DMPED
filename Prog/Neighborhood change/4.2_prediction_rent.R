@@ -1,56 +1,50 @@
-library(tidyverse)
-library(DescTools)
-library(purrr)
-library(tidycensus)
-library(mapview)
-library(stringr)
-library(educationdata)
-library(sf)
-library(readxl)
-library(urbnthemes)
-library(sp)
-library(ipumsr)
-library(survey)
-library(srvyr)
-# library(dummies)
-library(dplyr)
-library(Hmisc)
-library(haven)
-library(caret)
-library(boot)
-library(corrplot)
-library(stargazer)
+## predicting displacement risk with rent based neighborhood change results
+## Yipeng Su
+## last updated 9/25/2024
 
-housingmarket <- read_csv("C:/Users/Ysu/Box/Greater DC/Projects/DMPED Housing Assessment 2024/Task 2 - Nbrhd Change and Displacement Risk Assessment/Data collection/Clean/housingmarket.csv") 
+# Install pacman if not already installed
+if (!require("pacman")) install.packages("pacman")
 
-newrentdata <- read_csv("C:/Users/Ysu/Box/Greater DC/Projects/DMPED Housing Assessment 2024/Task 2 - Nbrhd Change and Displacement Risk Assessment/Data collection/Clean/rentvalue_cat.csv") %>% 
+# Load the required packages using pacman
+pacman::p_load(
+  tidyverse, DescTools, purrr, tidycensus, mapview, stringr, educationdata, sf, 
+  readxl, urbnthemes, sp, ipumsr, survey, srvyr, dplyr, Hmisc, haven, caret, 
+  boot, corrplot, stargazer
+)
+
+#update to your Box drive directory
+setwd("C:/Users/Ysu/Box/Greater DC/Projects/DMPED Housing Assessment 2024/Task 2 - Nbrhd Change and Displacement Risk Assessment/Data collection/")
+
+housingmarket <- read_csv("Clean/housingmarket.csv") 
+
+newrentdata <- read_csv("Clean/rentvalue_cat.csv") %>% 
   mutate(GEOID=as.numeric(GEOID))
 
 housingmarket <- housingmarket %>% 
   left_join(newrentdata,by=c("GEOID")) 
 
-neighborhoodname <- read_csv("C:/Users/Ysu/Box/Greater DC/Projects/DMPED Housing Assessment 2024/Task 2 - Nbrhd Change and Displacement Risk Assessment/Data collection/Clean/neighborhood_tract.csv")
+neighborhoodname <- read_csv("Clean/neighborhood_tract.csv")
 
-lowincome <- read_csv("C:/Users/Ysu/Box/Greater DC/Projects/DMPED Housing Assessment 2024/Task 2 - Nbrhd Change and Displacement Risk Assessment/Data collection/Clean/lowincome_pop.csv")
+lowincome <- read_csv("Clean/lowincome_pop.csv")
 
-raceethnicity <- read_csv("C:/Users/Ysu/Box/Greater DC/Projects/DMPED Housing Assessment 2024/Task 2 - Nbrhd Change and Displacement Risk Assessment/Data collection/Clean/race_ethnicity.csv")
+raceethnicity <- read_csv("Clean/race_ethnicity.csv")
 
-neighborhoodtype_rentcat <- read_csv("C:/Users/Ysu/Box/Greater DC/Projects/DMPED Housing Assessment 2024/Task 2 - Nbrhd Change and Displacement Risk Assessment/Data collection/Clean/neighborhoodtype_rentcat.csv")
+neighborhoodtype_rentcat <- read_csv("Clean/neighborhoodtype_rentcat.csv")
 
-vacancy <- read_csv("C:/Users/Ysu/Box/Greater DC/Projects/DMPED Housing Assessment 2024/Task 2 - Nbrhd Change and Displacement Risk Assessment/Data collection/Clean/vacancy.csv") %>% 
+vacancy <- read_csv("Clean/vacancy.csv") %>% 
   mutate(GEOID=geoid) %>% 
   select(GEOID, year, vacancyrate) %>% 
   filter(year==2012|year==2022) %>% 
   mutate(year=paste0("vacancy_", as.character(year))) %>% 
   spread(key=year,value=vacancyrate) 
 
-distance <- read_csv("C:/Users/Ysu/Box/Greater DC/Projects/DMPED Housing Assessment 2024/Task 2 - Nbrhd Change and Displacement Risk Assessment/Data collection/Clean/distance_downtown.csv")
+distance <- read_csv("Clean/distance_downtown.csv")
 
-lowincjobs <- read_csv("C:/Users/Ysu/Box/Greater DC/Projects/DMPED Housing Assessment 2024/Task 2 - Nbrhd Change and Displacement Risk Assessment/Data collection/Clean/lowincome_jobs.csv")
+lowincjobs <- read_csv("Clean/lowincome_jobs.csv")
 
-HUDsubsidy <- read_csv("C:/Users/Ysu/Box/Greater DC/Projects/DMPED Housing Assessment 2024/Task 2 - Nbrhd Change and Displacement Risk Assessment/Data collection/Clean/HUD_subsidy.csv")
+HUDsubsidy <- read_csv("Clean/HUD_subsidy.csv")
 
-college <- read_csv("C:/Users/Ysu/Box/Greater DC/Projects/DMPED Housing Assessment 2024/Task 2 - Nbrhd Change and Displacement Risk Assessment/Data collection/Clean/college.csv")
+college <- read_csv("Clean/college.csv")
 
 predictionmaster <- neighborhoodtype_rentcat %>% 
   left_join(housingmarket, by=c("GEOID")) %>% 
