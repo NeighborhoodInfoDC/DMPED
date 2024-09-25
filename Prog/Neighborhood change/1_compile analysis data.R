@@ -6,7 +6,7 @@
 if (!require("pacman")) install.packages("pacman")
 pacman::p_load(tidyverse, DescTools, purrr, tidycensus, mapview, stringr, 
                educationdata, sf, readxl, sp, ipumsr, 
-               survey, srvyr,dplyr, Hmisc, haven)
+               survey, srvyr,dplyr, Hmisc, haven, units)
 
 census_api_key("05de4dca638d81abd2dc60d0d28e3781183e185e", install = TRUE)
 #get your key at https://api.census.gov/data/key_signup.html
@@ -349,7 +349,7 @@ lowincome_2000<- get_decennial(geography = "tract",
               names_from = variable,
               values_from = c(value)) %>% 
   replace(is.na(.), 0) %>% 
-  mutate(lowincome_2000=as.numeric(P052002)+as.numeric(P052003)+as.numeric(P052004)+as.numeric(P052005)+as.numeric(P052006)+as.numeric(P052007)+as.numeric(P052008)) %>% 
+  mutate(lowincome_2000=as.numeric(P052002)+as.numeric(P052003)+as.numeric(P052004)+as.numeric(P052005)+as.numeric(P052006)+as.numeric(P052007)+as.numeric(P052008)*0.74) %>% 
   select(GEOID, lowincome_2000)
 
 
@@ -398,6 +398,12 @@ downtown_sf_proj <- st_transform(downtown_sf, crs = 3857)
 
 # Create half-mile buffer
 dt_halfmile <- st_buffer(downtown_sf_proj, dist = set_units(0.5, "mi"))
+
+tractboundary_20 <- get_acs(geography = "tract", 
+  variables = c("B01003_001"),
+  state = "DC",
+  geometry = TRUE,
+  year = 2022)
 
 tracts_distance <- tractboundary_20 %>%
   st_transform(crs = st_crs(downtown_sf)) %>%
