@@ -235,7 +235,7 @@ consolidated_2000_2010_housing <-Crosswalk_2000_to_2010 %>%
          renter2000_subpart=renter_2000*wt_renthu,
          owner2000_subpart=owner_2000*wt_ownhu) %>% 
   group_by(tr2010ge) %>% 
-  summarize(housing_2000_2010 = sum(housing2000_subpart, na.rm= TRUE),
+  summarise(housing_2000_2010 = sum(housing2000_subpart, na.rm= TRUE),
             renter_2000_2010 = sum(renter2000_subpart, na.rm= TRUE),
             owner_2000_2010= sum(owner2000_subpart, na.rm= TRUE)) 
 
@@ -247,7 +247,7 @@ consolidated_2000_2010_2020_housing <- Crosswalk_2010_to_2020 %>%
          renter2000_subpart=renter_2000_2010*wt_renthu,
          owner2000_subpart=owner_2000_2010*wt_ownhu) %>% 
   group_by(tr2020ge) %>% 
-  summarize(housing_2000_2020 = sum(housing2000_subpart, na.rm= TRUE),
+  summarise(housing_2000_2020 = sum(housing2000_subpart, na.rm= TRUE),
             renter_2000_2020 = sum(renter2000_subpart, na.rm= TRUE),
             owner_2000_2020=sum(owner2000_subpart, na.rm= TRUE)) 
 
@@ -257,7 +257,7 @@ consolidated_2010_2020_housing <-Crosswalk_2010_to_2020 %>%
          renter2012_subpart=renter_2012*wt_renthu,
          owner2012_subpart=owner_2012*wt_ownhu) %>% 
   group_by(tr2020ge) %>% 
-  summarize(housing_2012_2020 = sum(housing2012_subpart, na.rm= TRUE),
+  summarise(housing_2012_2020 = sum(housing2012_subpart, na.rm= TRUE),
             renter_2012_2020 = sum(renter2012_subpart, na.rm= TRUE),
             owner_2012_2020= sum(owner2012_subpart, na.rm= TRUE)) 
 
@@ -331,12 +331,12 @@ lowincome_2012<-
 test3 <- lowincome_2012 %>% 
   mutate(total="total") %>% 
   group_by(total) %>% 
-  summarize(lowincome=sum(lowincome_2012))
+  summarise(lowincome=sum(lowincome_2012))
 
 test4 <-consolidated_2010_2020_lowincome %>% 
   mutate(total="total") %>% 
   group_by(total) %>% 
-  summarize(lowincome=sum(lowincome_2012_2020))
+  summarise(lowincome=sum(lowincome_2012_2020))
 
 #HUD INCOME LIMIT 60% for 2 person household in 2000 is 38700, P052008 gives $35,000 to $39,999
 #https://api.census.gov/data/2000/dec/sf3/variables.html
@@ -358,7 +358,7 @@ consolidated_2000_2010_lowincome <-Crosswalk_2000_to_2010 %>%
   left_join(lowincome_2000, by=c("GEOID")) %>% 
   mutate(lowincome_2000_subpart=lowincome_2000*wt_pop) %>% 
   group_by(tr2010ge) %>% 
-  summarize(lowincome_2000_2010 = sum(lowincome_2000_subpart, na.rm= TRUE)) 
+  summarise(lowincome_2000_2010 = sum(lowincome_2000_subpart, na.rm= TRUE)) 
 
 # Crosswalk 2000 to 2020
 
@@ -366,14 +366,14 @@ consolidated_2000_2010_2020_lowincome <- Crosswalk_2010_to_2020 %>%
   left_join(consolidated_2000_2010_lowincome, by=c("tr2010ge")) %>% 
   mutate(lowincome_2000_subpart=lowincome_2000_2010*wt_pop) %>% 
   group_by(tr2020ge) %>% 
-  summarize(lowincome_2000_2020 = sum(lowincome_2000_subpart, na.rm= TRUE)) 
+  summarise(lowincome_2000_2020 = sum(lowincome_2000_subpart, na.rm= TRUE)) 
 
 # Crosswalk 2012 to 2020
 consolidated_2010_2020_lowincome <-Crosswalk_2010_to_2020 %>% 
   left_join(lowincome_2012, by=c("GEOID")) %>% 
   mutate(lowincome2012_subpart=lowincome_2012*wt_pop) %>% 
   group_by(tr2020ge) %>% 
-  summarize(lowincome_2012_2020 = sum(lowincome2012_subpart, na.rm= TRUE)) 
+  summarise(lowincome_2012_2020 = sum(lowincome2012_subpart, na.rm= TRUE)) 
 
 lowincomepop <- consolidated_2000_2010_2020_lowincome %>% 
   left_join(consolidated_2010_2020_lowincome,by=c("tr2020ge")) %>% 
@@ -521,7 +521,7 @@ consolidated_2000_2010_college <-Crosswalk_2000_to_2010 %>%
   mutate(college_2000_subpart=bachelors_or_more*wt_pop,
          age25_2000_subpart=over_25*wt_pop) %>% 
   group_by(tr2010ge) %>% 
-  summarize(college_2000_2010 = sum(college_2000_subpart, na.rm= TRUE),
+  summarise(college_2000_2010 = sum(college_2000_subpart, na.rm= TRUE),
             age25_2000_2010=sum(age25_2000_subpart, na.rm= TRUE)) 
 
 # Crosswalk 2000 to 2020
@@ -531,7 +531,7 @@ consolidated_2000_2010_2020_college <- Crosswalk_2010_to_2020 %>%
   mutate(college_2000_subpart=college_2000_2010*wt_pop,
          age25_2000_subpart= age25_2000_2010*wt_pop) %>% 
   group_by(tr2020ge) %>% 
-  summarize(college_2000_2020 = sum(college_2000_subpart, na.rm= TRUE),
+  summarise(college_2000_2020 = sum(college_2000_subpart, na.rm= TRUE),
             age25_2000_2020= sum(age25_2000_subpart, na.rm= TRUE)) %>% 
   mutate(pct_college_2000_2020=college_2000_2020/age25_2000_2020) %>% 
   select(tr2020ge,pct_college_2000_2020)
@@ -542,7 +542,7 @@ consolidated_2010_2020_college <-Crosswalk_2010_to_2020 %>%
   mutate(college_2012_subpart=bachelors_or_more*wt_pop,
          age25_2012_subpart=over_25*wt_pop) %>% 
   group_by(tr2020ge) %>% 
-  summarize(college_2012_2020 = sum(college_2012_subpart, na.rm= TRUE),
+  summarise(college_2012_2020 = sum(college_2012_subpart, na.rm= TRUE),
             age25_2012_2020= sum(age25_2012_subpart, na.rm= TRUE)) %>% 
   mutate(pct_college_2012_2020=college_2012_2020/age25_2012_2020) %>% 
   select(tr2020ge,pct_college_2012_2020)
