@@ -764,3 +764,46 @@ renvaluedata <- consolidated_2012_2020_rentcat %>%
 
 
 write.csv(renvaluedata,"C:/Users/Ysu/Box/Greater DC/Projects/DMPED Housing Assessment 2024/Task 2 - Nbrhd Change and Displacement Risk Assessment/Data collection/Clean/rentvalue_cat.csv")
+
+#########copied over from Sam's program compiling HH by race and ethnicity
+#race by household
+race_household_22 <- get_acs(geography = "tract",
+                             variables = c("B11001H_001", "B11001_001", "B11001D_001", "B11001E_001", "B11001B_001",
+                                           "B11001C_001", "B11001F_001", "B11001G_001", "B11001I_001"
+                             ), state = "DC",
+                             year = 2022,) %>%
+  pivot_wider(id_cols = c(GEOID, NAME),
+              names_from = variable,
+              values_from = estimate)%>%
+  rename(total_hh = B11001_001, non_hispanic_white_hh = B11001H_001,
+         non_hispanic_black_hh = B11001B_001, non_hispanic_indigenous_hh = B11001C_001,
+         non_hispanic_asian_hh = B11001D_001, non_hispanic_pacific_hh = B11001E_001,
+         some_other_race_hh = B11001F_001, two_or_more_races_hh = B11001G_001, hispanic_or_latino_hh = B11001I_001)
+
+race_household_12 <- get_acs(geography = "tract",
+                             variables = c("B11001H_001", "B11001_001", "B11001D_001", "B11001E_001", "B11001B_001",
+                                           "B11001C_001", "B11001F_001", "B11001G_001", "B11001I_001"
+                             ), state = "DC",
+                             year = 2012,) %>%
+  pivot_wider(id_cols = c(GEOID, NAME),
+              names_from = variable,
+              values_from = estimate)%>%
+  rename(total_hh = B11001_001, non_hispanic_white_hh = B11001H_001,
+         non_hispanic_black_hh = B11001B_001, non_hispanic_indigenous_hh = B11001C_001,
+         non_hispanic_asian_hh = B11001D_001, non_hispanic_pacific_hh = B11001E_001,
+         some_other_race_hh = B11001F_001, two_or_more_races_hh = B11001G_001, hispanic_or_latino_hh = B11001I_001)
+
+race_household_2000 <- get_decennial(geography = "tract",
+                                     variables = c("P026001", "P026A001", "P026B001", "P026C001", "P026D001", "P026E001",
+                                                   "P026F001", "P026G001", "P026H001"              
+                                     ), state = "DC",
+                                     year = 2000,) %>%
+  pivot_wider(id_cols = c(GEOID, NAME),
+              names_from = variable,
+              values_from = value)%>%
+  rename(total_hh = P026001, non_hispanic_white_hh = P026A001,
+         non_hispanic_black_hh = P026B001, non_hispanoc_indigenous_hh = P026C001,
+         non_hispanic_asian_hh = P026D001, non_hispanic_pacific_hh = P026E001,
+         some_other_race_hh = P026F001	, two_or_more_races_hh = P026G001	, hispanic_or_latino_hh = P026H001)
+
+#crosswalking is the same process, using hh weights
