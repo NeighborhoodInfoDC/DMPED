@@ -97,3 +97,5 @@ lowincblacksummary <- lowincome %>%
 
 write.csv(lowincblacksummary,"C:/Users/Ysu/Box/Greater DC/Projects/DMPED Housing Assessment 2024/Task 2 - Nbrhd Change and Displacement Risk Assessment/Data collection/Clean/lowincblacksummary.csv" )
 
+lowincomesummary <- lowincome %>% 
+  select(lowincome_2012_2020,lowincome_2022)

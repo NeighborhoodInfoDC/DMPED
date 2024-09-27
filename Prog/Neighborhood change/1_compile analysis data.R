@@ -6,7 +6,7 @@
 if (!require("pacman")) install.packages("pacman")
 pacman::p_load(tidyverse, DescTools, purrr, tidycensus, mapview, stringr, 
                educationdata, sf, readxl, sp, ipumsr, 
-               survey, srvyr,dplyr, Hmisc, haven, units)
+               survey, srvyr,dplyr, Hmisc, haven)
 
 census_api_key("05de4dca638d81abd2dc60d0d28e3781183e185e", install = TRUE)
 #get your key at https://api.census.gov/data/key_signup.html
@@ -78,7 +78,6 @@ dc_median_rent_2012 <-
           geometry = FALSE) %>% 
   mutate(rent_2012=estimate)
 
-# Total occupied units
 total_units_2012 <-
   get_acs(geography = "tract",
           variable = "B25042_001",
@@ -87,10 +86,9 @@ total_units_2012 <-
           geometry = FALSE) %>% 
   rename(units_2012=estimate)
 
-# Total housing units [Occupied units is H002002]
 total_units_2000 <-
   get_decennial(geography = "tract",
-                variable = "H001001",
+                variable = "H002002",
                 year = 2000,
                 state = "DC",
                 geometry = FALSE) %>% 
@@ -166,7 +164,7 @@ total_housing_units_2012<-
 
 total_housing_units_2000 <- 
   get_decennial(geography = "tract",
-                variables =  "H001001",
+                variables =  "H002002",
                 year = 2000,
                 state = "DC",
                 geometry = FALSE)%>% 
@@ -331,12 +329,12 @@ lowincome_2012<-
 test3 <- lowincome_2012 %>% 
   mutate(total="total") %>% 
   group_by(total) %>% 
-  summarise(lowincome=sum(lowincome_2012))
+  summarize(lowincome=sum(lowincome_2012))
 
 test4 <-consolidated_2010_2020_lowincome %>% 
   mutate(total="total") %>% 
   group_by(total) %>% 
-  summarise(lowincome=sum(lowincome_2012_2020))
+  summarize(lowincome=sum(lowincome_2012_2020))
 
 #HUD INCOME LIMIT 60% for 2 person household in 2000 is 38700, P052008 gives $35,000 to $39,999
 #https://api.census.gov/data/2000/dec/sf3/variables.html
@@ -398,12 +396,6 @@ downtown_sf_proj <- st_transform(downtown_sf, crs = 3857)
 
 # Create half-mile buffer
 dt_halfmile <- st_buffer(downtown_sf_proj, dist = set_units(0.5, "mi"))
-
-tractboundary_20 <- get_acs(geography = "tract", 
-  variables = c("B01003_001"),
-  state = "DC",
-  geometry = TRUE,
-  year = 2022)
 
 tracts_distance <- tractboundary_20 %>%
   st_transform(crs = st_crs(downtown_sf)) %>%
@@ -527,7 +519,7 @@ consolidated_2000_2010_college <-Crosswalk_2000_to_2010 %>%
   mutate(college_2000_subpart=bachelors_or_more*wt_pop,
          age25_2000_subpart=over_25*wt_pop) %>% 
   group_by(tr2010ge) %>% 
-  summarise(college_2000_2010 = sum(college_2000_subpart, na.rm= TRUE),
+  summarize(college_2000_2010 = sum(college_2000_subpart, na.rm= TRUE),
             age25_2000_2010=sum(age25_2000_subpart, na.rm= TRUE)) 
 
 # Crosswalk 2000 to 2020
@@ -537,7 +529,7 @@ consolidated_2000_2010_2020_college <- Crosswalk_2010_to_2020 %>%
   mutate(college_2000_subpart=college_2000_2010*wt_pop,
          age25_2000_subpart= age25_2000_2010*wt_pop) %>% 
   group_by(tr2020ge) %>% 
-  summarise(college_2000_2020 = sum(college_2000_subpart, na.rm= TRUE),
+  summarize(college_2000_2020 = sum(college_2000_subpart, na.rm= TRUE),
             age25_2000_2020= sum(age25_2000_subpart, na.rm= TRUE)) %>% 
   mutate(pct_college_2000_2020=college_2000_2020/age25_2000_2020) %>% 
   select(tr2020ge,pct_college_2000_2020)
@@ -548,7 +540,7 @@ consolidated_2010_2020_college <-Crosswalk_2010_to_2020 %>%
   mutate(college_2012_subpart=bachelors_or_more*wt_pop,
          age25_2012_subpart=over_25*wt_pop) %>% 
   group_by(tr2020ge) %>% 
-  summarise(college_2012_2020 = sum(college_2012_subpart, na.rm= TRUE),
+  summarize(college_2012_2020 = sum(college_2012_subpart, na.rm= TRUE),
             age25_2012_2020= sum(age25_2012_subpart, na.rm= TRUE)) %>% 
   mutate(pct_college_2012_2020=college_2012_2020/age25_2012_2020) %>% 
   select(tr2020ge,pct_college_2012_2020)
