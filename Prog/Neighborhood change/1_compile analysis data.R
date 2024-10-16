@@ -807,3 +807,179 @@ race_household_2000 <- get_decennial(geography = "tract",
          some_other_race_hh = P026F001	, two_or_more_races_hh = P026G001	, hispanic_or_latino_hh = P026H001)
 
 #crosswalking is the same process, using hh weights
+
+
+#add black population per DMPED feedback
+race_population_22 <- get_acs(geography = "tract",
+                             variables = c("B03002_003", "B03002_004", "B03002_012", "B03002_005", "B03002_006",
+                                           "B03002_007", "B03002_008", "B03002_009"
+                             ), state = "DC",
+                             year = 2022) %>%
+  pivot_wider(id_cols = c(GEOID, NAME),
+              names_from = variable,
+              values_from = estimate)%>%
+  rename(non_hispanic_white_pop_2022 = B03002_003,
+         non_hispanic_black_pop_2022 = B03002_004,
+         hispanic_or_latino_pop_2022 = B03002_012) %>% 
+  mutate(non_hispanic_aapi_pop_2022=B03002_006+B03002_007,
+         non_hispanic_other_pop_2022=B03002_005+B03002_008+B03002_009) %>% 
+  select(-(contains("B03002_")))
+
+race_population_12 <- get_acs(geography = "tract",
+                              variables = c("B03002_003", "B03002_004", "B03002_012", "B03002_005", "B03002_006",
+                                            "B03002_007", "B03002_008", "B03002_009"
+                              ), state = "DC",
+                              year = 2012) %>%
+  pivot_wider(id_cols = c(GEOID, NAME),
+              names_from = variable,
+              values_from = estimate)%>%
+  rename(non_hispanic_white_pop = B03002_003,
+         non_hispanic_black_pop = B03002_004,
+         hispanic_or_latino_pop = B03002_012) %>% 
+  mutate(non_hispanic_aapi_pop=B03002_006+B03002_007,
+         non_hispanic_other_pop=B03002_005+B03002_008+B03002_009) %>% 
+  select(-(contains("B03002_")))
+
+race_population_2000 <- get_decennial(geography = "tract",
+                                     variables = c("P007003", "P007004", "P007005", "P007006", "P007007", "P007008",
+                                                   "P007009", "P007010"            
+                                     ), state = "DC",
+                                     year = 2000) %>%
+  pivot_wider(id_cols = c(GEOID, NAME),
+              names_from = variable,
+              values_from = value)%>%
+  rename(non_hispanic_white_pop = P007003,
+         non_hispanic_black_pop = P007004, hispanic_or_latino_pop = P007010) %>% 
+  mutate(non_hispanic_aapi_pop=P007006+P007007,
+         non_hispanic_other_pop=P007005+P007008+P007009) %>% 
+  select(-(contains("P007")))
+
+
+#crosswalk 2000-2010
+consolidated_2000_2010_pop <-Crosswalk_2000_to_2010 %>% 
+  left_join(race_population_2000, by=c("GEOID")) %>% 
+  mutate(white_2000_subpart=non_hispanic_white_pop*wt_pop,
+         black_2000_subpart=non_hispanic_black_pop*wt_pop,
+         hispanic_2000_subpart=hispanic_or_latino_pop*wt_pop,
+         aapi_2000_subpart=non_hispanic_aapi_pop*wt_pop,
+         other_2000_subpart=non_hispanic_other_pop*wt_pop) %>% 
+  group_by(tr2010ge) %>% 
+  summarise(non_hispanic_white_pop_2000_2010 = sum(white_2000_subpart, na.rm= TRUE),
+            non_hispanic_black_pop_2000_2010 = sum(black_2000_subpart, na.rm= TRUE),
+            hispanic_or_latino_pop_2000_2010 = sum(hispanic_2000_subpart, na.rm= TRUE),
+            non_hispanic_aapi_pop_2000_2010 = sum(aapi_2000_subpart, na.rm= TRUE),
+            non_hispanic_other_pop_2000_2010 = sum(other_2000_subpart, na.rm= TRUE)
+            ) 
+
+# Crosswalk 2000 to 2020
+
+consolidated_2000_2010_2020_pop <- Crosswalk_2010_to_2020 %>% 
+  left_join(consolidated_2000_2010_pop, by=c("tr2010ge")) %>% 
+  mutate(white_2000_subpart=non_hispanic_white_pop_2000_2010*wt_pop,
+         black_2000_subpart=non_hispanic_black_pop_2000_2010*wt_pop,
+         hispanic_2000_subpart=hispanic_or_latino_pop_2000_2010*wt_pop,
+         aapi_2000_subpart=non_hispanic_aapi_pop_2000_2010*wt_pop,
+         other_2000_subpart=non_hispanic_other_pop_2000_2010*wt_pop) %>% 
+  group_by(tr2020ge) %>% 
+  summarise(non_hispanic_white_pop_2000_2010_2020 = sum(white_2000_subpart, na.rm= TRUE),
+            non_hispanic_black_pop_2000_2010_2020 = sum(black_2000_subpart, na.rm= TRUE),
+            hispanic_or_latino_pop_2000_2010_2020 = sum(hispanic_2000_subpart, na.rm= TRUE),
+            non_hispanic_aapi_pop_2000_2010_2020 = sum(aapi_2000_subpart, na.rm= TRUE),
+            non_hispanic_other_pop_2000_2010_2020 = sum(other_2000_subpart, na.rm= TRUE)
+  ) 
+
+# Crosswalk 2012 to 2020
+consolidated_2010_2020_pop <-Crosswalk_2010_to_2020 %>% 
+  left_join(race_population_12, by=c("GEOID")) %>% 
+  mutate(white_2012_subpart=non_hispanic_white_pop*wt_pop,
+         black_2012_subpart=non_hispanic_black_pop*wt_pop,
+         hispanic_2012_subpart=hispanic_or_latino_pop*wt_pop,
+         aapi_2012_subpart=non_hispanic_aapi_pop*wt_pop,
+         other_2012_subpart=non_hispanic_other_pop*wt_pop) %>% 
+  group_by(tr2020ge) %>% 
+  summarise(non_hispanic_white_pop_2012_2020 = sum(white_2012_subpart, na.rm= TRUE),
+          non_hispanic_black_pop_2012_2020 = sum(black_2012_subpart, na.rm= TRUE),
+          hispanic_or_latino_pop_2012_2020 = sum(hispanic_2012_subpart, na.rm= TRUE),
+          non_hispanic_aapi_pop_2012_2020 = sum(aapi_2012_subpart, na.rm= TRUE),
+          non_hispanic_other_pop_2012_2020 = sum(other_2012_subpart, na.rm= TRUE)
+) 
+
+popbyrace <- consolidated_2000_2010_2020_pop %>% 
+  left_join(consolidated_2010_2020_pop,by=c("tr2020ge")) %>% 
+  mutate(GEOID=as.character(tr2020ge)) %>% 
+  left_join(race_population_22,by=c("GEOID"))
+
+write.csv(popbyrace,"C:/Users/Ysu/Box/Greater DC/Projects/DMPED Housing Assessment 2024/Task 2 - Nbrhd Change and Displacement Risk Assessment/Data collection/Clean/pop_race_ethnicity.csv")
+
+### black households by tenure
+#note ACS table B25008B also gives total population by tenure
+
+black_tenure_22 <- get_acs(geography = "tract",
+                              variables = c("B25003B_002", "B25003B_003"
+                              ), state = "DC",
+                              year = 2022) %>%
+  pivot_wider(id_cols = c(GEOID, NAME),
+              names_from = variable,
+              values_from = estimate)%>%
+  rename(black_renter_2022 = B25003B_003,
+         black_owner_2022 = B25003B_002) 
+
+black_tenure_12 <- get_acs(geography = "tract",
+                           variables = c("B25003B_002", "B25003B_003"
+                           ), state = "DC",
+                           year = 2022) %>%
+  pivot_wider(id_cols = c(GEOID, NAME),
+              names_from = variable,
+              values_from = estimate)%>%
+  rename(black_renter_2012 = B25003B_003,
+         black_owner_2012 = B25003B_002) 
+
+black_tenure_2000<- 
+  get_decennial(geography = "tract",
+                variables =  c("H011012","H011004"),
+                year = 2000,
+                state = "DC",
+                geometry = FALSE)%>% 
+pivot_wider(id_cols = c(GEOID, NAME),
+            names_from = variable,
+            values_from = value)%>%
+  rename(black_renter_2000 = H011012, black_owner_2000 = H011004)
+
+#crosswalk 2000-2010
+consolidated_2000_2010_tenure <-Crosswalk_2000_to_2010 %>% 
+  left_join(black_tenure_2000, by=c("GEOID")) %>% 
+  mutate(renter_2000_subpart=black_renter_2000*wt_renthu,
+         owner_2000_subpart=black_owner_2000*wt_ownhu) %>% 
+  group_by(tr2010ge) %>% 
+  summarise(black_renter_2000_2010 = sum(renter_2000_subpart, na.rm= TRUE),
+            black_owner_2000_2010 = sum(owner_2000_subpart, na.rm= TRUE)
+  ) 
+
+# Crosswalk 2000 to 2020
+
+consolidated_2000_2010_2020_tenure <- Crosswalk_2010_to_2020 %>% 
+  left_join(consolidated_2000_2010_tenure, by=c("tr2010ge")) %>% 
+  mutate(renter_2000_subpart=black_renter_2000_2010*wt_pop,
+         owner_2000_subpart=black_owner_2000_2010*wt_pop
+        ) %>% 
+  group_by(tr2020ge) %>% 
+  summarise(black_renter_2000_2010_2020 = sum(renter_2000_subpart, na.rm= TRUE),
+            black_owner_2000_2010_2020 = sum(owner_2000_subpart, na.rm= TRUE)
+  ) 
+
+# Crosswalk 2012 to 2020
+consolidated_2010_2020_tenure <-Crosswalk_2010_to_2020 %>% 
+  left_join(black_tenure_12, by=c("GEOID")) %>% 
+  mutate(renter_2012_subpart=black_renter_2012*wt_renthu,
+         owner_2012_subpart=black_owner_2012*wt_ownhu) %>% 
+  group_by(tr2020ge) %>% 
+  summarise(black_renter_2012_2020 = sum(renter_2012_subpart, na.rm= TRUE),
+            black_owner_2012_2020 = sum(owner_2012_subpart, na.rm= TRUE)
+  ) 
+
+blacktenure <- consolidated_2000_2010_2020_tenure %>% 
+  left_join(consolidated_2010_2020_tenure,by=c("tr2020ge")) %>% 
+  mutate(GEOID=as.character(tr2020ge)) %>% 
+  left_join(black_tenure_22,by=c("GEOID"))
+
+write.csv(blacktenure,"C:/Users/Ysu/Box/Greater DC/Projects/DMPED Housing Assessment 2024/Task 2 - Nbrhd Change and Displacement Risk Assessment/Data collection/Clean/Black_tenure.csv")

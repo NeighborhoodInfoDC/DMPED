@@ -1,21 +1,17 @@
-library(tidyverse)
-library(DescTools)
-library(purrr)
-library(tidycensus)
-library(mapview)
-library(stringr)
-library(educationdata)
-library(sf)
-library(readxl)
-library(urbnthemes)
-library(sp)
-library(ipumsr)
-library(survey)
-library(srvyr)
-library(dummies)
-library(dplyr)
-library(Hmisc)
-census_api_key("05de4dca638d81abd2dc60d0d28e3781183e185e", install = TRUE)
+# Install pacman if not already installed
+if (!require("pacman")) install.packages("pacman")
+
+# Load the required packages using pacman
+pacman::p_load(
+  tidyverse, DescTools, purrr, tidycensus, mapview, stringr, educationdata, sf, 
+  readxl, urbnthemes, sp, ipumsr, survey, srvyr, dplyr, Hmisc, haven, caret, 
+  boot, corrplot, stargazer
+)
+
+# census_api_key("05de4dca638d81abd2dc60d0d28e3781183e185e", install = TRUE)
+
+#update to your Box drive directory
+setwd("C:/Users/Ysu/Box/Greater DC/Projects/DMPED Housing Assessment 2024/Task 2 - Nbrhd Change and Displacement Risk Assessment/Data collection/")
 
 Crosswalk_2000_to_2010 <- read_csv("C:/Users/Ysu/Box/Greater DC/Projects/DMPED Housing Assessment 2024/Task 2 - Nbrhd Change and Displacement Risk Assessment/Data collection/Raw/tract crosswalks/nhgis_tr2000_tr2010_11.csv") %>% 
   mutate(GEOID = as.character(tr2000ge))
@@ -99,3 +95,12 @@ write.csv(lowincblacksummary,"C:/Users/Ysu/Box/Greater DC/Projects/DMPED Housing
 
 lowincomesummary <- lowincome %>% 
   select(lowincome_2012_2020,lowincome_2022)
+
+#validate against HUD QCT (2022) per DMPED feedback
+
+QCT <- read.csv("Raw/QCT2022.csv") %>% 
+  filter(statefp==11) #61 tracts
+#this gives a list of identified tracts, per our past table, the 10 percent
+#threshold gives about 80 tracts
+#next step is to try using loss of lowincome and blck population both in terms of percentage and absolute value
+
