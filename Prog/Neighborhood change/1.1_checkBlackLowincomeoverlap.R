@@ -97,6 +97,7 @@ lowincomesummary <- lowincome %>%
   select(lowincome_2012_2020,lowincome_2022)
 
 #validate against HUD QCT (2022) per DMPED feedback
+#per discussion aggregate low income household estiamtes to PUMA and compare results
 
 QCT <- read.csv("Raw/QCT2022.csv") %>% 
   filter(statefp==11) #61 tracts
@@ -104,3 +105,38 @@ QCT <- read.csv("Raw/QCT2022.csv") %>%
 #threshold gives about 80 tracts
 #next step is to try using loss of lowincome and blck population both in terms of percentage and absolute value
 
+dc_pums_22 <- get_pums(
+  variables = c("PUMA", "SEX", "AGEP","WAGP" ,"SCHL","JWMNP","TAXAMT","RAC1P", "HISP", "HUPAC", "R65", "TEN", "VALP","BDSP","NP" ,"HINCP","GRNTP", "OCPIP","BLD"),
+  state = "DC",
+  survey = "acs1",
+  year = 2022
+) %>% 
+  mutate(jur="DC") 
+
+lowincome_pums <- dc_pums_22%>% 
+  filter(!is.na(HINCP)) %>% 
+  mutate(lowincome=ifelse(HINCP<68400,"lowincome","notlowincome")) %>% 
+  count(PUMA, lowincome, wt = WGTP) %>% 
+  filter(lowincome=="lowincome")
+
+test <- dc_pums_22%>% 
+  filter(!is.na(HINCP)) %>% 
+  mutate(household=1) %>% 
+  count(household, wt = WGTP) %>% 
+  filter(lowincome=="lowincome")
+  
+crosswalk <- read.delim("C:/Users/Ysu/Desktop/2020_Census_Tract_to_2020_PUMA.txt",
+                        sep =",",header = TRUE) %>% 
+  filter(STATEFP==11) %>% 
+  mutate(COUNTYFP=str_pad(COUNTYFP,3, pad="0"),
+         TRACTCE=str_pad(TRACTCE,6,pad="0"),
+         PUMA5CE=str_pad(PUMA5CE,5,pad="0")) %>% 
+  mutate(GEOID=paste0(STATEFP,COUNTYFP,TRACTCE))
+
+lowincome_tract_puma <- lowincome %>% 
+  mutate(GEOID=as.character(GEOID)) %>% 
+  left_join(crosswalk, by=c("GEOID")) %>% 
+  group_by(PUMA5CE) %>% 
+  summarize(lowincome_analysis=sum(lowincome_2022)) %>% 
+  mutate(PUMA=PUMA5CE) %>% 
+  left_join(lowincome_pums,by=c("PUMA"))
