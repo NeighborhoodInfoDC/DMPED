@@ -106,7 +106,7 @@ QCT <- read.csv("Raw/QCT2022.csv") %>%
 #next step is to try using loss of lowincome and blck population both in terms of percentage and absolute value
 
 dc_pums_22 <- get_pums(
-  variables = c("PUMA", "SEX", "AGEP","WAGP" ,"SCHL","JWMNP","TAXAMT","RAC1P", "HISP", "HUPAC", "R65", "TEN", "VALP","BDSP","NP" ,"HINCP","GRNTP", "OCPIP","BLD"),
+  variables = c("PUMA","SERIALNO", "SEX", "AGEP","WAGP" ,"SCHL","JWMNP","TAXAMT","RAC1P", "HISP", "HUPAC", "R65", "TEN", "VALP","BDSP","NP" ,"HINCP","GRNTP", "OCPIP","BLD"),
   state = "DC",
   survey = "acs1",
   year = 2022
@@ -116,14 +116,9 @@ dc_pums_22 <- get_pums(
 lowincome_pums <- dc_pums_22%>% 
   filter(!is.na(HINCP)) %>% 
   mutate(lowincome=ifelse(HINCP<68400,"lowincome","notlowincome")) %>% 
-  count(PUMA, lowincome, wt = WGTP) %>% 
-  filter(lowincome=="lowincome")
-
-test <- dc_pums_22%>% 
-  filter(!is.na(HINCP)) %>% 
-  mutate(household=1) %>% 
-  count(household, wt = WGTP) %>% 
-  filter(lowincome=="lowincome")
+  filter(lowincome=="lowincome") %>% 
+  distinct(SERIALNO, .keep_all = TRUE) %>%  # Ensure each household is counted once
+  count(PUMA, lowincome, wt = WGTP) 
   
 crosswalk <- read.delim("C:/Users/Ysu/Desktop/2020_Census_Tract_to_2020_PUMA.txt",
                         sep =",",header = TRUE) %>% 
@@ -137,6 +132,26 @@ lowincome_tract_puma <- lowincome %>%
   mutate(GEOID=as.character(GEOID)) %>% 
   left_join(crosswalk, by=c("GEOID")) %>% 
   group_by(PUMA5CE) %>% 
-  summarize(lowincome_analysis=sum(lowincome_2022)) %>% 
+  summarise(lowincome_analysis=sum(lowincome_2022)) %>% 
   mutate(PUMA=PUMA5CE) %>% 
   left_join(lowincome_pums,by=c("PUMA"))
+
+pumaboundary <- get_acs(
+  geography = "public use microdata area", 
+  variables = "B01003_001",                
+  state = "DC",                           
+  year = 2022,                            
+  geometry = TRUE                        
+) %>% 
+  mutate(PUMA=substr(GEOID, 3,7)) %>% 
+  left_join(lowincome_tract_puma,by=c("PUMA")) %>% 
+  mutate(difference=lowincome_analysis-n) %>% 
+  mutate(color = ifelse(difference > 0, "green", "yellow")) 
+
+ggplot(data = pumaboundary) +
+  geom_sf(aes(fill = color)) +                       # Fill PUMA regions based on the color mapping
+  geom_sf_text(aes(label = difference), size = 3) +  # Add labels showing the difference in each PUMA
+  scale_fill_identity() +                            # Use the colors specified directly in the data
+  labs(title = "Map of Differences between Actual and Analysis in PUMA Regions",
+       fill = "Difference") +
+  theme_minimal()       
