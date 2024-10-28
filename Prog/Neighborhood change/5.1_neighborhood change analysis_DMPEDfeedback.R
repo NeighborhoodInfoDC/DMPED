@@ -215,8 +215,8 @@ master6 <- map_file %>%
                                     lowmod_housing_2000=="no" & overalldecreasevalue_2012_2022=="yes" ~ "decreasing value neighborhood",
                                     continuedhigh=="yes" & vulnerable=="lossvulnerable" ~ "established opportunity with displacement risk",
                                     continuedhigh=="yes" & vulnerable=="nolossvulnerable" ~ "established opportunity",
-                                    continuedlow=="yes" & vulnerable=="lossvulnerable" ~ "disinvestment with displacement risk",
-                                    continuedlow=="yes" & vulnerable=="nolossvulnerable" ~ "future opportunity for growth",
+                                    continuedlow=="yes" & vulnerable=="lossvulnerable" ~ "underinvestment with displacement risk",
+                                    continuedlow=="yes" & vulnerable=="nolossvulnerable" ~ "underinvestment & future opportunity",
                                     TRUE~ "dynamic")) %>% 
   mutate(`neighborhood category` = factor(neighborhoodtype,
                                           levels = c("stable growing",
@@ -224,12 +224,12 @@ master6 <- map_file %>%
                                                      "decreasing value neighborhood",
                                                      "established opportunity",
                                                      "established opportunity with displacement risk",
-                                                     "disinvestment with displacement risk",
-                                                     "future opportunity for growth",
+                                                     "underinvestment with displacement risk",
+                                                     "underinvestment & future opportunity",
                                                      "dynamic"
                                           ))) 
 
-selected_vars <- c("changeinhomevalue", "pctchangeinhomevalue", "changeinunits", "pctchangeinunits",
+selected_vars <- c("medianhome_2022","changeinhomevalue", "pctchangeinhomevalue", "changeinunits", "pctchangeinunits",
                    "pctchangeinlowrent","changeinowner","pctchangeinowner","changeinrenter","pctchangeinrenter",
                    "changeinblackrenter","pctchangeinblackrenter","changeinblackowner","pctchangeinblackowner")
 
@@ -282,14 +282,15 @@ test <- master5 %>%
   filter(GEOID=="11001006804")
 
 displacementarea <- master6 %>% 
-  filter(neighborhoodtype=="exclusive growth with displacement risk"|neighborhoodtype=="established opportunity with displacement risk"|neighborhoodtype=="disinvestment with displacement risk")
+  filter(neighborhoodtype=="exclusive growth with displacement risk"|neighborhoodtype=="established opportunity with displacement risk"|neighborhoodtype=="underinvestment with displacement risk")
 
 urban_colors7 <- c("#73bfe2", "#f5cbdf","#fce39e", "#1696d2" ,"#e9807d","#fdd870","#dcedd9")
-urban_colors8 <- c("#73bfe2", "#f5cbdf","#fce39e", "#1696d2" ,"#e9807d" ,"#e46aa7","#fdd870","#dcedd9")
+urban_colors8 <- c("#f5f5f5", "#f5cbdf","#fce39e", "#e3e3e3" ,"#e9807d" ,"#e46aa7","#fdd870","#dcedd9")
+urban_colors8_2 <- c("#f5f5f5", "#cfe8f3","#fce39e", "#e3e3e3" ,"#73bfed" ,"#1696d2","#f5cbdf","#dcedd9")
 
 ggplot() +
   geom_sf(data =master6, aes( fill = `neighborhood category`))+
-  scale_fill_manual(name="neighborhoodchange type", values = urban_colors8, guide = guide_legend(override.aes = list(linetype = "blank", 
+  scale_fill_manual(name="neighborhoodchange type", values = urban_colors8_2, guide = guide_legend(override.aes = list(linetype = "blank", 
                                                                                                                      shape = NA)))+ 
   # geom_sf(BBCF, mapping = aes(), fill=NA,lwd =  0.5, color="#fdbf11",show.legend = "line")+
   # geom_sf(cog_all, mapping = aes(), fill=NA,lwd =  1, color="#ec008b",show.legend = "line")+
@@ -395,7 +396,7 @@ ggplot() +
 #prediction
 
 neighborhoodtype_Oct <- master6 %>% 
-  select(GEOID, neighborhoodtype) %>% #need to add back , NBH_NAMES when VPN works
+  select(GEOID, neighborhoodtype, NBH_NAMES) %>% 
   st_drop_geometry()
 
 neighborhoodname <- read_csv("Clean/neighborhood_tract.csv")
@@ -426,6 +427,7 @@ predictionmaster <-  neighborhoodtype_Oct %>%
   left_join(HUDsubsidy, by=c("GEOID")) %>% 
   left_join(college, by=c("GEOID")) %>% 
   left_join(newrentdata, by=c("GEOID")) %>% 
+  left_join(popbyrace, by=c("GEOID")) %>% 
   mutate(displacement=ifelse((neighborhoodtype=="exclusive growth with displacement risk"|neighborhoodtype=="established opportunity with displacement risk"|neighborhoodtype=="disinvestment with displacement risk"),1,0)) %>% 
   mutate(pct_hcv_2012=HCV_2012_2020/total_hh_2012_2020,
          pct_hcv_2022=HCV_2022/total_hh_2022) %>% 
@@ -443,8 +445,10 @@ predictionmaster <-  neighborhoodtype_Oct %>%
          changerent_2012=pct_2022_low-pct_2000_low,
          changeunits_2022=housing_2022-housing_2012_2020,
          changerent_2022=pct_2022_low-pct_2012_low, 
+         changelowincome_2012=lowincome_2012_2020-lowincome_2000_2020,
          changelowincome_2022=lowincome_2022-lowincome_2012_2020,
-         changeblack_2022=non_hispanic_black_hh_2022-non_hispanic_black_hh_2000_2020)
+         changeblack_2012=non_hispanic_black_pop_2012_2020-non_hispanic_black_pop_2000_2010_2020,
+         changeblack_2022=non_hispanic_black_pop_2022-non_hispanic_black_pop_2012_2020)
 
 predictionmaster1 <- predictionmaster %>% 
   rename(vacancy=vacancy_2012,
@@ -456,7 +460,13 @@ predictionmaster1 <- predictionmaster %>%
          lowincjob=pct_lowincjob_2012,
          hcv=pct_hcv_2012,
          changeunits=changeunits_2012,
-         changerent=changerent_2012) 
+         changerent=changerent_2012,
+         changeinblack=changeblack_2022,
+         changeinlowinc=changelowincome_2022) 
+
+out <- predictionmaster1 %>% 
+  select(GEOID,changeinlowinc,distance,vacancy,changeinblack,changerent,changeunits,hcv,lowincjob,college,black,lowinc,homevalue)
+write.csv(out,"C:/Users/Ysu/Documents/regression.csv")
 
 predictionmaster2 <- predictionmaster %>% 
   rename(vacancy=vacancy_2022,
@@ -482,52 +492,158 @@ corrdata <- predictionmaster %>%
          lowincjob=pct_lowincjob_2012,
          hcv=pct_hcv_2012,
          units=changeunits_2012,
-         lowrent=changerent_2012)
+         lowrent=changerent_2012,
+         changeblk=changeblack_2012,
+         changelowinc=changelowincome_2012)
 M = cor(corrdata)
 corrplot(M, order = 'AOE', diag=FALSE) # after 'AOE' reorder
-
+#remove college as it's correlated with many variables
 library(stargazer)
 
-logit <- glm(displacement ~ vacancy + distance + distancesquared+homevalue
-             + black  + lowincjob + hcv+changeunits+changerent, family=binomial(link="logit"), data=predictionmaster1) 
+corrdata2 <- predictionmaster %>% 
+  select(vacancy_2012,distance_to_downtown_miles,medianhome_2012_2020,pct_black_2012 ,  pct_lowincjob_2012 , pct_hcv_2012, changeunits_2012, changerent_2012) %>% 
+  rename(vacancy=vacancy_2012,
+         distance=distance_to_downtown_miles,
+         homevalue=medianhome_2012_2020,
+         black=pct_black_2012 ,
+         lowincjob=pct_lowincjob_2012,
+         hcv=pct_hcv_2012,
+         units=changeunits_2012,
+         lowrent=changerent_2012,
+         changeblk=changeblack_2012,
+         changelowinc=changelowincome_2012)
+M2= cor(corrdata2)
+#remove college, lowincome as they are highly correlated with share balck population
 
-logit2 <- glm(displacement ~  distance + distancesquared+homevalue
-              + black  + lowincjob + hcv , family=binomial(link="logit"), data=predictionmaster1) 
+OLS1 <- lm(changeinblack ~ vacancy + distance + distancesquared+ homevalue
+           + black  + lowincjob + hcv+changeunits+changerent, data = predictionmaster1)
 
-logit3 <- glm(displacement ~ vacancy + distance + distancesquared+homevalue
-              + black  + lowincjob , family=binomial(link="logit"), data=predictionmaster1) 
+OLS2 <- lm(changeinblack ~ vacancy + distance + distancesquared+homevalue
+           + black  + lowincjob + hcv+changeunits, data = predictionmaster1)
 
-logit4 <- glm(displacement ~ vacancy + distance + distancesquared+homevalue
-              + black + hcv, family=binomial(link="logit"), data=predictionmaster1) 
+OLS3 <- lm(changeinblack ~ vacancy + distance + distancesquared+homevalue
+           + black  + lowincjob + hcv+changerent, data = predictionmaster1)
 
-logit5 <- glm(displacement ~  distance + distancesquared+homevalue
-              + black  + lowincjob , family=binomial(link="logit"), data=predictionmaster1) 
+OLS4 <- lm(changeinblack ~ vacancy + distance + distancesquared+homevalue
+           + black  + lowincjob +changeunits+changerent, data = predictionmaster1)
+OLS5 <- lm(changeinblack ~ vacancy + distance + distancesquared+homevalue
+           + black   + hcv+changeunits+changerent, data = predictionmaster1)
+OLS6 <- lm(changeinblack ~ vacancy + distance + distancesquared+homevalue
+             + lowincjob + hcv+changeunits+changerent, data = predictionmaster1)
+OLS7 <- lm(changeinblack ~ vacancy + distance + distancesquared
+           + black  + lowincjob + hcv+changeunits+changerent, data = predictionmaster1)
+OLS8 <- lm(changeinblack ~  distance + distancesquared+homevalue
+           + black  + lowincjob + hcv+changeunits+changerent, data = predictionmaster1)
 
-logit6 <- glm(displacement ~ vacancy + distance + distancesquared+homevalue
-              + black  , family=binomial(link="logit"), data=predictionmaster1) 
+test <- lm(changeinblack ~ distance + distancesquared + vacancy + changerent + changeunits + hcv + lowincjob + college + black + lowinc + homevalue, data = predictionmaster1)
+summary(test)
 
-logit7 <- glm(displacement ~  distance + distancesquared+homevalue
-              + black  , family=binomial(link="logit"), data=predictionmaster1) 
+#################test model for black population change
 
-logit8 <- glm(displacement ~  vacancy + distance + distancesquared
-              + black  + lowincjob + hcv+changeunits+changerent, family=binomial(link="logit"), data=predictionmaster1) 
+# Define your dataset and number of folds
+set.seed(123)  # For reproducibility
+k <- 10  # Number of folds
+df <- predictionmaster1  # Assuming this is your dataset
+
+# List your predefined models as formulas
+formulas <- list(
+  OLS1 = changeinblack ~ vacancy + distance + distancesquared +homevalue + black  + lowincjob + hcv+changeunits+changerent,
+  OLS2 = changeinblack ~ vacancy + distance + distancesquared +homevalue+ black  + lowincjob + hcv+changeunits,
+  OLS3 = changeinblack ~ vacancy + distance + distancesquared +homevalue+ black  + lowincjob + hcv+changerent,
+  OLS4 = changeinblack ~ vacancy + distance + distancesquared +homevalue+ black  + lowincjob +changeunits+changerent,
+  OLS5 = changeinblack ~ vacancy + distance + distancesquared +homevalue+ black   + hcv+changeunits+changerent,
+  OLS6 = changeinblack ~ vacancy + distance + distancesquared +homevalue+ lowincjob + hcv+changeunits+changerent,
+  OLS7 =changeinblack ~ vacancy + distance + distancesquared+ black  + lowincjob + hcv+changeunits+changerent,
+  OLS8 = changeinblack ~ distance + distancesquared +homevalue+ black  + lowincjob + hcv+changeunits+changerent
+)
+
+# Function to perform k-fold cross-validation on a given formula
+cross_validate <- function(formula, data, k) {
+  n <- nrow(data)
+  fold_indices <- sample(rep(1:k, length.out = n))
+  rmse_values <- numeric(k)
+  
+  for (i in 1:k) {
+    # Split into training and testing sets
+    train_data <- data[fold_indices != i, ]
+    test_data <- data[fold_indices == i, ]
+    
+    # Fit the model
+    model <- lm(formula, data = train_data)
+    
+    # Predict on the test set and calculate RMSE
+    predictions <- predict(model, newdata = test_data)
+    actuals <- test_data$changeinblack
+    rmse_values[i] <- sqrt(mean((predictions - actuals)^2))
+  }
+  
+  # Return the mean RMSE across all folds
+  mean(rmse_values)
+}
+
+# Apply cross-validation to each model and store results
+results <- sapply(formulas, cross_validate, data = df, k = k)
+
+# Print RMSE results for each model
+print(results)
+
+#collect AIC information
+AIC(OLS1,OLS2,OLS3,OLS4,OLS5,OLS6,OLS7,OLS8 )
 
 #################predict
 
-# Predict probabilities of "am" being 1 (manual transmission)
-predicted_probs <- predict(logit8, predictionmaster2, type = "response")
-print(predicted_probs)
-# Convert probabilities to predicted class (0 or 1) based on a threshold of 0.5
-predicted_class <- ifelse(predicted_probs > 0.5, 1, 0)
-
 # Print predicted classes
-print(predicted_class)
-predictionmaster2$predicted_probs <- predicted_probs
-predictionmaster2$predicted_class <- predicted_class
+predicted <- predict(OLS5, predictionmaster2, type = "response")
+predictionmaster2$predictedchangeinblack <- predicted
 
-Testresult <- predictionmaster2 %>% 
+predictresult <- predictionmaster2 %>% 
   left_join(neighborhoodname, by=c("GEOID")) %>% 
-  select(GEOID, NBH_NAMES,Ward, NAME.y, displacement, predicted_probs,predicted_class )
+  # left_join(predictionmaster, by=c("GEOID")) %>% 
+  mutate(pct=predictedchangeinblack/non_hispanic_black_pop_2022) %>% 
+  mutate(pct=ifelse(pct<(-1),-1,pct)) %>% 
+  filter(non_hispanic_black_pop_2022>0) %>% 
+  mutate(startpop=ntile(non_hispanic_black_pop_2022,10)) %>% 
+  # select(GEOID, NBH_NAMES,Ward, NAME.y, displacement, predictedchangeinblack) %>% 
+  # select(GEOID,predictedchangeinblack,non_hispanic_black_hh_2022-non_hispanic_black_hh_2000_2020)
+  mutate(lossmorethan10=ifelse((pct< -0.1|predictedchangeinblack< -50)& startpop>2,1,0),
+         lossmorethan20=ifelse(pct<-0.2 & startpop>2 ,1,0)) %>% 
+  select(GEOID,pct,lossmorethan10,lossmorethan20,predictedchangeinblack,changeblack_2022) %>% 
+  mutate(predicted_class=ifelse(lossmorethan10==1,1,0))
+
+# Density plot for comparing two periods
+ggplot(predictresult) +
+  geom_density(aes(x = changeblack_2022, color = "2012-2022"), fill = "blue", alpha = 0.3) +
+  geom_density(aes(x = predictedchangeinblack, color = "2022-2032"), fill = "green", alpha = 0.3) +
+  labs(
+    title = "Comparison of Population Change Distribution",
+    x = "Population Change",
+    y = "Density"
+  ) +
+  scale_color_manual(values = c("2012-2022" = "blue", "2022-2032" = "green")) +
+  theme_minimal()
+
+test <- predictresult %>% 
+  filter(predicted_class==1) 
+
+test2 <- predicteddisplacementmap %>% 
+  # filter(displacement==1)
+  group_by(predicted_class,displacement) %>% 
+  count()
+  filter(predicted_class==1) 
+
+test <- master6 %>% 
+  left_join(predictionmaster2 , by="GEOID") %>% 
+  left_join(predictresult , by="GEOID") %>% 
+  filter(predicted_class==1)
+
+ggplot() +
+  geom_sf(test, mapping=aes(), fill="#dcdbdb", color="red", size=0.05)+
+  coord_sf(datum = NA)+  
+  geom_sf(data = tractboundary_20, fill = "transparent", color="#adabac")+
+  coord_sf(datum = NA)
+
+
+
 
 predicteddisplacementmap <- master6%>% 
   left_join(predictionmaster2 , by="GEOID") %>% 
@@ -535,15 +651,16 @@ predicteddisplacementmap <- master6%>%
   mutate(predictiontype=case_when(displacement==1 & predicted_class==1 ~ "continued displacement risk",
                                   displacement==0 & predicted_class==1 ~ "upcoming displacement risk",
                                   displacement==1 & predicted_class==0 ~ "decreased displacement risk",
-                                  displacement==0 & predicted_class==0 ~ "no displacement risk")) 
-# group_by(predictiontype) %>% 
-# count()
-# predict_map <- predicteddisplacementmap %>% 
-#   select(GEOID, neighborhoodtype.x, displacement, predictiontype, NBH_NAMES.x, total_hh_2022.x, pct_black_2022) %>% 
-#   rename(NBH_NAMES=NBH_NAMES.x,
-#          total_hh_2022=total_hh_2022.x,
-#          neighborhoodtype=neighborhoodtype.x) %>% 
-#   st_drop_geometry()
+                                  displacement==0 & predicted_class==0 ~ "no displacement risk")) %>% 
+  mutate(`predict category` = factor(predictiontype,
+                                          levels = c("continued displacement risk",
+                                                     "upcoming displacement risk",
+                                                     "decreased displacement risk",
+                                                     "no displacement risk"
+                                          ))) 
+
+
+
 
 upcomingdisplacement <- predicteddisplacementmap %>% 
   filter(predictiontype=="continued displacement risk"|predictiontype=="upcoming displacement risk") 
@@ -551,33 +668,20 @@ upcomingdisplacement <- predicteddisplacementmap %>%
 
 urban_colors7 <- c("#73bfe2", "#f5cbdf","#fce39e", "#1696d2" ,"#e9807d","#fdd870","#dcedd9")
 urban_colors8 <- c("#73bfe2", "#f5cbdf","#fce39e", "#1696d2" ,"#e9807d" ,"#9d9d9d","#fdd870","#dcedd9")
-
+urban_colors4 <- c("#f5cbdf","#fce39e","#dcedd9","#f5f5f5")
 
 ggplot() +
-  geom_sf(data =predicteddisplacementmap, aes( fill = `neighborhood category`))+
-  scale_fill_manual(name="neighborhoodchange type", values = urban_colors8, guide = guide_legend(override.aes = list(linetype = "blank", 
+  geom_sf(data =predicteddisplacementmap, aes( fill = `predict category`))+
+  scale_fill_manual(name="future displacement type", values = urban_colors4, guide = guide_legend(override.aes = list(linetype = "blank", 
                                                                                                                      shape = NA)))+ 
-  # geom_sf(BBCF, mapping = aes(), fill=NA,lwd =  0.5, color="#fdbf11",show.legend = "line")+
-  # geom_sf(cog_all, mapping = aes(), fill=NA,lwd =  1, color="#ec008b",show.legend = "line")+
-  # scale_color_manual(values = 'transparent', guide = guide_legend(override.aes = list(linetype = "solid"))) +
-  # geom_sf(water_sf, mapping=aes(), fill="#dcdbdb", color="#dcdbdb", size=0.05)+
-  # coord_sf(datum = NA)+
-  # theme(
-  #   panel.grid.major = element_line(colour = "transparent", linewidth = 0),
-  #   axis.title = element_blank(),
-  #   axis.line.y = element_blank(),
-  #   plot.caption = element_text(hjust = 0, linewidth = 16),
-  #   plot.title = element_text(linewidth = 18),
-  #   legend.title=element_text(linewidth=14),
-  #   legend.text = element_text(linewidth = 14)
-  # 
-  # )+
+  geom_sf(water_sf, mapping=aes(), fill="#dcdbdb", color="#dcdbdb", size=0.05)+
+  coord_sf(datum = NA)+
   guides(color = guide_legend(override.aes = list(size=5)))+
   geom_sf(data = tractboundary_20, fill = "transparent", color="#adabac")+
   coord_sf(datum = NA)+
-  geom_sf(data = upcomingdisplacement, fill = "transparent", color="#ec008b")+
-  coord_sf(datum = NA)+
-  labs(title = paste0("Neighborhood Change in DC based on OTR sales data"),
-       subtitle= "Increased displacement risk area highlighted in red",
+  # geom_sf(data = upcomingdisplacement, fill = "transparent", color="#ec008b")+
+  # coord_sf(datum = NA)+
+  labs(title = paste0("Predicted Displacement Areas in DC based on OTR sales data"),
+       subtitle= "",
        caption = "Source: Census 2000, ACS 5-year estimates 2008-2012, 2018-2022")
 
