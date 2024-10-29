@@ -11,7 +11,7 @@ pacman::p_load(
   readxl, urbnthemes, sp, ipumsr, survey, srvyr, dplyr, Hmisc, haven, corrplot
 )
 
-census_api_key("05de4dca638d81abd2dc60d0d28e3781183e185e", install = TRUE)
+# census_api_key("05de4dca638d81abd2dc60d0d28e3781183e185e", install = TRUE)
 #get your key at https://api.census.gov/data/key_signup.html
 
 #update to your Box drive directory
@@ -278,8 +278,6 @@ sumtract <- master6 %>%
   rename(Homevalue_method=n) %>% 
   st_drop_geometry()
 
-test <- master5 %>% 
-  filter(GEOID=="11001006804")
 
 displacementarea <- master6 %>% 
   filter(neighborhoodtype=="exclusive growth with displacement risk"|neighborhoodtype=="established opportunity with displacement risk"|neighborhoodtype=="underinvestment with displacement risk")
@@ -448,7 +446,9 @@ predictionmaster <-  neighborhoodtype_Oct %>%
          changelowincome_2012=lowincome_2012_2020-lowincome_2000_2020,
          changelowincome_2022=lowincome_2022-lowincome_2012_2020,
          changeblack_2012=non_hispanic_black_pop_2012_2020-non_hispanic_black_pop_2000_2010_2020,
-         changeblack_2022=non_hispanic_black_pop_2022-non_hispanic_black_pop_2012_2020)
+         changeblack_2022=non_hispanic_black_pop_2022-non_hispanic_black_pop_2012_2020,
+         pct_renter_2022=renter_2022/(renter_2022+owner_2022),
+         pct_renter_2012=renter_2012_2020/(renter_2012_2020+owner_2012_2020)) 
 
 predictionmaster1 <- predictionmaster %>% 
   rename(vacancy=vacancy_2012,
@@ -462,7 +462,8 @@ predictionmaster1 <- predictionmaster %>%
          changeunits=changeunits_2012,
          changerent=changerent_2012,
          changeinblack=changeblack_2022,
-         changeinlowinc=changelowincome_2022) 
+         changeinlowinc=changelowincome_2022,
+         pct_renter=pct_renter_2012) 
 
 out <- predictionmaster1 %>% 
   select(GEOID,changeinlowinc,distance,vacancy,changeinblack,changerent,changeunits,hcv,lowincjob,college,black,lowinc,homevalue)
@@ -478,14 +479,16 @@ predictionmaster2 <- predictionmaster %>%
          lowincjob=pct_lowincjob_2021,
          hcv=pct_hcv_2022,
          changeunits=changeunits_2022,
-         changerent=changerent_2022) 
+         changerent=changerent_2022,
+         pct_renter=pct_renter_2022) 
 
 ### test correlation
 corrdata <- predictionmaster %>% 
-  select(vacancy_2012,distance_to_downtown_miles,medianhome_2012_2020,pct_lowincome_2012, pct_black_2012 , pct_college_2012_2020 , pct_lowincjob_2012 , pct_hcv_2012, changeunits_2012, changerent_2012) %>% 
+  select(vacancy_2012,distance_to_downtown_miles,medianhome_2012_2020,pct_lowincome_2012, pct_black_2012 , pct_college_2012_2020 , pct_lowincjob_2012 , pct_hcv_2012, changeunits_2012, changeblack_2012,changelowincome_2012,changerent_2012,pct_renter_2012) %>% 
   rename(vacancy=vacancy_2012,
          distance=distance_to_downtown_miles,
          homevalue=medianhome_2012_2020,
+         pct_renter=pct_renter_2012,
          lowinc=pct_lowincome_2012,
          black=pct_black_2012 ,
          college=pct_college_2012_2020,
@@ -501,7 +504,7 @@ corrplot(M, order = 'AOE', diag=FALSE) # after 'AOE' reorder
 library(stargazer)
 
 corrdata2 <- predictionmaster %>% 
-  select(vacancy_2012,distance_to_downtown_miles,medianhome_2012_2020,pct_black_2012 ,  pct_lowincjob_2012 , pct_hcv_2012, changeunits_2012, changerent_2012) %>% 
+  select(vacancy_2012,distance_to_downtown_miles,medianhome_2012_2020,pct_black_2012 ,  pct_lowincjob_2012 , pct_hcv_2012, changeunits_2012, changeblack_2012,changelowincome_2012,changerent_2012,pct_renter_2012) %>% 
   rename(vacancy=vacancy_2012,
          distance=distance_to_downtown_miles,
          homevalue=medianhome_2012_2020,
@@ -535,79 +538,86 @@ OLS7 <- lm(changeinblack ~ vacancy + distance + distancesquared
 OLS8 <- lm(changeinblack ~  distance + distancesquared+homevalue
            + black  + lowincjob + hcv+changeunits+changerent, data = predictionmaster1)
 
-test <- lm(changeinblack ~ distance + distancesquared + vacancy + changerent + changeunits + hcv + lowincjob + college + black + lowinc + homevalue, data = predictionmaster1)
+testbest <- lm(changeinblack ~ distance + vacancy + changerent + 
+                 changeunits + hcv + lowincjob + college + black + lowinc + 
+                 homevalue, data = predictionmaster1)
+test <- lm(changeinblack ~ pct_renter+ changerent + changeunits + college + black + lowinc, data = predictionmaster1)
 summary(test)
 
 #################test model for black population change
 
-# Define your dataset and number of folds
-set.seed(123)  # For reproducibility
-k <- 10  # Number of folds
-df <- predictionmaster1  # Assuming this is your dataset
+# Load necessary libraries
+library(caret)
+library(dplyr)
 
-# List your predefined models as formulas
-formulas <- list(
-  OLS1 = changeinblack ~ vacancy + distance + distancesquared +homevalue + black  + lowincjob + hcv+changeunits+changerent,
-  OLS2 = changeinblack ~ vacancy + distance + distancesquared +homevalue+ black  + lowincjob + hcv+changeunits,
-  OLS3 = changeinblack ~ vacancy + distance + distancesquared +homevalue+ black  + lowincjob + hcv+changerent,
-  OLS4 = changeinblack ~ vacancy + distance + distancesquared +homevalue+ black  + lowincjob +changeunits+changerent,
-  OLS5 = changeinblack ~ vacancy + distance + distancesquared +homevalue+ black   + hcv+changeunits+changerent,
-  OLS6 = changeinblack ~ vacancy + distance + distancesquared +homevalue+ lowincjob + hcv+changeunits+changerent,
-  OLS7 =changeinblack ~ vacancy + distance + distancesquared+ black  + lowincjob + hcv+changeunits+changerent,
-  OLS8 = changeinblack ~ distance + distancesquared +homevalue+ black  + lowincjob + hcv+changeunits+changerent
-)
+# Define the dataset and target variable
+target_var <- "changeinblack"  # or "changeinblack" based on your analysis
+predictors <- c( "distance","distancesquared" ,"vacancy", "changerent", "changeunits", "hcv", 
+                "lowincjob", "black", "homevalue", "pct_renter")
 
-# Function to perform k-fold cross-validation on a given formula
-cross_validate <- function(formula, data, k) {
-  n <- nrow(data)
-  fold_indices <- sample(rep(1:k, length.out = n))
-  rmse_values <- numeric(k)
+# Initialize an empty data frame to store the results
+results <- data.frame(Model = character(), R_squared = numeric(), Adjusted_R_squared = numeric(),CV_RMSE = numeric(), AIC = numeric(), Variables = character())
+
+# Set up cross-validation control
+train_control <- trainControl(method = "cv", number = 10)
+
+# Loop through each possible combination of predictors
+for (i in 1:length(predictors)) {
+  # Generate all combinations of predictors of size i
+  predictor_combinations <- combn(predictors, i, simplify = FALSE)
   
-  for (i in 1:k) {
-    # Split into training and testing sets
-    train_data <- data[fold_indices != i, ]
-    test_data <- data[fold_indices == i, ]
+  for (combo in predictor_combinations) {
+    # Create a formula for the model
+    formula <- as.formula(paste(target_var, "~", paste(combo, collapse = " + ")))
     
-    # Fit the model
-    model <- lm(formula, data = train_data)
+    # Fit the model using 10-fold cross-validation
+    model_cv <- train(formula, data = predictionmaster1, method = "lm", trControl = train_control)
     
-    # Predict on the test set and calculate RMSE
-    predictions <- predict(model, newdata = test_data)
-    actuals <- test_data$changeinblack
-    rmse_values[i] <- sqrt(mean((predictions - actuals)^2))
+    # Extract cross-validated RMSE
+    cv_rmse <- model_cv$results$RMSE
+    
+    # Fit the model on the entire dataset to calculate R-squared and AIC
+    model <- lm(formula, data = predictionmaster1)
+    adjusted_r_squared <- summary(model)$adj.r.squared
+    model_aic <- AIC(model)
+    
+    # Store the results
+    results <- results %>%
+      add_row(Model = paste(combo, collapse = " + "), 
+              Adjusted_R_squared = adjusted_r_squared, 
+              CV_RMSE = cv_rmse, 
+              AIC = model_aic,
+              Variables = paste(combo, collapse = ", "))
   }
-  
-  # Return the mean RMSE across all folds
-  mean(rmse_values)
 }
 
-# Apply cross-validation to each model and store results
-results <- sapply(formulas, cross_validate, data = df, k = k)
+# Filter for the best model based on highest R-squared, lowest CV RMSE, and lowest AIC
+best_model <- results %>%
+  arrange(CV_RMSE,desc(R_squared), AIC) %>%
+  slice(1)
 
-# Print RMSE results for each model
-print(results)
+print("Best Model Based on Highest R-squared, Lowest Cross-Validated RMSE, and Lowest AIC:")
+print(best_model)
 
-#collect AIC information
-AIC(OLS1,OLS2,OLS3,OLS4,OLS5,OLS6,OLS7,OLS8 )
+blackmodel <- lm(changeinblack ~ distancesquared + vacancy + changeunits + hcv + black, data = predictionmaster1)
+summary(blackmodel)
 
 #################predict
 
 # Print predicted classes
-predicted <- predict(OLS5, predictionmaster2, type = "response")
+predicted <- predict(blackmodel, predictionmaster2, type = "response")
 predictionmaster2$predictedchangeinblack <- predicted
 
 predictresult <- predictionmaster2 %>% 
-  left_join(neighborhoodname, by=c("GEOID")) %>% 
+  # left_join(neighborhoodname, by=c("GEOID")) %>% 
   # left_join(predictionmaster, by=c("GEOID")) %>% 
   mutate(pct=predictedchangeinblack/non_hispanic_black_pop_2022) %>% 
   mutate(pct=ifelse(pct<(-1),-1,pct)) %>% 
   filter(non_hispanic_black_pop_2022>0) %>% 
   mutate(startpop=ntile(non_hispanic_black_pop_2022,10)) %>% 
-  # select(GEOID, NBH_NAMES,Ward, NAME.y, displacement, predictedchangeinblack) %>% 
-  # select(GEOID,predictedchangeinblack,non_hispanic_black_hh_2022-non_hispanic_black_hh_2000_2020)
   mutate(lossmorethan10=ifelse((pct< -0.1|predictedchangeinblack< -50)& startpop>2,1,0),
-         lossmorethan20=ifelse(pct<-0.2 & startpop>2 ,1,0)) %>% 
-  select(GEOID,pct,lossmorethan10,lossmorethan20,predictedchangeinblack,changeblack_2022) %>% 
+         lossmorethan20=ifelse(pct< -0.2 & startpop>2 ,1,0)) %>% 
+  select(GEOID,NBH_NAMES,neighborhoodtype,pct,startpop,non_hispanic_black_pop_2022,lossmorethan10,lossmorethan20,predictedchangeinblack,changeblack_2022) %>% 
   mutate(predicted_class=ifelse(lossmorethan10==1,1,0))
 
 # Density plot for comparing two periods
@@ -647,6 +657,7 @@ ggplot() +
 
 predicteddisplacementmap <- master6%>% 
   left_join(predictionmaster2 , by="GEOID") %>% 
+  left_join(predictresult , by="GEOID") %>% 
   # select(GEOID, displacement, predicted_probs,predicted_class) %>% 
   mutate(predictiontype=case_when(displacement==1 & predicted_class==1 ~ "continued displacement risk",
                                   displacement==0 & predicted_class==1 ~ "upcoming displacement risk",
@@ -659,7 +670,9 @@ predicteddisplacementmap <- master6%>%
                                                      "no displacement risk"
                                           ))) 
 
-
+prediction_blackpop <- predicteddisplacementmap %>% 
+  select(GEOID,predictiontype,`predict category`) %>% 
+  st_drop_geometry()
 
 
 upcomingdisplacement <- predicteddisplacementmap %>% 
@@ -681,7 +694,187 @@ ggplot() +
   coord_sf(datum = NA)+
   # geom_sf(data = upcomingdisplacement, fill = "transparent", color="#ec008b")+
   # coord_sf(datum = NA)+
-  labs(title = paste0("Predicted Displacement Areas in DC based on OTR sales data"),
+  labs(title = paste0("Predicted Displacement of Black population in DC based on OTR sales data"),
        subtitle= "",
        caption = "Source: Census 2000, ACS 5-year estimates 2008-2012, 2018-2022")
 
+
+########predicting low income households
+
+# Load necessary libraries
+library(caret)
+library(dplyr)
+
+# Define the dataset and target variable
+target_var <- "changeinlowinc"  # or "changeinblack" based on your analysis
+predictors <- c("distance","distancesquared","vacancy", "changerent", "changeunits", "hcv", 
+                "lowincjob", "black", "homevalue","pct_renter")
+
+# Initialize an empty data frame to store the results
+results <- data.frame(Model = character(), R_squared = numeric(), Adjusted_R_squared = numeric(),CV_RMSE = numeric(), AIC = numeric(), Variables = character())
+
+# Set up cross-validation control
+train_control <- trainControl(method = "cv", number = 10)
+
+# Loop through each possible combination of predictors
+for (i in 1:length(predictors)) {
+  # Generate all combinations of predictors of size i
+  predictor_combinations <- combn(predictors, i, simplify = FALSE)
+  
+  for (combo in predictor_combinations) {
+    # Create a formula for the model
+    formula <- as.formula(paste(target_var, "~", paste(combo, collapse = " + ")))
+    
+    # Fit the model using 10-fold cross-validation
+    model_cv <- train(formula, data = predictionmaster1, method = "lm", trControl = train_control)
+    
+    # Extract cross-validated RMSE
+    cv_rmse <- model_cv$results$RMSE
+    
+    # Fit the model on the entire dataset to calculate R-squared and AIC
+    model <- lm(formula, data = predictionmaster1)
+    adjusted_r_squared <- summary(model)$adj.r.squared
+    model_aic <- AIC(model)
+    
+    # Store the results
+    results <- results %>%
+      add_row(Model = paste(combo, collapse = " + "), 
+              Adjusted_R_squared = adjusted_r_squared, 
+              CV_RMSE = cv_rmse, 
+              AIC = model_aic,
+              Variables = paste(combo, collapse = ", "))
+  }
+}
+
+# Filter for the best model based on highest R-squared, lowest CV RMSE, and lowest AIC
+best_model <- results %>%
+  arrange(desc(R_squared), CV_RMSE,AIC) %>%
+  slice(1)
+
+print("Best Model Based on Highest R-squared, Lowest Cross-Validated RMSE, and Lowest AIC:")
+print(best_model)
+
+lowincmodel <- lm(changeinlowinc ~ distance + changerent + hcv + college + black + lowinc + homevalue + pct_renter, data = predictionmaster1)
+summary(lowincmodel)
+
+# Print predicted classes
+predicted <- predict(lowincmodel, predictionmaster2, type = "response")
+predictionmaster2$predictedchangeinlowinc <- predicted
+
+predictresult <- predictionmaster2 %>% 
+  # left_join(neighborhoodname, by=c("GEOID")) %>% 
+  # left_join(predictionmaster, by=c("GEOID")) %>% 
+  mutate(pct=predictedchangeinlowinc/lowincome_2022) %>% 
+  mutate(pct=ifelse(pct<(-1),-1,pct)) %>% 
+  filter(non_hispanic_black_pop_2022>0) %>% 
+  mutate(startpop=ntile(lowincome_2022,10)) %>% 
+  mutate(lossmorethan10=ifelse((pct< -0.1|predictedchangeinlowinc< -90)& startpop>2,1,0),
+         lossmorethan20=ifelse(pct< -0.2 & startpop>2 ,1,0)) %>% 
+  select(GEOID,NBH_NAMES,predictedchangeinlowinc,neighborhoodtype,pct,lossmorethan10,lossmorethan20,predictedchangeinlowinc,changelowincome_2022) %>% 
+  mutate(predicted_class=ifelse(lossmorethan10==1,1,0))
+
+# Calculate the 10 quintiles
+quintiles <- quantile(predictresult$predictedchangeinlowinc, probs = seq(0, 1, by = 0.1), na.rm = TRUE)
+
+# Display the quintiles
+print(quintiles)
+# Density plot for comparing two periods
+ggplot(predictresult) +
+  geom_density(aes(x = changelowincome_2022, color = "2012-2022"), fill = "blue", alpha = 0.3) +
+  geom_density(aes(x = predictedchangeinlowinc, color = "2022-2032"), fill = "green", alpha = 0.3) +
+  labs(
+    title = "Comparison of Population Change Distribution",
+    x = "Population Change",
+    y = "Density"
+  ) +
+  scale_color_manual(values = c("2012-2022" = "blue", "2022-2032" = "green")) +
+  theme_minimal()
+
+test <- predictresult %>% 
+  filter(predicted_class==1) 
+
+test2 <- predicteddisplacementmap %>% 
+  # filter(displacement==1)
+  group_by(predicted_class,displacement) %>% 
+  count()
+filter(predicted_class==1) 
+
+test <- master6 %>% 
+  left_join(predictionmaster2 , by="GEOID") %>% 
+  left_join(predictresult , by="GEOID") %>% 
+  filter(predicted_class==1)
+
+ggplot() +
+  geom_sf(test, mapping=aes(), fill="#dcdbdb", color="red", size=0.05)+
+  coord_sf(datum = NA)+  
+  geom_sf(data = tractboundary_20, fill = "transparent", color="#adabac")+
+  coord_sf(datum = NA)
+
+predicteddisplacementmap <- master6%>% 
+  left_join(predictionmaster2 , by="GEOID") %>% 
+  left_join(predictresult , by="GEOID") %>% 
+  # select(GEOID, displacement, predicted_probs,predicted_class) %>% 
+  mutate(predictiontype=case_when(displacement==1 & predicted_class==1 ~ "continued displacement risk",
+                                  displacement==0 & predicted_class==1 ~ "upcoming displacement risk",
+                                  displacement==1 & predicted_class==0 ~ "decreased displacement risk",
+                                  displacement==0 & predicted_class==0 ~ "no displacement risk")) %>% 
+  mutate(predictiontype=ifelse(GEOID=="11001007603","no displacement risk",predictiontype)) %>% 
+  mutate(`predict category` = factor(predictiontype,
+                                     levels = c("continued displacement risk",
+                                                "upcoming displacement risk",
+                                                "decreased displacement risk",
+                                                "no displacement risk"
+                                     ))) 
+  # select(GEOID,displacement, predicted_class,predictiontype,predictedchangeinlowinc.x,distance ,changerent ,hcv ,college ,black ,lowinc ,homevalue ,pct_renter) %>% 
+  # filter(GEOID=="11001007603")
+
+
+
+
+
+upcomingdisplacement <- predicteddisplacementmap %>% 
+  filter(predictiontype=="continued displacement risk"|predictiontype=="upcoming displacement risk") 
+
+
+urban_colors7 <- c("#73bfe2", "#f5cbdf","#fce39e", "#1696d2" ,"#e9807d","#fdd870","#dcedd9")
+urban_colors8 <- c("#73bfe2", "#f5cbdf","#fce39e", "#1696d2" ,"#e9807d" ,"#9d9d9d","#fdd870","#dcedd9")
+urban_colors4 <- c("#f5cbdf","#fce39e","#dcedd9","#f5f5f5")
+
+ggplot() +
+  geom_sf(data =predicteddisplacementmap, aes( fill = `predict category`))+
+  scale_fill_manual(name="future displacement type", values = urban_colors4, guide = guide_legend(override.aes = list(linetype = "blank", 
+                                                                                                                      shape = NA)))+ 
+  geom_sf(water_sf, mapping=aes(), fill="#dcdbdb", color="#dcdbdb", size=0.05)+
+  coord_sf(datum = NA)+
+  guides(color = guide_legend(override.aes = list(size=5)))+
+  geom_sf(data = tractboundary_20, fill = "transparent", color="#adabac")+
+  coord_sf(datum = NA)+
+  # geom_sf(data = upcomingdisplacement, fill = "transparent", color="#ec008b")+
+  # coord_sf(datum = NA)+
+  labs(title = paste0("Predicted Displacement of low income housseholds in DC based on OTR sales data"),
+       subtitle= "",
+       caption = "Source: Census 2000, ACS 5-year estimates 2008-2012, 2018-2022")
+
+prediction_lowinc <- predicteddisplacementmap %>% 
+  select(GEOID,predictiontype,`predict category`) %>% 
+  st_drop_geometry()
+
+#compile data for interactive map
+context <- master6 %>% 
+  mutate(change_hh_12_22=total_hh_2022-total_hh_2012_2020) %>% 
+  mutate(change_pop_12_22=(renter_2022+owner_2022)-(renter_2012_2020+owner_2012_2020)) %>% 
+  select(GEOID,Ward,NBH_NAMES,neighborhoodtype,`neighborhood category`,change_hh_12_22,change_pop_12_22,total_hh_2022) %>% 
+  st_drop_geometry()
+
+write.csv(context,"Clean/map_context.csv")
+
+mapdata_lowinc <- context %>% 
+  left_join(prediction_lowinc,by=c("GEOID")) 
+write.csv(mapdata_lowinc,"Clean/prediction_lowinc.csv")
+
+mapdata_black <- context %>% 
+  left_join(prediction_blackpop,by=c("GEOID")) 
+write.csv(mapdata_black,"Clean/prediction_blackpop.csv")
+
+
+  

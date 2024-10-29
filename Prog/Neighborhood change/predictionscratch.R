@@ -85,109 +85,13 @@ ggplot(popchange) +
   theme_minimal()
 
 
-
-#try new model for predicting black loss
-library(dplyr)
-
-# Define the dataset and target variable
-target_var <- "changeinblack"  # or "changeinblack" based on your analysis
-predictors <- c("distance", "distancesquared","vacancy", "changerent", "changeunits", "hcv", 
-                "lowincjob", "college", "black", "lowinc", "homevalue")
-
-# Initialize an empty data frame to store the results
-results <- data.frame(Model = character(), R_squared = numeric(), RMSE = numeric(), Variables = character())
-
-# Define a function to calculate RMSE
-calculate_rmse <- function(actual, predicted) {
-  sqrt(mean((actual - predicted)^2))
-}
-
-# Loop through each possible combination of predictors
-for (i in 1:length(predictors)) {
-  # Generate all combinations of predictors of size i
-  predictor_combinations <- combn(predictors, i, simplify = FALSE)
-  
-  for (combo in predictor_combinations) {
-    # Create a formula for the model
-    formula <- as.formula(paste(target_var, "~", paste(combo, collapse = " + ")))
-    
-    # Fit the model
-    model <- lm(formula, data = predictionmaster1)
-    
-    # Calculate R-squared
-    r_squared <- summary(model)$r.squared
-    
-    # Calculate RMSE
-    predictions <- predict(model, newdata = predictionmaster1)
-    rmse <- calculate_rmse(df[[target_var]], predictions)
-    
-    # Store the results
-    results <- results %>%
-      add_row(Model = paste(combo, collapse = " + "), 
-              R_squared = r_squared, 
-              RMSE = rmse, 
-              Variables = paste(combo, collapse = ", "))
-  }
-}
-
-# Filter for the best model based on highest R-squared and lowest RMSE
-best_model <- results %>%
-  arrange(desc(R_squared), RMSE) %>%
-  slice(1)
-
-print("Best Model Based on Highest R-squared and Lowest RMSE:")
-print(best_model)
-
-
-
-
-# Load necessary libraries
-library(caret)
-library(dplyr)
-
-# Define the dataset and target variable
-target_var <- "changeinlowinc"  # or "changeinblack" based on your analysis
-predictors <- c("distance", "vacancy", "changerent", "changeunits", "hcv", 
-                "lowincjob", "college", "black", "lowinc", "homevalue")
-
-# Initialize an empty data frame to store the results
-results <- data.frame(Model = character(), R_squared = numeric(), CV_RMSE = numeric(), Variables = character())
-
-# Set up cross-validation control
-train_control <- trainControl(method = "cv", number = 10)
-
-# Loop through each possible combination of predictors
-for (i in 1:length(predictors)) {
-  # Generate all combinations of predictors of size i
-  predictor_combinations <- combn(predictors, i, simplify = FALSE)
-  
-  for (combo in predictor_combinations) {
-    # Create a formula for the model
-    formula <- as.formula(paste(target_var, "~", paste(combo, collapse = " + ")))
-    
-    # Fit the model using 10-fold cross-validation
-    model_cv <- train(formula, data =  predictionmaster1, method = "lm", trControl = train_control)
-    
-    # Extract cross-validated RMSE
-    cv_rmse <- model_cv$results$RMSE
-    
-    # Calculate R-squared on the full dataset
-    model <- lm(formula, data = predictionmaster1)
-    r_squared <- summary(model)$r.squared
-    
-    # Store the results
-    results <- results %>%
-      add_row(Model = paste(combo, collapse = " + "), 
-              R_squared = r_squared, 
-              CV_RMSE = cv_rmse, 
-              Variables = paste(combo, collapse = ", "))
-  }
-}
-
-# Filter for the best model based on highest R-squared and lowest CV RMSE
-best_model <- results %>%
-  arrange(desc(R_squared), CV_RMSE) %>%
-  slice(1)
-
-print("Best Model Based on Highest R-squared and Lowest Cross-Validated RMSE:")
-print(best_model)
+test <- predictionmaster2 %>% 
+  # left_join(neighborhoodname, by=c("GEOID")) %>% 
+  # left_join(predictionmaster, by=c("GEOID")) %>% 
+  mutate(pct=predictedchangeinblack/non_hispanic_black_pop_2022) %>% 
+  mutate(pct=ifelse(pct<(-1),-1,pct)) %>% 
+  mutate(startpop=ntile(non_hispanic_black_pop_2022,10)) %>% 
+  mutate(lossmorethan10=ifelse((pct< -0.1|predictedchangeinblack< -50)& startpop>2,1,0),
+         lossmorethan20=ifelse(pct< -0.2 & startpop>2 ,1,0)) %>% 
+  select(GEOID,NBH_NAMES,neighborhoodtype,predictedchangeinblack,changeblack_2022,startpop,non_hispanic_black_pop_2022,pct,lossmorethan10,lossmorethan20) %>% 
+  mutate(predicted_class=ifelse(lossmorethan20==1,1,0))
