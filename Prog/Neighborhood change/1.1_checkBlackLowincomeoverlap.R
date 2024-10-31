@@ -136,6 +136,8 @@ lowincome_tract_puma <- lowincome %>%
   mutate(PUMA=PUMA5CE) %>% 
   left_join(lowincome_pums,by=c("PUMA"))
 
+write.csv(lowincome_tract_puma, "C:/Users/Ysu/Desktop/DMPED_Final/correlation.csv")
+
 pumaboundary <- get_acs(
   geography = "public use microdata area", 
   variables = "B01003_001",                

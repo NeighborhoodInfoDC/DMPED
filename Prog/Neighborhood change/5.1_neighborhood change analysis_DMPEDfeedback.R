@@ -48,6 +48,9 @@ newrentdata <- read_csv("Clean/rentvalue_cat.csv") %>%
   mutate(GEOID=as.numeric(GEOID)) %>% 
   select(GEOID,starts_with("pct_"))
 
+assisted <- read_csv("Raw/PresCat/Assisted_units_by_year_tract.csv") %>% 
+  mutate(GEOID=Geo2020) 
+
 analysismaster <- housingmarket %>% 
   left_join(lowincome, by=c("GEOID")) %>% 
   left_join(raceethnicity, by=c("GEOID")) %>% 
@@ -56,7 +59,8 @@ analysismaster <- housingmarket %>%
   left_join(popbyrace, by=c("GEOID")) %>% 
   left_join(blacktenure, by=c("GEOID")) %>% 
   left_join(newrentdata, by=c("GEOID")) %>% 
-  select(-NAME.y, -NAME.x)
+  select(-NAME.y, -NAME.x) %>% 
+  left_join(assisted, by=c("GEOID")) 
 
 tractboundary_20 <- get_acs(geography = "tract", 
                             variables = c("B01003_001"),
@@ -233,6 +237,10 @@ selected_vars <- c("medianhome_2022","changeinhomevalue", "pctchangeinhomevalue"
                    "pctchangeinlowrent","changeinowner","pctchangeinowner","changeinrenter","pctchangeinrenter",
                    "changeinblackrenter","pctchangeinblackrenter","changeinblackowner","pctchangeinblackowner")
 
+test <- master6 %>% 
+  group_by(vulnerable) %>% 
+  count()
+
 summary_by_loss <- master6 %>% 
   mutate(changeinhomevalue=medianhome_2022-medianhome_2000_2020,
          pctchangeinhomevalue=(medianhome_2022-medianhome_2000_2020)/medianhome_2000_2020) %>% 
@@ -283,12 +291,12 @@ displacementarea <- master6 %>%
   filter(neighborhoodtype=="exclusive growth with displacement risk"|neighborhoodtype=="established opportunity with displacement risk"|neighborhoodtype=="underinvestment with displacement risk")
 
 urban_colors7 <- c("#73bfe2", "#f5cbdf","#fce39e", "#1696d2" ,"#e9807d","#fdd870","#dcedd9")
-urban_colors8 <- c("#f5f5f5", "#f5cbdf","#fce39e", "#e3e3e3" ,"#e9807d" ,"#e46aa7","#fdd870","#dcedd9")
-urban_colors8_2 <- c("#f5f5f5", "#cfe8f3","#fce39e", "#e3e3e3" ,"#73bfed" ,"#1696d2","#f5cbdf","#dcedd9")
+urban_colors8 <- c("#f5f5f5", "#f5cbdf","#fce39e", "#e3e3e3" ,"#e9807d" ,"#fdd870","#dcedd9","#cfe8f3")
+urban_colors8_2 <- c("#f5f5f5", "#cfe8f3","#fce39e", "#e3e3e3" ,"" ,"#1696d2","#f5cbdf","#dcedd9")
 
 ggplot() +
   geom_sf(data =master6, aes( fill = `neighborhood category`))+
-  scale_fill_manual(name="neighborhoodchange type", values = urban_colors8_2, guide = guide_legend(override.aes = list(linetype = "blank", 
+  scale_fill_manual(name="neighborhoodchange type", values = urban_colors8, guide = guide_legend(override.aes = list(linetype = "blank", 
                                                                                                                      shape = NA)))+ 
   # geom_sf(BBCF, mapping = aes(), fill=NA,lwd =  0.5, color="#fdbf11",show.legend = "line")+
   # geom_sf(cog_all, mapping = aes(), fill=NA,lwd =  1, color="#ec008b",show.legend = "line")+
@@ -310,8 +318,8 @@ ggplot() +
   coord_sf(datum = NA)+
   # geom_sf(data = displacementarea, fill = "transparent", color="#ec008b")+
   # coord_sf(datum = NA)+
-  labs(title = paste0("Neighborhood Change in DC based on OTR sales data"),
-       subtitle= "Potential displacement area highlighted in red",
+  labs(title = paste0("Neighborhood Change in DC"),
+       subtitle= "",
        caption = "Source: Census 2000, ACS 5-year estimates 2008-2012, 2018-2022, Real Property Tax Database")
 
 #tracts that loss vulnerbale households
@@ -503,6 +511,9 @@ corrplot(M, order = 'AOE', diag=FALSE) # after 'AOE' reorder
 #remove college as it's correlated with many variables
 library(stargazer)
 
+correlation <- as.data.frame(M)
+write.csv(correlation, "C:/Users/Ysu/Desktop/DMPED_Final/correlation.csv")
+
 corrdata2 <- predictionmaster %>% 
   select(vacancy_2012,distance_to_downtown_miles,medianhome_2012_2020,pct_black_2012 ,  pct_lowincjob_2012 , pct_hcv_2012, changeunits_2012, changeblack_2012,changelowincome_2012,changerent_2012,pct_renter_2012) %>% 
   rename(vacancy=vacancy_2012,
@@ -593,13 +604,13 @@ for (i in 1:length(predictors)) {
 
 # Filter for the best model based on highest R-squared, lowest CV RMSE, and lowest AIC
 best_model <- results %>%
-  arrange(CV_RMSE,desc(R_squared), AIC) %>%
+  arrange(CV_RMSE, AIC) %>%
   slice(1)
 
 print("Best Model Based on Highest R-squared, Lowest Cross-Validated RMSE, and Lowest AIC:")
 print(best_model)
 
-blackmodel <- lm(changeinblack ~ distancesquared + vacancy + changeunits + hcv + black, data = predictionmaster1)
+blackmodel <- lm(changeinblack ~ distancesquared + vacancy + changerent + black, data = predictionmaster1)
 summary(blackmodel)
 
 #################predict
@@ -612,13 +623,19 @@ predictresult <- predictionmaster2 %>%
   # left_join(neighborhoodname, by=c("GEOID")) %>% 
   # left_join(predictionmaster, by=c("GEOID")) %>% 
   mutate(pct=predictedchangeinblack/non_hispanic_black_pop_2022) %>% 
+  mutate(totalpop=hispanic_or_latino_pop_2022+non_hispanic_black_pop_2022+non_hispanic_aapi_pop_2022+non_hispanic_black_pop_2022+non_hispanic_other_pop_2022+non_hispanic_white_pop_2022) %>% 
   mutate(pct=ifelse(pct<(-1),-1,pct)) %>% 
   filter(non_hispanic_black_pop_2022>0) %>% 
-  mutate(startpop=ntile(non_hispanic_black_pop_2022,10)) %>% 
-  mutate(lossmorethan10=ifelse((pct< -0.1|predictedchangeinblack< -50)& startpop>2,1,0),
+  mutate(startpop=ntile(non_hispanic_black_pop_2022/totalpop,10)) %>% 
+  mutate(lossmorethan10=ifelse((pct< -0.1|predictedchangeinblack< -225)& startpop>2,1,0),
          lossmorethan20=ifelse(pct< -0.2 & startpop>2 ,1,0)) %>% 
   select(GEOID,NBH_NAMES,neighborhoodtype,pct,startpop,non_hispanic_black_pop_2022,lossmorethan10,lossmorethan20,predictedchangeinblack,changeblack_2022) %>% 
   mutate(predicted_class=ifelse(lossmorethan10==1,1,0))
+
+# 0%        10%        20%        30%        40%        50%        60%        70%        80%        90% 
+#   -388.56400 -225.39644 -184.97985 -162.54354 -135.96820 -117.27073  -86.88849  -46.42943   27.69657  187.64174 
+# 100% 
+# 1480.68282 
 
 # Density plot for comparing two periods
 ggplot(predictresult) +
@@ -670,6 +687,10 @@ predicteddisplacementmap <- master6%>%
                                                      "no displacement risk"
                                           ))) 
 
+test <- predicteddisplacementmap %>% 
+  group_by(predictiontype) %>% 
+  count()
+
 prediction_blackpop <- predicteddisplacementmap %>% 
   select(GEOID,predictiontype,`predict category`) %>% 
   st_drop_geometry()
@@ -681,7 +702,7 @@ upcomingdisplacement <- predicteddisplacementmap %>%
 
 urban_colors7 <- c("#73bfe2", "#f5cbdf","#fce39e", "#1696d2" ,"#e9807d","#fdd870","#dcedd9")
 urban_colors8 <- c("#73bfe2", "#f5cbdf","#fce39e", "#1696d2" ,"#e9807d" ,"#9d9d9d","#fdd870","#dcedd9")
-urban_colors4 <- c("#f5cbdf","#fce39e","#dcedd9","#f5f5f5")
+urban_colors4 <- c("#f5cbdf","#fce39e","#e3e3e3","#f5f5f5")
 
 ggplot() +
   geom_sf(data =predicteddisplacementmap, aes( fill = `predict category`))+
@@ -694,7 +715,7 @@ ggplot() +
   coord_sf(datum = NA)+
   # geom_sf(data = upcomingdisplacement, fill = "transparent", color="#ec008b")+
   # coord_sf(datum = NA)+
-  labs(title = paste0("Predicted Displacement of Black population in DC based on OTR sales data"),
+  labs(title = paste0("Predicted Displacement of Black population in DC in the next 10 years"),
        subtitle= "",
        caption = "Source: Census 2000, ACS 5-year estimates 2008-2012, 2018-2022")
 
@@ -748,13 +769,13 @@ for (i in 1:length(predictors)) {
 
 # Filter for the best model based on highest R-squared, lowest CV RMSE, and lowest AIC
 best_model <- results %>%
-  arrange(desc(R_squared), CV_RMSE,AIC) %>%
+  arrange(CV_RMSE,AIC) %>%
   slice(1)
 
 print("Best Model Based on Highest R-squared, Lowest Cross-Validated RMSE, and Lowest AIC:")
 print(best_model)
 
-lowincmodel <- lm(changeinlowinc ~ distance + changerent + hcv + college + black + lowinc + homevalue + pct_renter, data = predictionmaster1)
+lowincmodel <- lm(changeinlowinc ~ changeunits + hcv + lowincjob + black + pct_renter, data = predictionmaster1)
 summary(lowincmodel)
 
 # Print predicted classes
@@ -766,12 +787,19 @@ predictresult <- predictionmaster2 %>%
   # left_join(predictionmaster, by=c("GEOID")) %>% 
   mutate(pct=predictedchangeinlowinc/lowincome_2022) %>% 
   mutate(pct=ifelse(pct<(-1),-1,pct)) %>% 
-  filter(non_hispanic_black_pop_2022>0) %>% 
-  mutate(startpop=ntile(lowincome_2022,10)) %>% 
-  mutate(lossmorethan10=ifelse((pct< -0.1|predictedchangeinlowinc< -90)& startpop>2,1,0),
+  filter(lowincome_2022>0) %>% 
+  mutate(startpop=ntile(lowincome_2022/total_hh_2022,10)) %>% 
+  mutate(lossmorethan10=ifelse((pct< -0.1|predictedchangeinlowinc< -57)& startpop>2,1,0),
          lossmorethan20=ifelse(pct< -0.2 & startpop>2 ,1,0)) %>% 
   select(GEOID,NBH_NAMES,predictedchangeinlowinc,neighborhoodtype,pct,lossmorethan10,lossmorethan20,predictedchangeinlowinc,changelowincome_2022) %>% 
   mutate(predicted_class=ifelse(lossmorethan10==1,1,0))
+
+# > # Display the 10 quintiles
+#   > print(quintiles)
+# 0%         10%         20%         30%         40%         50%         60%         70% 
+#   -102.007513  -57.541949  -42.648267  -26.160810  -11.045471    2.139951   17.091454   28.588312 
+# 80%         90%        100% 
+# 45.998625   84.403605  328.922645 
 
 # Calculate the 10 quintiles
 quintiles <- quantile(predictresult$predictedchangeinlowinc, probs = seq(0, 1, by = 0.1), na.rm = TRUE)
@@ -829,7 +857,9 @@ predicteddisplacementmap <- master6%>%
   # filter(GEOID=="11001007603")
 
 
-
+test <- predicteddisplacementmap %>% 
+  group_by(predictiontype) %>% 
+  count()
 
 
 upcomingdisplacement <- predicteddisplacementmap %>% 
@@ -838,7 +868,7 @@ upcomingdisplacement <- predicteddisplacementmap %>%
 
 urban_colors7 <- c("#73bfe2", "#f5cbdf","#fce39e", "#1696d2" ,"#e9807d","#fdd870","#dcedd9")
 urban_colors8 <- c("#73bfe2", "#f5cbdf","#fce39e", "#1696d2" ,"#e9807d" ,"#9d9d9d","#fdd870","#dcedd9")
-urban_colors4 <- c("#f5cbdf","#fce39e","#dcedd9","#f5f5f5")
+urban_colors4 <- c("#f5cbdf","#fce39e","#e3e3e3","#f5f5f5")
 
 ggplot() +
   geom_sf(data =predicteddisplacementmap, aes( fill = `predict category`))+
@@ -851,7 +881,7 @@ ggplot() +
   coord_sf(datum = NA)+
   # geom_sf(data = upcomingdisplacement, fill = "transparent", color="#ec008b")+
   # coord_sf(datum = NA)+
-  labs(title = paste0("Predicted Displacement of low income housseholds in DC based on OTR sales data"),
+  labs(title = paste0("Predicted Displacement of low income households in DC in the next 10 years"),
        subtitle= "",
        caption = "Source: Census 2000, ACS 5-year estimates 2008-2012, 2018-2022")
 
