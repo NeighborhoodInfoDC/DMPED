@@ -474,7 +474,7 @@ predictionmaster1 <- predictionmaster %>%
          pct_renter=pct_renter_2012) 
 
 out <- predictionmaster1 %>% 
-  select(GEOID,changeinlowinc,distance,vacancy,changeinblack,changerent,changeunits,hcv,lowincjob,college,black,lowinc,homevalue)
+  select(GEOID,changeinlowinc,distance,vacancy,changeinblack,changerent,changeunits,hcv,lowincjob,college,black,lowinc,homevalue,pct_renter)
 write.csv(out,"C:/Users/Ysu/Documents/regression.csv")
 
 predictionmaster2 <- predictionmaster %>% 
