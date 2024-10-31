@@ -291,7 +291,7 @@ displacementarea <- master6 %>%
   filter(neighborhoodtype=="exclusive growth with displacement risk"|neighborhoodtype=="established opportunity with displacement risk"|neighborhoodtype=="underinvestment with displacement risk")
 
 urban_colors7 <- c("#73bfe2", "#f5cbdf","#fce39e", "#1696d2" ,"#e9807d","#fdd870","#dcedd9")
-urban_colors8 <- c("#f5f5f5", "#f5cbdf","#fce39e", "#e3e3e3" ,"#e9807d" ,"#fdd870","#dcedd9","#cfe8f3")
+urban_colors8 <- c("#f5f5f5", "#f5cbdf","#fff2cf", "#e3e3e3" ,"#e9807d" ,"#fdd870","#dcedd9","#cfe8f3")
 urban_colors8_2 <- c("#f5f5f5", "#cfe8f3","#fce39e", "#e3e3e3" ,"" ,"#1696d2","#f5cbdf","#dcedd9")
 
 ggplot() +
@@ -693,7 +693,10 @@ test <- predicteddisplacementmap %>%
 
 prediction_blackpop <- predicteddisplacementmap %>% 
   select(GEOID,predictiontype,`predict category`) %>% 
-  st_drop_geometry()
+  st_drop_geometry() %>% 
+  rename(predictiontype_black=predictiontype) %>% 
+  select(GEOID,predictiontype_black)
+
 
 
 upcomingdisplacement <- predicteddisplacementmap %>% 
@@ -887,7 +890,9 @@ ggplot() +
 
 prediction_lowinc <- predicteddisplacementmap %>% 
   select(GEOID,predictiontype,`predict category`) %>% 
-  st_drop_geometry()
+  st_drop_geometry() %>% 
+  rename(predictiontype_lowinc=predictiontype) %>% 
+  select(GEOID,predictiontype_lowinc)
 
 #compile data for interactive map
 context <- master6 %>% 
@@ -907,4 +912,37 @@ mapdata_black <- context %>%
 write.csv(mapdata_black,"Clean/prediction_blackpop.csv")
 
 
+selected_vars <- c("medianhome_2022","changeinhomevalue", "lowincchange","blkchange","pctchangeinhomevalue","totalunits", "shareassisted","changeinunits", "pctchangeinunits",
+                   "changeinassistedunits","pctchangeinassistedunits", "pctchangeinlowrent","changeinowner","pctchangeinowner","changeinrenter","pctchangeinrenter",
+                   "changeinblackrenter","pctchangeinblackrenter","changeinblackowner","pctchangeinblackowner")
+
+summary <- prediction_blackpop %>% 
+  left_join(prediction_lowinc, by=c("GEOID")) %>% 
+  mutate(black=ifelse(predictiontype_black=="upcoming displacement risk"|predictiontype_black=="continued displacement risk",1,0),
+         lowinc=ifelse(predictiontype_lowinc=="upcoming displacement risk"|predictiontype_lowinc=="continued displacement risk",1,0)) %>% 
+  mutate(total=black+lowinc) %>% 
+  mutate(masterpredict=ifelse(total>0,"predicteddisplacement","nopredicteddisplacement")) %>% 
+  left_join(master6,by=c("GEOID")) %>% 
+  mutate(lowincchange=(lowincome_2022-lowincome_2000_2020)/lowincome_2000_2020,
+         blkchange=(non_hispanic_black_pop_2022-non_hispanic_black_pop_2000_2010_2020)/non_hispanic_black_pop_2000_2010_2020) %>% 
+  mutate(changeinhomevalue=medianhome_2022-medianhome_2000_2020,
+         pctchangeinhomevalue=(medianhome_2022-medianhome_2000_2020)/medianhome_2000_2020) %>% 
+  mutate(totalunits=housing_2022,,
+         changeinunits=housing_2022-housing_2000_2020,
+         pctchangeinunits=(housing_2022-housing_2000_2020)/housing_2000_2020) %>% 
+  mutate(shareassisted=mid_asst_units_2022/totalunits,
+         totalassisted=mid_asst_units_2022,
+         changeinassistedunits=mid_asst_units_2022-mid_asst_units_2000,
+         pctchangeinassistedunits=(mid_asst_units_2022-mid_asst_units_2000)/mid_asst_units_2000) %>% 
+  mutate(pctchangeinlowrent=pct_2022_low-pct_2000_low) %>% 
+  mutate(changeinowner=owner_2022-owner_2000_2020,
+         pctchangeinowner=(owner_2022-owner_2000_2020)/owner_2000_2020) %>% 
+  mutate(changeinrenter=renter_2022-renter_2000_2020,
+         pctchangeinrenter=(renter_2022-renter_2000_2020)/renter_2000_2020) %>% 
+  mutate(changeinblackrenter=black_renter_2022-black_renter_2000_2010_2020,
+         pctchangeinblackrenter=(black_renter_2022-black_renter_2000_2010_2020)/black_renter_2000_2010_2020) %>% 
+  mutate(changeinblackowner=black_owner_2022-black_owner_2000_2010_2020,
+         pctchangeinblackowner=(black_owner_2022-black_owner_2000_2010_2020)/black_owner_2000_2010_2020,na.rm=TRUE) %>% 
+  group_by(masterpredict) %>% 
+  summarise(across(all_of(selected_vars), ~ mean(.x, na.rm = TRUE), .names = "{.col}_mean"))
   
