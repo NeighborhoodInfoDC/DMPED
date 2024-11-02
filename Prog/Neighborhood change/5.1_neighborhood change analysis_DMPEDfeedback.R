@@ -678,13 +678,13 @@ predicteddisplacementmap <- master6%>%
   # select(GEOID, displacement, predicted_probs,predicted_class) %>% 
   mutate(predictiontype=case_when(displacement==1 & predicted_class==1 ~ "continued displacement risk",
                                   displacement==0 & predicted_class==1 ~ "upcoming displacement risk",
-                                  displacement==1 & predicted_class==0 ~ "decreased displacement risk",
-                                  displacement==0 & predicted_class==0 ~ "no displacement risk")) %>% 
+                                  displacement==1 & predicted_class==0 ~ "lessened displacement risk",
+                                  displacement==0 & predicted_class==0 ~ "minimal displacement risk")) %>% 
   mutate(`predict category` = factor(predictiontype,
                                           levels = c("continued displacement risk",
                                                      "upcoming displacement risk",
-                                                     "decreased displacement risk",
-                                                     "no displacement risk"
+                                                     "lessened displacement risk",
+                                                     "minimal displacement risk"
                                           ))) 
 
 test <- predicteddisplacementmap %>% 
@@ -847,14 +847,14 @@ predicteddisplacementmap <- master6%>%
   # select(GEOID, displacement, predicted_probs,predicted_class) %>% 
   mutate(predictiontype=case_when(displacement==1 & predicted_class==1 ~ "continued displacement risk",
                                   displacement==0 & predicted_class==1 ~ "upcoming displacement risk",
-                                  displacement==1 & predicted_class==0 ~ "decreased displacement risk",
-                                  displacement==0 & predicted_class==0 ~ "no displacement risk")) %>% 
-  mutate(predictiontype=ifelse(GEOID=="11001007603","no displacement risk",predictiontype)) %>% 
+                                  displacement==1 & predicted_class==0 ~ "lessened displacement risk",
+                                  displacement==0 & predicted_class==0 ~ "minimal displacement risk")) %>% 
+  mutate(predictiontype=ifelse(GEOID=="11001007603","minimal displacement risk",predictiontype)) %>% 
   mutate(`predict category` = factor(predictiontype,
                                      levels = c("continued displacement risk",
                                                 "upcoming displacement risk",
-                                                "decreased displacement risk",
-                                                "no displacement risk"
+                                                "lessened displacement risk",
+                                                "minimal displacement risk"
                                      ))) 
   # select(GEOID,displacement, predicted_class,predictiontype,predictedchangeinlowinc.x,distance ,changerent ,hcv ,college ,black ,lowinc ,homevalue ,pct_renter) %>% 
   # filter(GEOID=="11001007603")
