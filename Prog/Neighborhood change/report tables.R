@@ -61,16 +61,18 @@ neighborhoodtype <- master6 %>%
   st_drop_geometry()
 
 
-selected_vars <- c("medianhome_2022","changeinhomevalue", "lowincchange","blkchange","pctchangeinhomevalue","totalunits", "shareassisted","changeinunits", "pctchangeinunits",
+selected_vars <- c("medianhome_2022","changeinhomevalue", "lowincchange","blkchange","pctlowincchange","pctblkchange","pctchangeinhomevalue","totalunits", "shareassisted","changeinunits", "pctchangeinunits",
                    "changeinassistedunits","pctchangeinassistedunits", "pctchangeinlowrent","changeinowner","pctchangeinowner","changeinrenter","pctchangeinrenter",
                    "changeinblackrenter","pctchangeinblackrenter","changeinblackowner","pctchangeinblackowner")
 
 summary_by_type <- master6 %>% 
-  mutate(lowincchange=(lowincome_2022-lowincome_2000_2020)/lowincome_2000_2020,
-         blkchange=(non_hispanic_black_pop_2022-non_hispanic_black_pop_2000_2010_2020)/non_hispanic_black_pop_2000_2010_2020) %>% 
+  mutate(lowincchange=lowincome_2022-lowincome_2000_2020,
+         blkchange=non_hispanic_black_pop_2022-non_hispanic_black_pop_2000_2010_2020,
+         pctlowincchange=(lowincome_2022-lowincome_2000_2020)/lowincome_2000_2020,
+         pctblkchange=(non_hispanic_black_pop_2022-non_hispanic_black_pop_2000_2010_2020)/non_hispanic_black_pop_2000_2010_2020) %>% 
   mutate(changeinhomevalue=medianhome_2022-medianhome_2000_2020,
          pctchangeinhomevalue=(medianhome_2022-medianhome_2000_2020)/medianhome_2000_2020) %>% 
-  mutate(totalunits=housing_2022,,
+  mutate(totalunits=housing_2022,
          changeinunits=housing_2022-housing_2000_2020,
          pctchangeinunits=(housing_2022-housing_2000_2020)/housing_2000_2020) %>% 
   mutate(shareassisted=mid_asst_units_2022/totalunits,
@@ -90,17 +92,36 @@ summary_by_type <- master6 %>%
   summarise(across(all_of(selected_vars), ~ mean(.x, na.rm = TRUE), .names = "{.col}_mean")) %>% 
   st_drop_geometry() 
 
+selected_vars <- c("shareassisted",
+                   "changeinassistedunits","pctchangeinassistedunits"
+                  )
 
-test <- assisted %>% 
+test <- master6 %>% 
   mutate(change=mid_asst_units_2022-mid_asst_units_2000) %>% 
-  select(GEOID, change, mid_asst_units_2000,mid_asst_units_2022) %>% 
-  right_join(master6, by=c("GEOID")) %>% 
-  filter(neighborhoodtype=="stable growing") %>% 
-  select(GEOID, change, mid_asst_units_2000,mid_asst_units_2022) %>%
+  # select(GEOID, change, mid_asst_units_2000,mid_asst_units_2022) %>% 
+  mutate(nochange0=ifelse(mid_asst_units_2000==0 & mid_asst_units_2022==0,1,0)) %>% 
+  filter(nochange0==0) %>% 
+  mutate(mid_asst_units_2000=ifelse(mid_asst_units_2000==0,1,mid_asst_units_2000)) %>% 
+  # right_join(master6, by=c("GEOID")) %>% 
+  mutate(shareassisted=mid_asst_units_2022/housing_2022,
+         totalassisted=mid_asst_units_2022,
+         changeinassistedunits=mid_asst_units_2022-mid_asst_units_2000,
+         pctchangeinassistedunits=(mid_asst_units_2022-mid_asst_units_2000)/mid_asst_units_2000) %>% 
+  # filter(neighborhoodtype=="stable growing") %>% 
+  # select(GEOID, change, mid_asst_units_2000,mid_asst_units_2022) %>%
   group_by(neighborhoodtype) %>% 
-  summarise(totalassit=sum(mid_asst_units_2022))
+  summarise(across(all_of(selected_vars), ~ mean(.x, na.rm = TRUE), .names = "{.col}_mean")) %>% 
+  st_drop_geometry() 
 
 stabel <- master6 %>% 
   filter(neighborhoodtype=="stable growing") %>% 
   select(GEOID) %>% 
   left_join(test,by=c("GEOID"))
+
+#investigate east of river trend and confirm prediction results
+testeast <-  master6 %>%
+  mutate(lowincchange=lowincome_2022-lowincome_2000_2020,
+         blkchange=non_hispanic_black_pop_2022-non_hispanic_black_pop_2000_2010_2020,
+         pctlowincchange=(lowincome_2022-lowincome_2000_2020)/lowincome_2000_2020,
+         pctblkchange=(non_hispanic_black_pop_2022-non_hispanic_black_pop_2000_2010_2020)/non_hispanic_black_pop_2000_2010_2020) %>% 
+  

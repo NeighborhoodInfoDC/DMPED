@@ -27,7 +27,7 @@ tractboundary_20 <- get_acs(geography = "tract",
                             year = 2022)
 
 #read in the CSV from OTR method
-neighborhoodchange_masterdata <- read.csv("map_context.csv")
+neighborhoodchange_masterdata1 <- read.csv("map_context.csv")
 
 #read in the CSV from black prediction
 neighborhoodchange_masterdata2 <- read.csv("prediction_lowinc.csv")
