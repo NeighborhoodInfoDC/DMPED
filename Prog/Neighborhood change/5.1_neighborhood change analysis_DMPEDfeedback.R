@@ -267,7 +267,7 @@ data3 <- master6 %>%
 ggplot() +
   geom_sf(data = data3, aes(fill = loss_gt_10), color = "white", size = 0.2) +
   # scale_fill_manual(values = c("FALSE" = "gray", "TRUE" = "red"), labels = c("≤ 10%", "> 10%")) +
-  scale_fill_manual(values = c("FALSE" = "gray", "TRUE" = "red"), labels = c("more than 100", "les than 100")) +
+  scale_fill_manual(values = c("FALSE" = "gray", "TRUE" = "red"), labels = c("More than 100", "100 or less")) +
   labs(
     title = "Black Population Gain by Tract",
     fill = "Population Gain"
