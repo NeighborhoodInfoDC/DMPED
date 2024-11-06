@@ -221,6 +221,8 @@ test <- master6 %>%
   group_by(vulnerable) %>% 
   count()
 
+# Neighborhood Change in DC map
+
 urban_colors7 <- c("#73bfe2", "#f5cbdf","#fce39e", "#1696d2" ,"#e9807d","#fdd870","#dcedd9")
 urban_colors8 <- c("#f5f5f5", "#f5cbdf","#fff2cf", "#e3e3e3" ,"#e9807d" ,"#fdd870","#dcedd9","#cfe8f3")
 urban_colors8_2 <- c("#f5f5f5", "#cfe8f3","#fce39e", "#e3e3e3" ,"" ,"#1696d2","#f5cbdf","#dcedd9")
@@ -263,6 +265,7 @@ data2 <- master6 %>%
 data3 <- master6 %>%
   mutate(loss_gt_10 = loss_2000_2012>100)
 
+# Black Population Gain by Tract map
 # Now plot using a discrete color scale
 ggplot() +
   geom_sf(data = data3, aes(fill = loss_gt_10), color = "white", size = 0.2) +
@@ -275,6 +278,7 @@ ggplot() +
   theme_minimal()
 
 
+#######################################################################
 #prediction
 
 neighborhoodtype_Oct <- master6 %>% 
@@ -468,7 +472,7 @@ print(best_model)
 blackmodel <- lm(changeinblack ~distancesquared+vacancy+changeunits+hcv+lowincjob+black+homevalue+pct_renter, data = predictionmaster1)
 summary(blackmodel)
 
-#################predict
+#################predicting Black population
 
 # Print predicted classes
 predicted <- predict(blackmodel, predictionmaster2, type = "response")
@@ -701,6 +705,7 @@ ggplot() +
   geom_sf(data = tractboundary_20, fill = "transparent", color="#adabac")+
   coord_sf(datum = NA)
 
+# Predicted displacement of low income households map
 predicteddisplacementmap <- master6%>% 
   left_join(predictionmaster2 , by="GEOID") %>% 
   left_join(predictresult , by="GEOID") %>% 
