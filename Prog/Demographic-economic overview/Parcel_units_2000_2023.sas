@@ -1,5 +1,5 @@
 /**************************************************************************
- Program:  Parcel_units_2000_2023.sas
+ Program:  Parcel_units_2010_2023.sas
  Library:  DMPED
  Project:  Urban-Greater DC
  Author:   P. Tatian
@@ -137,7 +137,10 @@ data Units_parcel_year;
       else units_coop = no_units;
     end;
     
-    when ( '13', '19' ) units_rental = active_res_occupancy_count;
+    when ( '13', '19' ) do;
+      if active_res_occupancy_count = 1 then units_sf = 1;
+      else units_rental = active_res_occupancy_count;
+    end;
     
   end;
   
@@ -148,8 +151,10 @@ data Units_parcel_year;
   length new_proptype $ 3;
   
   if ui_proptype in ( '13', '19' ) then do;
-    if units_total < 5 then new_proptype = '131';
-    else new_proptype = '132';
+    if units_total = 1 then new_proptype = '10';
+    else if 1 < units_total < 5 then new_proptype = '131';
+    else if units_total >= 5 then new_proptype = '132';
+    else new_proptype = '';
   end;
   else new_proptype = ui_proptype;
     
@@ -174,7 +179,7 @@ data Units_parcel_year;
 run;
 
 
-%File_info( data=Units_parcel_year, printobs=5 )
+%File_info( data=Units_parcel_year, printobs=5, freqvars=ui_proptype new_proptype )
 
 
 ** Tables **;
@@ -200,18 +205,19 @@ options orientation=landscape;
 options nodate nonumber;
 options missing='0';
 
-ods rtf file="&_dcdata_default_path\DMPED\Prog\Demographic-economic overview\Parcel_units_2000_2023.rtf" style=Styles.Rtf_arial_9pt;
+ods rtf file="&_dcdata_default_path\DMPED\Prog\Demographic-economic overview\Parcel_units_2010_2023.rtf" style=Styles.Rtf_arial_9pt;
 ods listing close;
 
 footnote1 height=9pt "Prepared by Urban-Greater DC (greaterdc.urban.org), &fdate..";
 footnote2 height=9pt j=r '{Page}\~{\field{\*\fldinst{\pard\b\i0\chcbpat8\qc\f1\fs19\cf1{PAGE }\cf0\chcbpat0}}}';
 
-ods csvall body="&_dcdata_default_path\DMPED\Prog\Demographic-economic overview\Parcel_units_2000_2023_total.csv";
+ods csvall body="&_dcdata_default_path\DMPED\Prog\Demographic-economic overview\Parcel_units_2010_2023_total.csv";
 
 title2 ' ';
 title3 'Residential Units by Property Type and Year, DC';
 
 proc tabulate data=Units_parcel_year format=comma8.0 noseps missing;
+  where not( missing( new_proptype ) );
   class Year;
   class new_proptype /order=data preloadfmt;
   var parcels units_total;
@@ -229,7 +235,7 @@ ods csvall close;
 title3 'Residential Units by Property Type, Ward, and Year, DC';
 
 proc tabulate data=Units_parcel_year format=comma8.0 noseps missing;
-  where not( missing( Ward2022 ) );
+  where not( missing( new_proptype ) ) and not( missing( Ward2022 ) );
   class Year Ward2022;
   class new_proptype /order=data preloadfmt;
   var parcels units_total;
@@ -247,7 +253,7 @@ run;
 title3 'Residential Units by Property Type, Neighborhood Cluster, and Year, DC';
 
 proc tabulate data=Units_parcel_year format=comma8.0 noseps missing;
-  where not( missing( Cluster2017 ) );
+  where not( missing( new_proptype ) ) and not( missing( Cluster2017 ) );
   class Year Cluster2017;
   class new_proptype /order=data preloadfmt;
   var parcels units_total;
