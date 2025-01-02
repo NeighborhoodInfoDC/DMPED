@@ -26,18 +26,35 @@
 
 
 /** Parcel_base + Geo = 185744 obs **/
-/** Next: merge MAR xref + unit counts **/
+/** Parcel_base + Geo + Xref = 194547 obs **/
+/** Parcel_base + Geo + Xref + AddrPts = 194547 obs **/
 
 proc sql noprint;
+
   create table Parcel_mar as
-  select 
-    Base.ssl, Base.ownerpt_extractdat_first, Base.ownerpt_extractdat_last, Base.ui_proptype, Base.no_units, 
-    Geo.Ward2022, Geo.Cluster2017, Geo.GeoBlk2020, Geo.Geo2020 
-  from RealProp.Parcel_base as Base left join RealProp.Parcel_geo as Geo
-  on Base.ssl = Geo.SSL 
-  where ui_proptype in ( '10', '11', '12', '13', '19' ) and 
-    ( year( ownerpt_extractdat_first ) <= &end_yr and year( ownerpt_extractdat_last ) >= &start_yr )
-  order by Base.ssl;
+  
+    select 
+      BaseGeoXref.*, AddrPts.address_id, AddrPts.active_res_occupancy_count
+    from
+      Mar.Address_points_view as AddrPts right join
+      ( select
+          BaseGeo.*, Xref.ssl, Xref.address_id
+        from
+          Mar.Address_ssl_xref as Xref right join
+          ( select 
+              Base.ssl, Base.ownerpt_extractdat_first, Base.ownerpt_extractdat_last, Base.ui_proptype, Base.no_units, 
+              Geo.Ward2022, Geo.Cluster2017, Geo.GeoBlk2020, Geo.Geo2020 
+            from RealProp.Parcel_base as Base left join RealProp.Parcel_geo as Geo
+            on Base.ssl = Geo.SSL 
+            where ui_proptype in ( '10', '11', '12', '13', '19' ) and 
+              ( year( ownerpt_extractdat_first ) <= &end_yr and year( ownerpt_extractdat_last ) >= &start_yr )
+          ) as BaseGeo
+          on BaseGeo.ssl = Xref.ssl
+      ) as BaseGeoXref
+    on BaseGeoXref.address_id = AddrPts.address_id
+    
+  order by BaseGeoXref.ssl;
+  
   quit;
   
 %File_info( data=Parcel_mar )
