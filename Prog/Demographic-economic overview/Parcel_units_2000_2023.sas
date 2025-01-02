@@ -33,32 +33,76 @@ proc sql noprint;
 
   create table Parcel_mar as
   
-    select 
-      BaseGeoXref.*, AddrPts.address_id, AddrPts.active_res_occupancy_count
-    from
-      Mar.Address_points_view as AddrPts right join
-      ( select
-          BaseGeo.*, Xref.ssl, Xref.address_id
-        from
-          Mar.Address_ssl_xref as Xref right join
-          ( select 
-              Base.ssl, Base.ownerpt_extractdat_first, Base.ownerpt_extractdat_last, Base.ui_proptype, Base.no_units, 
-              Geo.Ward2022, Geo.Cluster2017, Geo.GeoBlk2020, Geo.Geo2020 
-            from RealProp.Parcel_base as Base left join RealProp.Parcel_geo as Geo
-            on Base.ssl = Geo.SSL 
-            where ui_proptype in ( '10', '11', '12', '13', '19' ) and 
-              ( year( ownerpt_extractdat_first ) <= &end_yr and year( ownerpt_extractdat_last ) >= &start_yr )
-          ) as BaseGeo
-          on BaseGeo.ssl = Xref.ssl
-      ) as BaseGeoXref
-    on BaseGeoXref.address_id = AddrPts.address_id
+    select BaseGeo.*, XrefUnits.*
     
-  order by BaseGeoXref.ssl;
+    from
   
+      ( select 
+          Base.ssl, Base.ownerpt_extractdat_first, Base.ownerpt_extractdat_last, Base.ui_proptype, Base.no_units, 
+          Geo.Ward2022, Geo.Cluster2017, Geo.GeoBlk2020, Geo.Geo2020 
+        from RealProp.Parcel_base as Base left join RealProp.Parcel_geo as Geo
+        on Base.ssl = Geo.SSL 
+        where ui_proptype in ( '10', '11', '12', '13', '19' ) and 
+          ( year( ownerpt_extractdat_first ) <= &end_yr and year( ownerpt_extractdat_last ) >= &start_yr )
+      ) as BaseGeo
+
+      left join
+      
+      ( select 
+          XrefAddrPts.ssl,
+          sum( XrefAddrPts.active_res_occupancy_count ) as active_res_occupancy_count 
+        from
+          ( select 
+              coalesce( Xref.address_id, AddrPts.address_id ) as address_id, 
+              Xref.ssl, 
+              AddrPts.active_res_occupancy_count 
+            from Mar.Address_ssl_xref as Xref left join Mar.Address_points_view as AddrPts 
+            on Xref.address_id = AddrPts.address_id
+          ) as XrefAddrPts
+        group by ssl
+      ) as XrefUnits
+      
+    on BaseGeo.ssl = XrefUnits.ssl
+      
+    order by BaseGeo.ssl;
+    
   quit;
+
+
+%File_info( data=Parcel_mar, printobs=10 )
+
+
+proc print data=Parcel_mar (obs=40);
+  where ui_proptype = '10';
+  by ui_proptype;
+  var ssl active_: ;
+run;
   
-%File_info( data=Parcel_mar )
+proc print data=Parcel_mar (obs=100);
+  where ui_proptype = '11';
+  by ui_proptype;
+  var ssl active_: ;
+run;
+
+proc print data=Parcel_mar (obs=100);
+  where ui_proptype = '12';
+  by ui_proptype;
+  var ssl active_: no_units;
+run;
   
+proc print data=Parcel_mar (obs=100);
+  where ui_proptype = '13';
+  by ui_proptype;
+  var ssl active_: ;
+run;
+  
+proc print data=Parcel_mar (obs=100);
+  where ui_proptype = '19';
+  by ui_proptype;
+  var ssl active_: ;
+run;
+
+
 ENDSAS;
   
   
