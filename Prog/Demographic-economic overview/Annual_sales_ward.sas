@@ -67,6 +67,12 @@
   run;
 
   ** Output data to CSV **;
+  
+  proc format;
+    value $type
+      "SF" = "Single Family"
+      "CONDO" = "Condominium";
+  run;
 
   ods listing close;
 
@@ -76,6 +82,7 @@
     by ward2022;
     id type;
     var r_mprice_&start_yr-r_mprice_&end_yr;
+    format type $type.;
   run;
   
   ods csvall close;
