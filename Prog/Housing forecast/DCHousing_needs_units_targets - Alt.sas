@@ -350,9 +350,9 @@ data Housing_needs_baseline_2018_22;
 					if rentgrs<900 then mrentlevel=1;
 	                if 900 <=rentgrs<1400 then mrentlevel=2;
 	                if 1400 <=rentgrs<1800 then mrentlevel=3;
-	                if 1800 <=rentgrs<2800 then mrentlevel=4;
-	                if 2800 <=rentgrs<3600 then mrentlevel=5;
-	                if rentgrs >= 3600 then mrentlevel=6;
+	                if 1800 <=rentgrs<2800 then mrentlevel=4;*wrong range needs fixed. ;
+	                if 2800 <=rentgrs<3600 then mrentlevel=5;*wrong range needs fixed. ;
+	                if rentgrs >= 3600 then mrentlevel=6;*wrong range needs fixed. ;
 
 
 				end; 
