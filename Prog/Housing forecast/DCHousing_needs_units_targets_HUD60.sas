@@ -12,7 +12,7 @@
 Adapts current housing needs script  DCHousing_needs_units_targets - Alt : 
 New HUD INC categories using 30-60 and 60-80% AMI instead of 30-50 and 50-80. 
 
- 
+ Modifications: LH 03/09/2025 Modify cost categories for 60% and mathematical 80% of AMI, adjusted top end owner categories.
 **************************************************************************/
 
 %include "\\sas1\DCdata\SAS\Inc\StdLocal.sas";
@@ -21,7 +21,7 @@ New HUD INC categories using 30-60 and 60-80% AMI instead of 30-50 and 50-80.
 %DCData_lib( DMPED )
 %DCData_lib( Ipums )
 
-%let date=07252024; 
+%let date=03092025; 
 
 proc format;
 
@@ -39,22 +39,22 @@ proc format;
   value rcost
 	  1= "$0 to $899"
 	  2= "$900 to $1,399"
-	  3= "$1,400 to $1,799"
-	  4= "$1,800 to $2,299"
+	  3= "$1,400 to $1,699"
+	  4= "$1,700 to $2,299"
 	  5= "$2,300 to $2,799"
 	  6= "$2,800 and above" 
   ;
 
     value ocost
 	  1= "$0 to $1,399"
-	  2= "$1,400 to $1,799"
-	  3= "$1,800 to $2,499"
-	  4= "$2,500 to $3,199"
-	  5= "$3,200 to $4,199"
-	  6= "$4,200 and above"
+	  2= "$1,400 to $1,699"
+	  3= "$1,700 to $2,299"
+	  4= "$2,300 to $2,999"
+	  5= "$3,000 to $3,799"
+	  6= "$3,800 and above"
   ;
 
-
+/*not adjusted*/
   value acost
 	  1= "$0 to $899"
 	  2= "$900 to $1,299"
@@ -302,8 +302,8 @@ data Housing_needs_baseline_2018_22;
 			rentlevel=.;
 			if 0 <=rentgrs<900 then rentlevel=1; *900 is 30% of the monthly income for HH2 (34,200*.3/12 = 855) extremely low income, rounded to nearest 100;
             if 900 <=rentgrs<1400 then rentlevel=2; *1400 is 30% of the monthly income for HH2 (56,950*.3/12 = 1424) with very low income, rounded to nearest 100; 
-            if 1400 <=rentgrs<1800 then rentlevel=3; *1800 is 30% monthly income HH2 (72,000*.3/12 = 1800) with low incomes, already rounded to nearest 100;
-            if 1800 <=rentgrs<2300 then rentlevel=4;
+            if 1400 <=rentgrs<1700 then rentlevel=3; *1700 is 30% monthly income HH2 at 60% of AMI (68340*.3/12 = 1700)  already rounded to nearest 100;
+            if 1700 <=rentgrs<2300 then rentlevel=4; *2300 is 30% of montly income of HH2 at mathematical 80% of AMI (91,120*.3/12=2300) already rounded to nearest 100;
             if 2300 <=rentgrs<2800 then rentlevel=5;
             if rentgrs >= 2800 then rentlevel=6;
 
@@ -316,8 +316,8 @@ data Housing_needs_baseline_2018_22;
 					mrentlevel=.;
 					if max_rent<900 then mrentlevel=1;
 					if 900 <=max_rent<1400 then mrentlevel=2;
-					if 1400 <=max_rent<1800 then mrentlevel=3;
-					if 1800 <=max_rent<2300 then mrentlevel=4;
+					if 1400 <=max_rent<1700 then mrentlevel=3;
+					if 1700 <=max_rent<2300 then mrentlevel=4;
 					if 2300 <=max_rent<2800 then mrentlevel=5;
 					if max_rent >= 2800 then mrentlevel=6;
 
@@ -327,10 +327,10 @@ data Housing_needs_baseline_2018_22;
 
 					if rentgrs<900 then mrentlevel=1;
 	                if 900 <=rentgrs<1400 then mrentlevel=2;
-	                if 1400 <=rentgrs<1800 then mrentlevel=3;
-	                if 1800 <=rentgrs<2800 then mrentlevel=4;
-	                if 2800 <=rentgrs<3600 then mrentlevel=5;
-	                if rentgrs >= 3600 then mrentlevel=6;
+	                if 1400 <=rentgrs<1700 then mrentlevel=3;
+	                if 1700 <=rentgrs<2300 then mrentlevel=4;
+	                if 2300 <=rentgrs<2800 then mrentlevel=5;
+	                if rentgrs >= 2800 then mrentlevel=6;
 
 
 				end; 
@@ -340,15 +340,15 @@ data Housing_needs_baseline_2018_22;
 					fmrentlevel=.;
 					if max_rent<900 then fmrentlevel=1;
 					if 900 <=max_rent<1400 then fmrentlevel=2;
-					if 1400 <=max_rent<1800 then fmrentlevel=3;
-					if 1800 <=max_rent<2300 then fmrentlevel=4;
+					if 1400 <=max_rent<1700 then fmrentlevel=3;
+					if 1700 <=max_rent<2300 then fmrentlevel=4;
 					if 2300 <=max_rent<2800 then fmrentlevel=5;
 					if max_rent >= 2800 then fmrentlevel=6;
 
 
 
 		 *rent cost categories now used in targets that provide a set of categories useable for renters and owners combined; 
-			
+			/*LH - 3/9/25 not adjusted for mathematical 80% of AMI & 60% of AMI)*/
 			allcostlevel=.;
 			if rentgrs<900 then allcostlevel=1;
             if 900 <=rentgrs<1400 then allcostlevel=2;
@@ -444,11 +444,11 @@ data Housing_needs_baseline_2018_22;
 
 			ownlevel=.;
 				if 0 <=total_month<1400 then ownlevel=1;
-	           if 1400 <=total_month<1800 then ownlevel=2;
-	           if 1800 <=total_month<2500 then ownlevel=3;
-	           if 2500 <=total_month<3200 then ownlevel=4;
-	           if 3200 <=total_month<4200 then ownlevel=5;
-	           if total_month >= 4200 then ownlevel=6;
+	           if 1400 <=total_month<1700 then ownlevel=2;
+	           if 1700 <=total_month<2300 then ownlevel=3;
+	           if 2300 <=total_month<3000 then ownlevel=4;
+	           if 3000 <=total_month<3800 then ownlevel=5;
+	           if total_month >= 3800 then ownlevel=6;
 
 
 			*for desired cost for current housing needs is current payment if not cost-burdened
@@ -459,22 +459,22 @@ data Housing_needs_baseline_2018_22;
 				
 
 					if max_ocost<1400 then mownlevel=1; *removed zero on one end to capture 2 HHs with negative HHINCOME and max_ocost;
-		            if 1400 <=max_ocost<1800 then mownlevel=2;
-		            if 1800 <=max_ocost<2500 then mownlevel=3;
-		            if 2500 <=max_ocost<3200 then mownlevel=4;
-		            if 3200 <=max_ocost<4200 then mownlevel=5;
-		            if max_ocost >= 4200 then mownlevel=6;
+		            if 1400 <=max_ocost<1700 then mownlevel=2;
+		            if 1700 <=max_ocost<2300 then mownlevel=3;
+		            if 2300 <=max_ocost<3000 then mownlevel=4;
+		            if 3000 <=max_ocost<3800 then mownlevel=5;
+		            if max_ocost >= 3800 then mownlevel=6;
 
 				end;
 
 				else if costburden=0 then do; 
 
 					if owncost<1400 then mownlevel=1;
-					if 1400 <=owncost<1800 then mownlevel=2;
-					if 1800 <=owncost<2500 then mownlevel=3;
-					if 2500 <=owncost<3200 then mownlevel=4;
-					if 3200 <=owncost<4200 then mownlevel=5;
-					if owncost >= 4200 then mownlevel=6;
+					if 1400 <=owncost<1700 then mownlevel=2;
+					if 1700 <=owncost<2300 then mownlevel=3;
+					if 2300 <=owncost<3000 then mownlevel=4;
+					if 3000 <=owncost<3800 then mownlevel=5;
+					if owncost >= 3800 then mownlevel=6;
 
 				end; 
 
@@ -482,24 +482,25 @@ data Housing_needs_baseline_2018_22;
 		
 			curownlevel=.;
 				if 0 <=owncost<1400 then curownlevel=1;
-	           if 1400 <=owncost<1800 then curownlevel=2;
-	           if 1800 <=owncost<2500 then curownlevel=3;
-	           if 2500 <=owncost<3200 then curownlevel=4;
-	           if 3200 <=owncost<4200 then curownlevel=5;
-	           if owncost >= 4200 then curownlevel=6;
+	           if 1400 <=owncost<1700 then curownlevel=2;
+	           if 1700 <=owncost<2300 then curownlevel=3;
+	           if 2300 <=owncost<3000 then curownlevel=4;
+	           if 3000 <=owncost<3800 then curownlevel=5;
+	           if owncost >= 3800 then curownlevel=6;
 
 			*future housing needs categories based on desired cost distribution;
 
 			   fmownlevel=.;
 						if max_ocost<1400 then fmownlevel=1; *removed zero on one end to capture 2 HHs with negative HHINCOME and max_ocost;
-		            if 1400 <=max_ocost<1800 then fmownlevel=2;
-		            if 1800 <=max_ocost<2500 then fmownlevel=3;
-		            if 2500 <=max_ocost<3200 then fmownlevel=4;
-		            if 3200 <=max_ocost<4200 then fmownlevel=5;
-		            if max_ocost >= 4200 then fmownlevel=6;
+		            if 1400 <=max_ocost<1700 then fmownlevel=2;
+		            if 1700 <=max_ocost<2300 then fmownlevel=3;
+		            if 2300 <=max_ocost<3000 then fmownlevel=4;
+		            if 3000 <=max_ocost<3800 then fmownlevel=5;
+		            if max_ocost >= 3800 then fmownlevel=6;
 
 
 		 *owner cost categories now used in targets that provide a set of categories useable for renters and owners combined; 
+				/*LH - 3/9/25 not adjusted for mathematical 80% of AMI & 60% of AMI)*/
 			allcostlevel=.;
 			if owncost<900 then allcostlevel=1;
 			if 900 <=owncost<1400 then allcostlevel=2;
@@ -636,13 +637,14 @@ data Housing_needs_vacant_2018_22 Other_vacant_2018_22 ;
 		rentlevel=.;
 		if 0 <=rentgrs<900 then rentlevel=1; *900 is 30% of the monthly income for HH2 (34,200*.3/12 = 855) extremely low income, rounded to nearest 100;
         if 900 <=rentgrs<1400 then rentlevel=2; *1400 is 30% of the monthly income for HH2 (56,950*.3/12 = 1424) with very low income, rounded to nearest 100; 
-        if 1400 <=rentgrs<1800 then rentlevel=3; *1800 is 30% monthly income HH2 (72,000*.3/12 = 1800) with low incomes, already rounded to nearest 100;
-        if 1800 <=rentgrs<2300 then rentlevel=4;
+        if 1400 <=rentgrs<1700 then rentlevel=3; *1800 is 30% monthly income HH2 (72,000*.3/12 = 1800) with low incomes, already rounded to nearest 100;
+        if 1700 <=rentgrs<2300 then rentlevel=4;
         if 2300 <=rentgrs<2800 then rentlevel=5;
         if rentgrs >= 2800 then rentlevel=6;
 
 
 		/*create  categories now used in targets for renter/owner costs combined*/ 
+		/*LH - 3/9/25 not adjusted for mathematical 80% of AMI & 60% of AMI)*/
 				allcostlevel=.;
 				if rentgrs<900 then allcostlevel=1;
 	            if 900 <=rentgrs<1400 then allcostlevel=2;
@@ -684,23 +686,24 @@ data Housing_needs_vacant_2018_22 Other_vacant_2018_22 ;
 
 			ownlevel=.;
 				if 0 <=total_month<1400 then ownlevel=1;
-	           if 1400 <=total_month<1800 then ownlevel=2;
-	           if 1800 <=total_month<2500 then ownlevel=3;
-	           if 2500 <=total_month<3200 then ownlevel=4;
-	           if 3200 <=total_month<4200 then ownlevel=5;
-	           if total_month >= 4200 then ownlevel=6;
+	           if 1400 <=total_month<1700 then ownlevel=2;
+	           if 1700 <=total_month<2300 then ownlevel=3;
+	           if 2300 <=total_month<3000 then ownlevel=4;
+	           if 3000 <=total_month<3800 then ownlevel=5;
+	           if total_month >= 3800 then ownlevel=6;
 
 			*curownlevel based on owners total month cost for owners, since owncost is not available for vacant units;
 			curownlevel=.;
 				if 0 <=total_month<1400 then curownlevel=1;
-	           if 1400 <=total_month<1800 then curownlevel=2;
-	           if 1800 <=total_month<2500 then curownlevel=3;
-	           if 2500 <=total_month<3200 then curownlevel=4;
-	           if 3200 <=total_month<4200 then curownlevel=5;
-	           if total_month >= 4200 then curownlevel=6;
+	           if 1400 <=total_month<1700 then curownlevel=2;
+	           if 1700 <=total_month<2300 then curownlevel=3;
+	           if 2300 <=total_month<3000 then curownlevel=4;
+	           if 3000 <=total_month<3800 then curownlevel=5;
+	           if total_month >= 3800 then curownlevel=6;
 
 			
 			/*create  categories now used in targets for renter/owner costs combined*/ 
+			   /*LH - 3/9/25 not adjusted for mathematical 80% of AMI & 60% of AMI)*/
 				allcostlevel=.;
 				if total_month<900 then allcostlevel=1;
 				if 900 <=total_month<1400 then allcostlevel=2;
@@ -811,3 +814,266 @@ PROC FREQ DATA = Housing_needs_baseline_2018_22;
 	WEIGHT hhwt;
 RUN;
 */
+
+
+
+
+/* HOUSING TENURE */
+
+proc freq data=Housing_needs_baseline_2018_22;
+tables tenure /  out=tenure_totals;
+weight hhwt;
+run; 
+
+proc export data=tenure_totals
+ 	outfile="&_dcdata_default_path\DMPED\Prog\Housing Forecast\Tenure_totals_occupied_60_&date..csv"
+   dbms=csv
+   replace;
+   run;
+
+/* HOUSING INCOME */
+
+proc freq data=Housing_needs_baseline_2018_22;
+tables hud_inc /  out=hud_inc_cat;
+weight hhwt;
+run; 
+
+proc export data=hud_inc_cat
+ 	outfile="&_dcdata_default_path\DMPED\Prog\Housing Forecast\hud_inc_cat_60_&date..csv"
+   dbms=csv
+   replace;
+   run;
+*look up relevant occupations;
+ *https://usa.ipums.org/usa/volii/occ2018.shtml ; 
+ proc print data=Housing_needs_baseline_2018_22 (obs=10);
+ where hud_inc=1 and numprec=2 and fulltime=1 and yearround=1;
+ var tenure empstat occ hud_inc;
+ run;
+ proc print data=Housing_needs_baseline_2018_22 (obs=10);
+ where hud_inc=2 and numprec=2 and fulltime=1 and yearround=1;
+ var tenure empstat occ hud_inc;
+ run;
+  proc print data=Housing_needs_baseline_2018_22 (obs=10);
+ where hud_inc=3 and numprec=2 and fulltime=1 and yearround=1;
+ var tenure empstat occ hud_inc;
+ run;
+  proc print data=Housing_needs_baseline_2018_22 (obs=10);
+ where hud_inc=4 and numprec=2 and fulltime=1 and yearround=1;
+ var tenure empstat occ hud_inc;
+ run;
+  proc print data=Housing_needs_baseline_2018_22 (obs=10);
+ where hud_inc=5 and numprec=2 and fulltime=1 and yearround=1;
+ var tenure empstat occ hud_inc;
+ run;
+  proc print data=Housing_needs_baseline_2018_22 (obs=10);
+ where hud_inc=6 and numprec=2 and fulltime=1 and yearround=1;
+ var tenure empstat occ hud_inc;
+ run;
+
+ proc freq data=Housing_needs_baseline_2018_22;
+ where  numprec=2 and fulltime=1 and yearround=1;
+ weight hhwt;
+ tables occ*hud_inc / out=hud_inc_occ;
+ run;
+
+proc export data=hud_inc_occ
+ 	outfile="&_dcdata_default_path\DMPED\Prog\Housing Forecast\hud_inc_occ_60_&date..csv"
+   dbms=csv
+   replace;
+   run;
+
+/* Housing Tenure by Household Income (HUD AMI categories)*/
+proc freq data=Housing_needs_baseline_2018_22;
+tables hud_inc*tenure /nopercent norow  out=tenure_hud_inc_cat OUTPCT;
+weight hhwt;
+run; 
+
+
+proc export data=tenure_hud_inc_cat
+ 	outfile="&_dcdata_default_path\DMPED\Prog\Housing Forecast\tenure_hud_inc_cat_60_&date..csv"
+   dbms=csv
+   replace;
+   run;
+
+/*HOUSING COST BURDEN BY INCOME/TENURE */
+proc freq data=Housing_needs_baseline_2018_22;
+tables tenure*costburden*hud_inc /  out=burden_tenure_hud_inc OUTPCT;
+weight hhwt;
+run;
+
+proc export data=burden_tenure_hud_inc
+ 	outfile="&_dcdata_default_path\DMPED\Prog\Housing Forecast\burden_tenure_hud_inc_60_&date..csv"
+   dbms=csv
+   replace;
+   run;
+
+/*HOUSING UNIT COST - RENT*/
+*Including occupied and vacant units;
+proc freq data=all;
+where tenure = 1;
+tables rentlevel/  out=renter_costs_cat_all_units;
+weight hhwt;
+run;
+
+proc export data=renter_costs_cat_all_units
+ 	outfile="&_dcdata_default_path\DMPED\Prog\Housing Forecast\renter_costs_cat_all_units_60_&date..csv"
+   dbms=csv
+   replace;
+   run;
+
+*NOTE FREQ in output is not a weighted count. Is the mean being successfully weighted?;
+proc summary data= all (where = (tenure = 1));
+var rentgrs;
+weight hhwt; 
+output out= rent_all_units mean=;
+run;
+
+/*Not exporting for now*/
+
+
+/*HOUSING COSTS OWNERS (CURRENT PAYMENT)*/
+*Including occupied and vacant units;
+proc freq data=all;
+where tenure = 2;
+tables curownlevel /  out=own_costs_cat_all_units;
+weight hhwt;
+run;
+
+proc export data=own_costs_cat_all_units
+ 	outfile="&_dcdata_default_path\DMPED\Prog\Housing Forecast\own_costs_cat_all_units_60_&date..csv"
+   dbms=csv
+   replace;
+   run;
+proc sort data=all;
+by curownlevel;
+proc means data=all;
+by curownlevel;
+var valueh;
+weight hhwt;
+run; 
+proc means data=all;
+var valueh;
+weight hhwt;
+run; 
+
+/* HOUSING COSTS FOR FIRST-TIME OWNERS */
+*Including occupied and vacant units;
+proc freq data=all;
+where tenure = 2;
+tables ownlevel /  out=first_own_costs_cat_all_units;
+weight hhwt;
+run;
+
+proc export data=first_own_costs_cat_all_units
+ 	outfile="&_dcdata_default_path\DMPED\Prog\Housing Forecast\first_own_costs_cat_all_units_60_&date..csv"
+   dbms=csv
+   replace;
+   run;
+
+/* BY TENURE: HOUSEHOLDS "AFFORDABLE/DESIRED" HOUSING COST BAND VS SUPPLY AT THAT LEVEL */
+
+*all tenures, occupied units;
+PROC FREQ DATA = Housing_needs_baseline_2018_22; 
+tables tenure*mallcostlevel /nocol nopercent  out=afford_hous_cost_tenure OUTPCT;
+weight hhwt;
+run;
+
+proc export data=afford_hous_cost_tenure
+ 	outfile="&_dcdata_default_path\DMPED\Prog\Housing Forecast\afford_hous_cost_tenure_60_&date..csv"
+   dbms=csv
+   replace;
+   run;
+
+*renters, occupied units;
+PROC FREQ DATA = Housing_needs_baseline_2018_22; 
+where tenure = 1;
+tables mrentlevel /  out=afford_rent_cost ;
+weight hhwt;
+run;
+
+proc export data=afford_rent_cost
+ 	outfile="&_dcdata_default_path\DMPED\Prog\Housing Forecast\afford_rent_cost_60_&date..csv"
+   dbms=csv
+   replace;
+   run;
+
+*owners, occupied units;
+PROC FREQ DATA = Housing_needs_baseline_2018_22; 
+where tenure = 2;
+tables mownlevel /  out=afford_own_cost ;
+weight hhwt;
+run; 
+
+
+proc export data=afford_own_cost
+ 	outfile="&_dcdata_default_path\DMPED\Prog\Housing Forecast\afford_own_cost_60_&date..csv"
+   dbms=csv
+   replace;
+   run;
+
+/*Cost mismatch/competition for lower cost units: Figure 20 in 2019 report by Housing Cost by Ability to Pay by Tenure*/
+
+*all units split out by tenure;
+*rent;
+PROC FREQ DATA = all; 
+where tenure = 1;
+tables paycategory*rentlevel /  out=abil_pay_rent_all_units OUTPCT;
+weight hhwt;
+run;
+
+proc export data=abil_pay_rent_all_units
+ 	outfile="&_dcdata_default_path\DMPED\Prog\Housing Forecast\abil_pay_rent_all_units_60_&date..csv"
+   dbms=csv
+   replace;
+   run;
+
+ *own based on current payment; 
+PROC FREQ DATA = all; 
+where tenure = 2;
+tables paycategory*curownlevel /  out=abil_pay_own_cur_all_units OUTPCT;
+weight hhwt;
+run;
+
+proc export data=abil_pay_own_cur_all_units
+ 	outfile="&_dcdata_default_path\DMPED\Prog\Housing Forecast\abil_pay_own_cur_all_units_60_&date..csv"
+   dbms=csv
+   replace;
+   run;
+
+*own based on first time buyer payment; 
+PROC FREQ DATA = all; 
+where tenure = 2;
+tables couldafford*ownlevel /  out=abil_pay_own_first_all_units OUTPCT;
+weight hhwt;
+run;
+
+proc export data=abil_pay_own_first_all_units
+ 	outfile="&_dcdata_default_path\DMPED\Prog\Housing Forecast\abil_pay_own_first_all_units_60_&date..csv"
+   dbms=csv
+   replace;
+   run;
+
+/* VACANT BY TYPE */
+PROC FREQ DATA = Housing_needs_vacant_2018_22;
+	TABLES VACANCY_R /  out=vacancy_by_type;
+	Weight hhwt;
+RUN;
+
+proc export data=vacancy_by_type
+ 	outfile="&_dcdata_default_path\DMPED\Prog\Housing Forecast\vacancy_by_type_60_&date..csv"
+   dbms=csv
+   replace;
+   run;
+
+/* OTHER VACANT BY TYPE */
+
+PROC FREQ DATA = other_vacant_2018_22;
+	TABLES VACANCY/  out=other_vacancy_by_type;
+	Weight hhwt;
+RUN;
+
+proc export data=other_vacancy_by_type
+ 	outfile="&_dcdata_default_path\DMPED\Prog\Housing Forecast\other_vacancy_by_type_60_&date..csv"
+   dbms=csv
+   replace;
+   run;
