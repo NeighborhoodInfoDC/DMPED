@@ -26,6 +26,8 @@ Net new Housing units needed to accommodate growth (2020-2035) (including increa
 
 Housing cost levels new households could afford by tenure in 2035 (mid, high, alt) 
 
+Modification: LH 3/9/25 Adjusted rent and owner cost formats for mathematical 80% of AMI and 60%. 
+
 
 **************************************************************************/
 
@@ -35,7 +37,7 @@ Housing cost levels new households could afford by tenure in 2035 (mid, high, al
 %DCData_lib( DMPED )
 %DCData_lib( Ipums )
 
-%let date=08152024; 
+%let date=03092025; 
 
 PROC FORMAT;
 
@@ -53,22 +55,22 @@ PROC FORMAT;
 	 value rcost
 	  1= "$0 to $899"
 	  2= "$900 to $1,399"
-	  3= "$1,400 to $1,799"
-	  4= "$1,800 to $2,299"
+	  3= "$1,400 to $1,699"
+	  4= "$1,700 to $2,299"
 	  5= "$2,300 to $2,799"
 	  6= "More than $2,800"
   ;
 
     value ocost
 	  1= "$0 to $1,399"
-	  2= "$1,400 to $1,799"
-	  3= "$1,800 to $2,499"
-	  4= "$2,500 to $3,199"
-	  5= "$3,200 to $4,199"
-	  6= "More than $4,200"
+	  2= "$1,400 to $1,699"
+	  3= "$1,700 to $2,299"
+	  4= "$2,300 to $2,999"
+	  5= "$3,000 to $3,799"
+	  6= "More than $3,800"
   ;
 
-
+	/*not updated for mathematical 80% of ami*/
   value acost
 	  1= "$0 to $899"
 	  2= "$900 to $1,399"
