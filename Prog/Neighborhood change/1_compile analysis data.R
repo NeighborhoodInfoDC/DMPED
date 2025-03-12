@@ -927,7 +927,7 @@ black_tenure_22 <- get_acs(geography = "tract",
 black_tenure_12 <- get_acs(geography = "tract",
                            variables = c("B25003B_002", "B25003B_003"
                            ), state = "DC",
-                           year = 2022) %>%
+                           year = 2012) %>%
   pivot_wider(id_cols = c(GEOID, NAME),
               names_from = variable,
               values_from = estimate)%>%
@@ -983,3 +983,85 @@ blacktenure <- consolidated_2000_2010_2020_tenure %>%
   left_join(black_tenure_22,by=c("GEOID"))
 
 write.csv(blacktenure,"C:/Users/Ysu/Box/Greater DC/Projects/DMPED Housing Assessment 2024/Task 2 - Nbrhd Change and Displacement Risk Assessment/Data collection/Clean/Black_tenure.csv")
+
+#### Jan 2025 updated displacement risk calculations- add share rent burdened
+rentburden_22 <- get_acs(geography = "tract",
+                             variables = c("B25070_001","B25070_010"
+                                          
+                             ), state = "DC",
+                             year = 2022) %>%
+  pivot_wider(id_cols = c(GEOID, NAME),
+              names_from = variable,
+              values_from = estimate)%>%
+  mutate(total_morethan50percent =B25070_010,
+         total_renter=B25070_001) %>% 
+  mutate(share_rentburdened=total_morethan50percent/total_renter) %>%
+  mutate(total=1) %>% 
+  group_by(total) %>% 
+  mutate(cityave_rentburden=sum(total_morethan50percent)/sum(total_renter)) %>% 
+  ungroup() %>% 
+  select(GEOID, total_morethan50percent,share_rentburdened, cityave_rentburden)
+
+
+write.csv(rentburden_22,"C:/Users/Ysu/Box/Greater DC/Projects/DMPED Housing Assessment 2024/Task 2 - Nbrhd Change and Displacement Risk Assessment/Data collection/Clean/rentburdenshare_22.csv")
+
+#change in rent
+renvaluedata <- consolidated_2012_2020_rentcat %>% 
+  mutate(GEOID=as.character(tr2020ge)) %>% 
+  left_join(dc_rent_2022_cat,by=c("GEOID")) %>% 
+  mutate(rent_2012_low=(rentcat_20percent_2012_2020+rentcat_40percent_2012_2020)/totalrenterhh_2012_2020) %>% 
+   mutate(rent_2022_low=(rentcat_20percent_2022+rentcat_40percent_2022)/totalrenterhh_2022) %>% 
+  mutate(changeinlowrenthh=rent_2022_low-rent_2012_low) 
+
+cityrent <- renvaluedata %>% 
+  mutate(total=1) %>% 
+  group_by(total) %>% 
+  summarise(total12low=sum(rentcat_20percent_2012_2020+rentcat_40percent_2012_2020),
+            total22low=sum(rentcat_20percent_2022+rentcat_40percent_2022),
+            total22=sum(totalrenterhh_2022),
+            total12=sum(totalrenterhh_2012_2020)) %>%
+  mutate(citychange=total22low/total22-total12low/total12) #-0.02082012
+
+renvaluedata <- renvaluedata %>% 
+  select(GEOID, changeinlowrenthh) %>% 
+  mutate(citychangeinlowrent=-0.02082012)
+  
+
+write.csv(renvaluedata,"C:/Users/Ysu/Box/Greater DC/Projects/DMPED Housing Assessment 2024/Task 2 - Nbrhd Change and Displacement Risk Assessment/Data collection/Clean/cityrentchange.csv")
+
+#change in college
+
+percent_bachelors_over_25_2022 <- get_acs(geography = "county",
+                                          variables = c("B15003_022", "B15003_023", "B15003_024", "B15003_025", "B07001_006","B07001_007", "B07001_008",
+                                                        "B07001_009", "B07001_010", "B07001_011", "B07001_012", "B07001_013",
+                                                        "B07001_014", "B07001_015", "B07001_016" ),
+                                          year = 2022,
+                                          state = "DC",
+                                          geometry = FALSE) %>%
+  pivot_wider(id_cols = c(GEOID, NAME),
+              names_from = variable,
+              values_from = estimate) %>%
+  mutate(over_25 = B07001_006 +  B07001_007 + B07001_008 + B07001_009 + B07001_010 + B07001_011 
+         + B07001_012  + B07001_013  + B07001_014  + B07001_015  + B07001_016, #AGGREGATING THE 25 AND UP AGE CATEGORIES
+         bachelors_or_more = B15003_022 + B15003_023 + B15003_024 + B15003_025,
+         percent_bachelors = bachelors_or_more/over_25) 
+sum(percent_bachelors_over_25_2022$bachelors_or_more) #0.6263609
+sum(percent_bachelors_over_25_2022$over_25)
+# write.csv(percent_bachelors_over_25_2022, "age_college_22_data.csv")
+#303532/484596 = 6263609 thats right
+percent_bachelors_over_25_2012 <- get_acs(geography = "county",
+                                          variables = c("B15003_022", "B15003_023", "B15003_024", "B15003_025", "B07001_006","B07001_007", "B07001_008",
+                                                        "B07001_009", "B07001_010", "B07001_011", "B07001_012", "B07001_013",
+                                                        "B07001_014", "B07001_015", "B07001_016" ),
+                                          year = 2012,
+                                          state = "DC",
+                                          geometry = FALSE) %>%
+  pivot_wider(id_cols = c(GEOID, NAME),
+              names_from = variable,
+              values_from = estimate) %>%
+  mutate(over_25 = B07001_006 +  B07001_007 + B07001_008 + B07001_009 + B07001_010 + B07001_011 
+         + B07001_012  + B07001_013  + B07001_014  + B07001_015  + B07001_016, #AGGREGATING THE 25 AND UP AGE CATEGORIES
+         bachelors_or_more = B15003_022 + B15003_023 + B15003_024 + B15003_025,
+         percent_bachelors = bachelors_or_more/over_25) 
+sum(percent_bachelors_over_25_2012$bachelors_or_more)
+sum(percent_bachelors_over_25_2012$over_25) #0.5120571
