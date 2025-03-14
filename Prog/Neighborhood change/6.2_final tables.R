@@ -168,9 +168,9 @@ lowinccat <- master7 %>%
   mutate(lowincomeexclusion=ifelse(quintile_cutoffs_inc_2012<3 & quintile_cutoffs_inc_2022<3 , "lowincome exclusion", "notlowincomeexclusion")) %>%
   mutate(lowinclosstype=ifelse(pctchange_12_22<=-0.11 & change_lowincome<(-6), "lowincomeloss", "notlowincomeloss")) %>%
   mutate(lowincgaintype=ifelse(pctchange_12_22>=0.12 & pct_lowincome_2022>=pct_lowincome_2012, "lowincomegain", "notlowincomegain")) %>%
-  mutate(neighborhoodtype=case_when(lowincomeexclusion=="lowincome exclusion" ~ "lowincome exclusion",
-                                    lowinclosstype=="lowincomeloss" ~ "lowincomeloss",
-                                    lowincgaintype=="lowincomegain" ~ "lowincomegain",
+  mutate(neighborhoodtype=case_when(lowincomeexclusion=="lowincome exclusion" ~ "Exclusion of Households with Low Income",
+                                    lowinclosstype=="lowincomeloss" ~ "Loss of Households with Low Income",
+                                    lowincgaintype=="lowincomegain" ~ "Gain of Households with Low Income",
                                     TRUE ~ "no change"))
   # mutate(neighborhoodtype=case_when(lowincomeexclusion=="lowincome exclusion" ~ "exclusion",
   #                                 TRUE ~ "no change"))
@@ -242,9 +242,9 @@ write.csv(marketsummary_by_type, "Clean/marketsummary_by_type_Feb.csv")
 
 maplowinccat <- lowinccat %>% 
   mutate(`neighborhood category` = factor(neighborhoodtype,
-                                          levels = c("lowincomeloss",
-                                                     "lowincomegain",
-                                                     "lowincome exclusion",
+                                          levels = c("Loss of Households with Low Income",
+                                                     "Gain of Households with Low Income",
+                                                     "Exclusion of Households with Low Income",
                                                      "no change"
                                           ))) %>% 
   filter(neighborhoodtype!="no change")
@@ -259,33 +259,26 @@ write.csv(neighborhoodchangemap_DMPED , "Clean/neighborhoodchange_DMPED.csv")
 
 urban_colors4 <- c("#f5cbdf","#cfe8f3","#fce39e")
 
+
 ggplot() +
-  geom_sf(data =maplowinccat, aes( fill = `neighborhood category`))+
-  scale_fill_manual(name="neighborhoodchange type", values = urban_colors4, guide = guide_legend(override.aes = list(linetype = "blank", 
-                                                                                                                     shape = NA)))+ 
-  # geom_sf(BBCF, mapping = aes(), fill=NA,lwd =  0.5, color="#fdbf11",show.legend = "line")+
-  # geom_sf(cog_all, mapping = aes(), fill=NA,lwd =  1, color="#ec008b",show.legend = "line")+
-  # scale_color_manual(values = 'transparent', guide = guide_legend(override.aes = list(linetype = "solid"))) +
-  geom_sf(water_sf, mapping=aes(), fill="#dcdbdb", color="#dcdbdb", size=0.05)+
-  coord_sf(datum = NA)+
-  # theme(
-  #   panel.grid.major = element_line(colour = "transparent", linewidth = 0),
-  #   axis.title = element_blank(),
-  #   axis.line.y = element_blank(),
-  #   plot.caption = element_text(hjust = 0, linewidth = 16),
-  #   plot.title = element_text(linewidth = 18),
-  #   legend.title=element_text(linewidth=14),
-  #   legend.text = element_text(linewidth = 14)
-  # 
-  # )+
-  guides(color = guide_legend(override.aes = list(size=5)))+
-  geom_sf(data = tractboundary_20, fill = "transparent", color="#adabac")+
-  coord_sf(datum = NA)+
-  # geom_sf(data = displacementarea, fill = "transparent", color="#ec008b")+
-  # coord_sf(datum = NA)+
-  labs(title = paste0("Neighborhood Change in DC"),
-       subtitle= "Types by change in households with low-income",
-       caption = "Source: Census 2000, ACS 5-year estimates 2008-2012, 2018-2022, Real Property Tax Database")
+  geom_sf(data = maplowinccat, aes(fill = `neighborhood category`)) +
+  scale_fill_manual(name = "Neighborhood Change Type", values = urban_colors4, 
+                    guide = guide_legend(override.aes = list(linetype = "blank", shape = NA))) + 
+  geom_sf(data = water_sf, fill = "#dcdbdb", color = "#dcdbdb", size = 0.05) +
+  geom_sf(data = tractboundary_20, fill = "transparent", color = "#adabac") +
+  coord_sf(expand = FALSE) +  # Prevents extra padding
+  labs(
+    title = "Neighborhood Change in DC",
+    subtitle = "Types by change in households with low-income",
+    caption = "Source: Census 2000, ACS 5-year estimates 2008-2012, 2018-2022, Real Property Tax Database"
+  ) +
+  theme_void() +  # Ensures no background/grid elements
+  theme(
+    panel.border = element_blank(),    # Removes panel border
+    panel.background = element_blank(), # Removes panel background
+    plot.background = element_blank(),  # Ensures no gray background
+    legend.background = element_blank() # Removes legend background
+  )
 
 
 
