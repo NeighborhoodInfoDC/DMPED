@@ -283,7 +283,7 @@ ggplot() +
 
 
 displacement_tracts <- maplowinccat %>% 
-  filter(neighborhoodtype=="lowincomeloss")
+  filter(neighborhoodtype=="Loss of Households with Low Income")
 
 neighbors <- lowinccat %>%
   filter(st_touches(geometry, st_union(displacement_tracts), sparse = FALSE)) %>% 
@@ -442,11 +442,32 @@ predictionmaster <-  neighborhoodtype_Jan %>%
              )
 
 
-test <- predictionmaster %>% 
-  select(GEOID, population_vulnerability_cat, quintile3)
-
-test2 <- mapdisplacement %>% 
-  select(GEOID, population_vulnerability_cat, quintile3)
+mapdisplacement <- predictionmaster %>% 
+  mutate(GEOID=as.character(GEOID)) %>% 
+  left_join(tractboundary_20, by=c("GEOID")) %>% 
+  st_as_sf() %>% 
+  mutate(`population vulnerability` = factor(population_vulnerability_cat,
+                                          levels = c("Lowest",
+                                                     "Lower",
+                                                     "Intermediate",
+                                                     "Higher",
+                                                     "Highest"
+                                          ))) %>% 
+  mutate(`housing condition` = factor(housing_condition_cat,
+                                             levels = c("Lowest",
+                                                        "Lower",
+                                                        "Intermediate",
+                                                        "Higher",
+                                                        "Highest"
+                                             ))) %>% 
+  mutate(`market pressure` = factor(market_pressure_cat,
+                                      levels = c("Lowest",
+                                                 "Lower",
+                                                 "Intermediate",
+                                                 "Higher",
+                                                 "Highest"
+                                      ))) 
+  
 
 urban_vulnerable <- c("#f5f5f5","#cfe8f3","#a2d4ec","#1696d2","#0a4c6a")
 urban_housing <- c("#f5f5f5","#dcedd9","#bcdeb4","#55b748","#2c5c2d")
@@ -495,7 +516,7 @@ ggplot() +
 
 ggplot() +
   geom_sf(data =mapdisplacement, aes( fill = `market pressure`))+
-  scale_fill_manual(name="Housing Condition", values = urban_market, guide = guide_legend(override.aes = list(linetype = "blank", 
+  scale_fill_manual(name="Market Pressure", values = urban_market, guide = guide_legend(override.aes = list(linetype = "blank", 
                                                                                                                shape = NA)))+ 
   geom_sf(water_sf, mapping=aes(), fill="#dcdbdb", color="#dcdbdb", size=0.05)+
   coord_sf(datum = NA)+
