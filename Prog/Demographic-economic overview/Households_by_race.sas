@@ -67,15 +67,18 @@ data Census_2020;
   %Convert_vars( vars=&Census_2020_total )
   %Convert_vars( vars=&Census_2020_race )
   
-  TotalHHs = P16_001N;
-  BlackHHs = P16B_001N;
-  AIANHHs = P16C_001N;
-  AsianHHs = P16D_001N;
-  NHOPIHHs = P16E_001N;
-  OtherRacHHs = P16F_001N;
-  MultiRacHHs = P16G_001N;
-  LatinoHHs = P16H_001N;
-  NHWhteHHs = P16I_001N;
+  TotalHHs = _P16_001N;
+  BlackHHs = _P16B_001N;
+  AIANHHs = _P16C_001N;
+  AsianHHs = _P16D_001N;
+  NHOPIHHs = _P16E_001N;
+  OtherRacHHs = _P16F_001N;
+  MultiRacHHs = _P16G_001N;
+  LatinoHHs = _P16H_001N;
+  NHWhiteHHs = _P16I_001N;
+  
+  AsnPIHHs = AsianHHs + NHOPIHHs;
+  AllOtherHHs = AIANHHs + OtherRacHHs + MultiRacHHs;
   
 run;
 
@@ -107,16 +110,19 @@ data Census_2010;
   %Convert_vars( vars=&Census_2010_total )
   %Convert_vars( vars=&Census_2010_race )
   
-  TotalHHs = P015001;
-  BlackHHs = P018B001;
-  AIANHHs = P018C001;
-  AsianHHs = P018D001;
-  NHOPIHHs = P018E001;
-  OtherRacHHs = P018F001;
-  MultiRacHHs = P018G001;
-  LatinoHHs = P018H001;
-  NHWhteHHs = P018I001;
+  TotalHHs = _P015001;
+  BlackHHs = _P018B001;
+  AIANHHs = _P018C001;
+  AsianHHs = _P018D001;
+  NHOPIHHs = _P018E001;
+  OtherRacHHs = _P018F001;
+  MultiRacHHs = _P018G001;
+  LatinoHHs = _P018H001;
+  NHWhiteHHs = _P018I001;
   
+  AsnPIHHs = AsianHHs + NHOPIHHs;
+  AllOtherHHs = AIANHHs + OtherRacHHs + MultiRacHHs;
+
 run;
 
 %File_info( data=Census_2010 )
@@ -127,7 +133,7 @@ run;
 ****  2000   ****;
 
 %let Census_2000_total = P015001;
-%let Census_2000_race = %str(P018B001,P018C001,P018D001,P018E001,P018F001,P018G001,P018H001,P018I001);
+%let Census_2000_race = %str(P015B001,P015C001,P015D001,P015E001,P015F001,P015G001,P015H001,P015I001);
 
 
 %Get_census_api(
@@ -146,16 +152,19 @@ data Census_2000;
   %Convert_vars( vars=&Census_2000_total )
   %Convert_vars( vars=&Census_2000_race )
   
-  TotalHHs = P015001;
-  BlackHHs = P018B001;
-  AIANHHs = P018C001;
-  AsianHHs = P018D001;
-  NHOPIHHs = P018E001;
-  OtherRacHHs = P018F001;
-  MultiRacHHs = P018G001;
-  LatinoHHs = P018H001;
-  NHWhteHHs = P018I001;
+  TotalHHs = _P015001;
+  BlackHHs = _P015B001;
+  AIANHHs = _P015C001;
+  AsianHHs = _P015D001;
+  NHOPIHHs = _P015E001;
+  OtherRacHHs = _P015F001;
+  MultiRacHHs = _P015G001;
+  LatinoHHs = _P015H001;
+  NHWhiteHHs = _P015I001;
   
+  AsnPIHHs = AsianHHs + NHOPIHHs;
+  AllOtherHHs = AIANHHs + OtherRacHHs + MultiRacHHs;
+
 run;
 
 %File_info( data=Census_2000 )
