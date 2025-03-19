@@ -183,17 +183,24 @@ data Census_all;
 run;
 
 
-ods csvall body="&_dcdata_default_path\DMPED\Prog\Households_by_race.csv";
+ods csvall body="&_dcdata_default_path\DMPED\Prog\Demographic-economic overview\Households_by_race.csv";
 
 proc tabulate data=Census_all format=comma12.0 noseps missing;
   class Year;
-  var TotalHHs AsnPIHHs BlackHHs LatinoHHs NHWhite AllOtherHHs;
+  var TotalHHs AsnPIHHs BlackHHs LatinoHHs NHWhiteHHs AllOtherHHs;
   table 
     /** Rows **/
     Year=' ',
     /** Columns **/
-    sum=' ' * ( )
+    sum='Households by race/ethnicity of householder' * ( TotalHHs AsnPIHHs BlackHHs LatinoHHs NHWhiteHHs AllOtherHHs )
   ;
+  label
+    TotalHHs = "Total"
+	AsnPIHHs = "Asian + Pacific Islander alone"
+    BlackHHs = "Black alone"
+    LatinoHHs = "Latino"
+    NHWhiteHHs = "Non-Latino white alone"
+    AllOtherHHs = "All other races";
 
 run;
 
