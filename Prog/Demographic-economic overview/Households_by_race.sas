@@ -48,7 +48,7 @@
 ****  2020  ****;
 
 %let Census_2020_total = P16_001N;
-%let Census_2020_race = %str(P16H_001N,P16I_001N,P16J_001N,P16K_001N,P16L_001N,P16M_001N,P16N_001N,P16O_001N);
+%let Census_2020_race = %str(P16B_001N,P16C_001N,P16D_001N,P16E_001N,P16F_001N,P16G_001N,P16H_001N,P16I_001N);
 
 %Get_census_api(
 
@@ -103,3 +103,6 @@ run;
 %File_info( data=Census_2010 )
 
 run;
+
+
+/**%let Census_2020_race = %str(P16H_001N,P16I_001N,P16J_001N,P16K_001N,P16L_001N,P16M_001N,P16N_001N,P16O_001N);**/
