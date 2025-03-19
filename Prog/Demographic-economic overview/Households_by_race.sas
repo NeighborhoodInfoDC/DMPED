@@ -21,7 +21,7 @@
 
 %Get_census_api(
 
-  api='https://api.census.gov/data/2020/dec/dhc?get=NAME,P16_001N,P16H_001N,P16I_001N,P16J_001N,P16K_001N,P16L_001N,P16M_001N,P16N_001N,P16O_001N&for=state:11',
+  api="https://api.census.gov/data/2020/dec/dhc?get=NAME,P16_001N,P16H_001N,P16I_001N,P16J_001N,P16K_001N,P16L_001N,P16M_001N,P16N_001N,P16O_001N&for=state:11&%nrstr(&key)=&_dcdata_census_api_key",
   out=Census_2020
   
 )
