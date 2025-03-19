@@ -45,8 +45,10 @@
 /** End Macro Definition **/
 
 
+****  2020  ****;
+
 %let Census_2020_total = P16_001N;
-%let Census_2020_race = %str(P16H_001N,P16I_001N,P16J_001N,P16K_001N,P16L_001N,P16M_001N,P16N_001N,P16O_001N );
+%let Census_2020_race = %str(P16H_001N,P16I_001N,P16J_001N,P16K_001N,P16L_001N,P16M_001N,P16N_001N,P16O_001N);
 
 %Get_census_api(
 
@@ -69,5 +71,35 @@ data Census_2020;
 run;
 
 %File_info( data=Census_2020 )
+
+run;
+
+
+****  2010   ****;
+
+%let Census_2010_total = P015001;
+%let Census_2010_race = %str(P015003,P015004,P015005,P015006,P015007,P015008,P015009,P015010);
+
+%Get_census_api(
+
+  api="https://api.census.gov/data/2010/dec/sf1?get=NAME,%trim(&Census_2010_total),%trim(&Census_2010_race)&for=state:11%nrstr(&key)=&_dcdata_census_api_key",
+  out=Census_2010
+  
+)
+
+data Census_2010;
+
+  set Census_2010;
+  
+  retain Year 2010;
+  
+  %Convert_vars( vars=&Census_2010_total )
+  %Convert_vars( vars=&Census_2010_race )
+  
+  Check_sum = sum( &Census_2010_race );
+  
+run;
+
+%File_info( data=Census_2010 )
 
 run;
