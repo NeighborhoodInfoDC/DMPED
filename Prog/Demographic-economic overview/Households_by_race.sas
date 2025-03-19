@@ -171,3 +171,30 @@ run;
 
 run;
 
+
+** Combine data **;
+
+data Census_all;
+
+  set Census_2000 Census_2010 Census_2020;
+  
+  drop P015: P018: P16: ;
+  
+run;
+
+
+ods csvall body="&_dcdata_default_path\DMPED\Prog\Households_by_race.csv";
+
+proc tabulate data=Census_all format=comma12.0 noseps missing;
+  class Year;
+  var TotalHHs AsnPIHHs BlackHHs LatinoHHs NHWhite AllOtherHHs;
+  table 
+    /** Rows **/
+    Year=' ',
+    /** Columns **/
+    sum=' ' * ( )
+  ;
+
+run;
+
+ods csvall close;
