@@ -45,11 +45,12 @@
 /** End Macro Definition **/
 
 
-%let Census_2020_vars = P16_001N,P16H_001N,P16I_001N,P16J_001N,P16K_001N,P16L_001N,P16M_001N,P16N_001N,P16O_001N;
+%let Census_2020_total = P16_001N;
+%let Census_2020_race = %str(P16H_001N,P16I_001N,P16J_001N,P16K_001N,P16L_001N,P16M_001N,P16N_001N,P16O_001N );
 
 %Get_census_api(
 
-  api="https://api.census.gov/data/2020/dec/dhc?get=NAME,&Census_2020_vars.&for=state:11%nrstr(&key)=&_dcdata_census_api_key",
+  api="https://api.census.gov/data/2020/dec/dhc?get=NAME,%trim(&Census_2020_total),%trim(&Census_2020_race)&for=state:11%nrstr(&key)=&_dcdata_census_api_key",
   out=Census_2020
   
 )
@@ -58,7 +59,12 @@ data Census_2020;
 
   set Census_2020;
   
-  %Convert_vars( vars=&Census_2020_vars )
+  retain Year 2020;
+  
+  %Convert_vars( vars=&Census_2020_total )
+  %Convert_vars( vars=&Census_2020_race )
+  
+  Check_sum = sum( &Census_2020_race );
   
 run;
 
