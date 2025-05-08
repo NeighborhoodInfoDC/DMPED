@@ -27,7 +27,6 @@ OTR_sales <- data %>%
   # filter(is.na(mprice_tot_2000)) #8 missing in 2022 #13 missing in 2012 #12 missing in 2000
   mutate(GEOID=as.numeric(GEOID))
 
-
 housingmarket <- read_csv("Clean/housingmarket.csv") 
 
 lowincome <- read_csv("Clean/lowincome_pop.csv")

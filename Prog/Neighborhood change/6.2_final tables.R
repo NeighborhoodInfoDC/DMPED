@@ -70,7 +70,9 @@ master7 <- map_file %>%
          medianhome_2022=ifelse(GEOID=="11001007401",500000,medianhome_2022),
          medianhome_2012_2020=ifelse(GEOID=="11001007401",207250,medianhome_2012_2020),
          medianhome_2012_2020=ifelse(GEOID=="11001009602",284900,medianhome_2012_2020)) %>% #use nearest year sales data if available
-  filter(!is.na(medianhome_2022)& !is.na(medianhome_2012_2020) ) %>%
+  filter(!is.na(medianhome_2022)& !is.na(medianhome_2012_2020)) %>%
+  # filter(is.na(medianhome_2022)==TRUE |is.na(medianhome_2012_2020==TRUE)) %>%
+  # select(GEOID, medianhome_2022, medianhome_2012_2020,total_hh_2012_2020)
   mutate(quintile_2000=ntile(medianhome_2000_2020,5),
          quintile_2012=ntile(medianhome_2012_2020,5),
          quintile_2022=ntile(medianhome_2022,5)) %>% 
@@ -475,16 +477,20 @@ urban_market <- c("#f5f5f5","#fff2cf","#fce39e","#fccb41","#ca5800")
 urban_displacement <- c("#f5f5f5","#fff2cf","#f5cbdf","#e54096","#af1f6b")
 
 mapdisplacement_DMPED <- mapdisplacement %>% 
-  st_drop_geometry() %>% 
-  select(GEOID, Ward,NBH_NAMES,neighborhoodtype, population_vulnerability_cat, housing_condition_cat, market_pressure_cat, displacement_cat,lowincome_2022, lowincome_2012_2020, lowincome_2000_2020,non_hispanic_black_hh_2022,non_hispanic_black_hh_2012_2020,non_hispanic_black_hh_2000_2020,
+  mutate(GEOID=as.numeric(GEOID)) %>%
+  select(GEOID,population_vulnerability_cat, housing_condition_cat, market_pressure_cat, displacement_cat) %>% 
+  full_join(neighborhoodchangemap_DMPED, by=c("GEOID")) %>%
+  # st_drop_geometry() %>% 
+  select(GEOID,Ward, NBH_NAMES,neighborhoodtype, population_vulnerability_cat, housing_condition_cat, market_pressure_cat, displacement_cat,lowincome_2022, lowincome_2012_2020, lowincome_2000_2020,non_hispanic_black_hh_2022,non_hispanic_black_hh_2012_2020,non_hispanic_black_hh_2000_2020,
          total_hh_2022, total_hh_2012_2020, total_hh_2000_2020,housing_2022,housing_2012_2020,housing_2000_2020 ) %>% 
   mutate(across(where(is.numeric), round))
 
 write.csv(mapdisplacement_DMPED, "Clean/NeighborhoodTypes_DMPED.csv")
+st_write(mapdisplacement_DMPED, "Clean/NeighborhoodTypes_DMPED.shp", append = FALSE)
 
 ggplot() +
   geom_sf(data =mapdisplacement, aes( fill = `population vulnerability`))+
-  scale_fill_manual(name="Population Vulnerabilities", values = urban_vulnerable, guide = guide_legend(override.aes = list(linetype = "blank", 
+  scale_fill_manual(name="Population Vulnerabilities", values = urban_displacement, guide = guide_legend(override.aes = list(linetype = "blank", 
                                                                                                                            shape = NA)))+ 
   geom_sf(water_sf, mapping=aes(), fill="#dcdbdb", color="#dcdbdb", size=0.05)+
   coord_sf(datum = NA)+
