@@ -132,6 +132,24 @@ map_report2 <- merge(analysismaster,tractboundary_20, by=c("GEOID")) %>%
   st_as_sf() %>% 
   filter(GEOID!=11001010900 & GEOID!=11001007301)
 
+map_report3 <- merge(analysismaster,tractboundary_20, by=c("GEOID")) %>% 
+  mutate(change_black_22_12=non_hispanic_black_pop_2022-non_hispanic_black_pop_2012_2020,
+         change_black_12_00=non_hispanic_black_pop_2012_2020-non_hispanic_black_pop_2000_2010_2020) %>% 
+  select(GEOID, geometry,change_black_22_12, change_black_12_00) %>% 
+  pivot_longer(cols = c(change_black_12_00,change_black_22_12),
+               names_to = "variable", values_to = "value") %>% 
+  st_as_sf() %>% 
+  filter(GEOID!=11001010900 & GEOID!=11001007301)
+
+map_report3 <- merge(analysismaster,tractboundary_20, by=c("GEOID")) %>% 
+  mutate(change_lowinc_22_12=total_hh_2022-total_hh_2012_2020,
+         change_lowinc_12_00=total_hh_2012_2020-total_hh_2000_2020) %>% 
+  select(GEOID, geometry,change_lowinc_22_12, change_lowinc_12_00) %>% 
+  pivot_longer(cols = c(change_lowinc_12_00,change_lowinc_22_12),
+               names_to = "variable", values_to = "value") %>% 
+  st_as_sf() %>% 
+  filter(GEOID!=11001010900 & GEOID!=11001007301)
+
 ggplot() +
   geom_sf(data =map_report1, aes( fill = value), color = NA)+
   scale_fill_gradient2(low = "#ec008b", mid = "white", high = "#46abdb", midpoint = 0, 
@@ -150,6 +168,24 @@ ggplot() +
     strip.text = element_text(size = 14, face = "bold")  # Increases facet title size and makes it bold
   )
 
+ggplot() +
+  geom_sf(data =map_report3, aes( fill = value), color = NA)+
+  scale_fill_gradient2(low = "#ec008b", mid = "white", high = "#46abdb", midpoint = 0, 
+                       name = "Change in low-income households") +  geom_sf(water_sf, mapping=aes(), fill="#dcdbdb", color="#dcdbdb", size=0.05)+
+  coord_sf(datum = NA)+
+  facet_wrap(~ variable, ncol = 2, labeller = labeller(
+    variable = c("change_lowinc_12_00" = "2000 to 2010",
+                 "change_lowinc_22_12" = "2010 to 2020"
+                 ))) +
+  # labs(title = "Population and Household Change in DC during 2012-2022",
+  #      caption = "Source: Your Data Source") +
+  theme_minimal() +
+  theme(legend.position = "right")+
+  guides(color = guide_legend(override.aes = list(size=5)))+
+  theme(
+    legend.position = "right",
+    strip.text = element_text(size = 14, face = "bold")  # Increases facet title size and makes it bold
+  )
 
 #map of low income household loss
 # lowinccat <- master7 %>% 
@@ -170,9 +206,9 @@ lowinccat <- master7 %>%
   mutate(lowincomeexclusion=ifelse(quintile_cutoffs_inc_2012<3 & quintile_cutoffs_inc_2022<3 , "lowincome exclusion", "notlowincomeexclusion")) %>%
   mutate(lowinclosstype=ifelse(pctchange_12_22<=-0.11 & change_lowincome<(-6), "lowincomeloss", "notlowincomeloss")) %>%
   mutate(lowincgaintype=ifelse(pctchange_12_22>=0.12 & pct_lowincome_2022>=pct_lowincome_2012, "lowincomegain", "notlowincomegain")) %>%
-  mutate(neighborhoodtype=case_when(lowincomeexclusion=="lowincome exclusion" ~ "Exclusion of Households with Low Income",
-                                    lowinclosstype=="lowincomeloss" ~ "Loss of Households with Low Income",
-                                    lowincgaintype=="lowincomegain" ~ "Gain of Households with Low Income",
+  mutate(neighborhoodtype=case_when(lowincomeexclusion=="lowincome exclusion" ~ "Exclusion of households with low incomes",
+                                    lowinclosstype=="lowincomeloss" ~ "Loss of households with low incomes",
+                                    lowincgaintype=="lowincomegain" ~ "Gain of households with low incomes",
                                     TRUE ~ "no change"))
   # mutate(neighborhoodtype=case_when(lowincomeexclusion=="lowincome exclusion" ~ "exclusion",
   #                                 TRUE ~ "no change"))
@@ -244,9 +280,9 @@ write.csv(marketsummary_by_type, "Clean/marketsummary_by_type_Feb.csv")
 
 maplowinccat <- lowinccat %>% 
   mutate(`neighborhood category` = factor(neighborhoodtype,
-                                          levels = c("Loss of Households with Low Income",
-                                                     "Gain of Households with Low Income",
-                                                     "Exclusion of Households with Low Income",
+                                          levels = c("Loss of households with low incomes",
+                                                     "Gain of households with low incomes",
+                                                     "Exclusion of households with low incomes",
                                                      "no change"
                                           ))) %>% 
   filter(neighborhoodtype!="no change")
@@ -285,7 +321,7 @@ ggplot() +
 
 
 displacement_tracts <- maplowinccat %>% 
-  filter(neighborhoodtype=="Loss of Households with Low Income")
+  filter(neighborhoodtype=="Loss of households with low incomes")
 
 neighbors <- lowinccat %>%
   filter(st_touches(geometry, st_union(displacement_tracts), sparse = FALSE)) %>% 
@@ -401,7 +437,7 @@ predictionmaster <-  neighborhoodtype_Jan %>%
   left_join(neighbors,by=c("GEOID")) %>%
   mutate(adjacency=ifelse(type=="neighbor", 50, 0)) %>% 
   mutate(adjacency=ifelse(is.na(adjacency)==TRUE,0,adjacency)) %>% 
-  select(GEOID,normalizedpctblack,qtilelowinc,morethancityrentburden,qtilerental,normalized_notrestricted,changeinrent,mprice_tot_2022,mprice_tot_2012,changeinhomeprice,normalized_price,changeincollege,adjacency) %>% 
+  select(GEOID,normalizedpctblack,qtilelowinc,morethancityrentburden,qtilerental,normalized_notrestricted,changeinrent,mprice_tot_2022,mprice_tot_2012,changeinhomeprice,normalized_price,changeincollege,adjacency,pct_lowincome_2022) %>% 
     mutate(population_vulnerability=(normalizedpctblack+qtilelowinc+morethancityrentburden)/3) %>% 
     mutate(housing_condition=(qtilerental+normalized_notrestricted)/2) %>% 
     mutate(market_pressure=(changeinrent+normalized_price+changeincollege+adjacency)/4) %>%
@@ -550,7 +586,7 @@ overallriskmap <- mapdisplacement %>%
 
 ggplot() +
   geom_sf(data =overallriskmap, aes( fill = `displacement risk`))+
-  scale_fill_manual(name="Overall Displacement Risk", values = urban_displacement, guide = guide_legend(override.aes = list(linetype = "blank", 
+  scale_fill_manual(name="Overall displacement risk", values = urban_displacement, guide = guide_legend(override.aes = list(linetype = "blank", 
                                                                                                               shape = NA)))+ 
   geom_sf(water_sf, mapping=aes(), fill="#dcdbdb", color="#dcdbdb", size=0.05)+
   coord_sf(datum = NA)+
@@ -559,6 +595,67 @@ ggplot() +
   coord_sf(datum = NA)+
   # geom_sf(data = displacementarea, fill = "transparent", color="#ec008b")+
   # coord_sf(datum = NA)+
-  labs(title = paste0("Future Displacement Risks"),
+  labs(title = paste0("Future Displacement Risk"),
        subtitle= "Displacement risk based on population vulnerabilities, housing conditions, and market pressure",
        caption = "Source: ACS 5-year estimates 2008-2012,2018-2022,DC Office of Tax and Revenue ")
+
+
+ggplot() +
+  geom_sf(data = overallriskmap, aes(fill = `displacement risk`)) +
+  scale_fill_manual(
+    name = "Overall displacement risk", 
+    values = urban_displacement, 
+    guide = guide_legend(
+      override.aes = list(linetype = "blank", shape = NA)
+    )
+  ) + 
+  geom_sf(data = water_sf, mapping = aes(), fill = "#dcdbdb", color = "#dcdbdb", size = 0.05) +
+  geom_sf(data = tractboundary_20, fill = "transparent", color = "#adabac") +
+  coord_sf(datum = NA) +
+  # geom_sf(data = displacementarea, fill = "transparent", color = "#ec008b") +
+  labs(
+    title = paste0("Future Displacement Risk"),
+    subtitle = "Displacement risk based on population vulnerabilities, housing conditions, and market pressure",
+    caption = "Source: ACS 5-year estimates 2008-2012,2018-2022,DC Office of Tax and Revenue "
+  ) +
+  theme(
+    legend.position = "right",
+    legend.title = element_text(size = 10),
+    legend.text = element_text(size = 9)
+  )
+
+library(urbnthemes)
+
+set_urbn_defaults(style = "print")
+set_urbn_defaults(style = "print")
+# Create scatter plot
+library(urbnthemes)
+ggplot() +
+  geom_sf(data = overallriskmap, aes(fill = `displacement risk`)) +
+  scale_fill_manual(
+    name = "Overall displacement risk", 
+    values = urban_displacement, 
+    guide = guide_legend(
+      override.aes = list(linetype = "blank", shape = NA)
+    )
+  ) + 
+  geom_sf(data = water_sf, mapping = aes(), fill = "#dcdbdb", color = "#dcdbdb", size = 0.05) +
+  geom_sf(data = tractboundary_20, fill = "transparent", color = "#adabac") +
+  coord_sf(datum = NA) +
+  # geom_sf(data = displacementarea, fill = "transparent", color = "#ec008b") +
+  labs(
+    title = paste0("Future Displacement Risk"),
+    subtitle = "Displacement risk based on population vulnerabilities, housing conditions, and market pressure",
+    caption = "Source: ACS 5-year estimates 2008-2012,2018-2022,DC Office of Tax and Revenue "
+  ) +
+  theme(
+    legend.position = "right",
+    legend.direction = "vertical",
+    legend.title = element_text(size = 10),
+    legend.text = element_text(size = 9)
+  ) +
+  guides(fill = guide_legend(
+    title = "Overall displacement risk",
+    override.aes = list(linetype = "blank", shape = NA),
+    ncol = 1
+  ))
