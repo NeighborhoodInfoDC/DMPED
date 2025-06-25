@@ -575,13 +575,13 @@ ggplot() +
 #need to remove the bottom 20 percent tracts in terms of low income household from the overall risk map
 overallriskmap <- mapdisplacement %>% 
   mutate(quintile_lowinc = ntile(pct_lowincome_2022, 5)) %>% 
-  mutate(displacement_cat=ifelse(quintile_lowinc==1, "Lower",displacement_cat)) %>% 
+  mutate(displacement_cat=ifelse(quintile_lowinc==1, "Lower risk",displacement_cat)) %>% 
   mutate(`displacement risk` = factor(displacement_cat,
-                                      levels = c("Lowest",
-                                                 "Lower",
-                                                 "Intermediate",
-                                                 "Higher",
-                                                 "Highest"
+                                      levels = c("Lowest risk",
+                                                 "Lower risk",
+                                                 "Intermediate risk",
+                                                 "Higher risk",
+                                                 "Highest risk"
                                       ))) 
 
 ggplot() +
