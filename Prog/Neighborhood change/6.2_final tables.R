@@ -109,7 +109,7 @@ medianlosslowinc_12_22 <-master7 %>%
             medianpctchange_2012_2022=median(pctchange_2012_2022),
             median_change_share=median(change_share_lowincome_2012_2022))
 
-quintiles_A <- quantile(medianlosslowinc_12_22$pct_lowincome_2022, probs = seq(0, 1, 0.1), na.rm = TRUE)
+quintiles_A <- quantile(medianlosslowinc_12_22$pct_lowincome_2012, probs = seq(0, 1, 0.1), na.rm = TRUE)
 print(quintiles_A)
   
 #understand the distritbution of change of low income population
@@ -444,38 +444,38 @@ predictionmaster <-  neighborhoodtype_Jan %>%
     mutate(displacement_risk=population_vulnerability*(housing_condition+market_pressure)) %>%
     mutate(quintile3 = ntile(population_vulnerability, 5),  # Create quintiles
            population_vulnerability_cat = case_when(
-                 quintile3 == 1 ~ "Lowest",   # Lowest quintile
-                 quintile3 == 2 ~ "Lower",  # Second quintile
-                 quintile3 == 3 ~ "Intermediate",  # Middle quintile
-                 quintile3 == 4 ~ "Higher",  # Fourth quintile
-                 quintile3 == 5 ~ "Highest"  # Top quintile
+                 quintile3 == 1 ~ "Lowest risk",   # Lowest quintile
+                 quintile3 == 2 ~ "Lower risk",  # Second quintile
+                 quintile3 == 3 ~ "Intermediate risk",  # Middle quintile
+                 quintile3 == 4 ~ "Higher risk",  # Fourth quintile
+                 quintile3 == 5 ~ "Highest risk"  # Top quintile
                )
              ) %>% 
     mutate(quintile4 = ntile(housing_condition, 5),  # Create quintiles
            housing_condition_cat = case_when(
-                 quintile4 == 1 ~ "Lowest",   # Lowest quintile
-                 quintile4 == 2 ~ "Lower",  # Second quintile
-                 quintile4 == 3 ~ "Intermediate",  # Middle quintile
-                 quintile4 == 4 ~ "Higher",  # Fourth quintile
-                 quintile4 == 5 ~ "Highest"  # Top quintile
+             quintile3 == 1 ~ "Lowest risk",   # Lowest quintile
+             quintile3 == 2 ~ "Lower risk",  # Second quintile
+             quintile3 == 3 ~ "Intermediate risk",  # Middle quintile
+             quintile3 == 4 ~ "Higher risk",  # Fourth quintile
+             quintile3 == 5 ~ "Highest risk"  # Top quintile
                )
              ) %>%
     mutate(quintile5 = ntile(market_pressure, 5),  # Create quintiles
            market_pressure_cat = case_when(
-                 quintile5 == 1 ~ "Lowest",   # Lowest quintile
-                 quintile5 == 2 ~ "Lower",  # Second quintile
-                 quintile5 == 3 ~ "Intermediate",  # Middle quintile
-                 quintile5 == 4 ~ "Higher",  # Fourth quintile
-                 quintile5 == 5 ~ "Highest"  # Top quintile
+             quintile3 == 1 ~ "Lowest risk",   # Lowest quintile
+             quintile3 == 2 ~ "Lower risk",  # Second quintile
+             quintile3 == 3 ~ "Intermediate risk",  # Middle quintile
+             quintile3 == 4 ~ "Higher risk",  # Fourth quintile
+             quintile3 == 5 ~ "Highest risk"  # Top quintile
                )
              ) %>%
     mutate(quintile6 = ntile(displacement_risk, 5),  # Create quintiles
            displacement_cat=case_when(
-                 quintile6 == 1 ~ "Lowest",   # Lowest quintile
-                 quintile6 == 2 ~ "Lower",  # Second quintile
-                 quintile6 == 3 ~ "Intermediate",  # Middle quintile
-                 quintile6 == 4 ~ "Higher",  # Fourth quintile
-                 quintile6 == 5 ~ "Highest"  # Top quintile
+             quintile3 == 1 ~ "Lowest risk",   # Lowest quintile
+             quintile3 == 2 ~ "Lower risk",  # Second quintile
+             quintile3 == 3 ~ "Intermediate risk",  # Middle quintile
+             quintile3 == 4 ~ "Higher risk",  # Fourth quintile
+             quintile3 == 5 ~ "Highest risk"  # Top quintile
                )
              )
 
@@ -485,25 +485,25 @@ mapdisplacement <- predictionmaster %>%
   left_join(tractboundary_20, by=c("GEOID")) %>% 
   st_as_sf() %>% 
   mutate(`population vulnerability` = factor(population_vulnerability_cat,
-                                          levels = c("Lowest",
-                                                     "Lower",
-                                                     "Intermediate",
-                                                     "Higher",
-                                                     "Highest"
+                                          levels = c("Lowest risk",
+                                                     "Lower risk",
+                                                     "Intermediate risk",
+                                                     "Higher risk",
+                                                     "Highest risk"
                                           ))) %>% 
   mutate(`housing condition` = factor(housing_condition_cat,
-                                             levels = c("Lowest",
-                                                        "Lower",
-                                                        "Intermediate",
-                                                        "Higher",
-                                                        "Highest"
+                                      levels = c("Lowest risk",
+                                                 "Lower risk",
+                                                 "Intermediate risk",
+                                                 "Higher risk",
+                                                 "Highest risk"
                                              ))) %>% 
   mutate(`market pressure` = factor(market_pressure_cat,
-                                      levels = c("Lowest",
-                                                 "Lower",
-                                                 "Intermediate",
-                                                 "Higher",
-                                                 "Highest"
+                                    levels = c("Lowest risk",
+                                               "Lower risk",
+                                               "Intermediate risk",
+                                               "Higher risk",
+                                               "Highest risk"
                                       ))) 
   
 
@@ -535,14 +535,14 @@ ggplot() +
   coord_sf(datum = NA)+
   # geom_sf(data = displacementarea, fill = "transparent", color="#ec008b")+
   # coord_sf(datum = NA)+
-  labs(title = paste0("Future Displacement Risks"),
+  labs(title = paste0("Future Displacement Risk"),
        subtitle= "Population Vulnerabilities",
        caption = "Source: ACS 5-year estimates 2008-2012, 2018-2022")
 
 
 ggplot() +
   geom_sf(data =mapdisplacement, aes( fill = `housing condition`))+
-  scale_fill_manual(name="Housing Condition", values = urban_housing, guide = guide_legend(override.aes = list(linetype = "blank", 
+  scale_fill_manual(name="Housing Stock", values = urban_housing, guide = guide_legend(override.aes = list(linetype = "blank", 
                                                                                                                shape = NA)))+ 
   geom_sf(water_sf, mapping=aes(), fill="#dcdbdb", color="#dcdbdb", size=0.05)+
   coord_sf(datum = NA)+
@@ -552,13 +552,13 @@ ggplot() +
   # geom_sf(data = displacementarea, fill = "transparent", color="#ec008b")+
   # coord_sf(datum = NA)+
   labs(title = paste0("Future Displacement Risks"),
-       subtitle= "Housing Conditions",
+       subtitle= "Housing Stock",
        caption = "Source: ACS 5-year estimates 2018-2022,DC Preservation Catalog")
 
 
 ggplot() +
   geom_sf(data =mapdisplacement, aes( fill = `market pressure`))+
-  scale_fill_manual(name="Market Pressure", values = urban_market, guide = guide_legend(override.aes = list(linetype = "blank", 
+  scale_fill_manual(name="Market Pressures", values = urban_market, guide = guide_legend(override.aes = list(linetype = "blank", 
                                                                                                                shape = NA)))+ 
   geom_sf(water_sf, mapping=aes(), fill="#dcdbdb", color="#dcdbdb", size=0.05)+
   coord_sf(datum = NA)+
