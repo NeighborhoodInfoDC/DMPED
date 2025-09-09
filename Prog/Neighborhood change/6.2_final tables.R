@@ -294,13 +294,28 @@ neighborhoodchangemap_DMPED <- lowinccat %>%
 
 write.csv(neighborhoodchangemap_DMPED , "Clean/neighborhoodchange_DMPED.csv")
 
+maplowinccat <- read.csv("C:/Users/Ysu/Box/Greater DC/Projects/DMPED Housing Assessment 2024/Task 2 - Nbrhd Change and Displacement Risk Assessment/Data collection/Clean/neighborhoodchange_DMPED.csv") %>% 
+  mutate(GEOID=as.character(GEOID)) %>% 
+  left_join(tractboundary_20, by=c("GEOID")) %>% 
+  mutate(neighborhoodtype=case_when(neighborhoodtype=="Loss of Households with Low Income" ~ "Loss of households with low incomes",
+                                    neighborhoodtype=="Gain of Households with Low Income" ~ "Gain of households with low incomes",
+                                    neighborhoodtype=="Exclusion of Households with Low Income" ~ "Exclusion of households with low incomes")) %>% 
+mutate(`neighborhood category` = factor(neighborhoodtype,
+                                        levels = c("Loss of households with low incomes",
+                                                   "Gain of households with low incomes",
+                                                   "Exclusion of households with low incomes",
+                                                   "no change"
+                                        ))) %>% 
+  filter(neighborhoodtype!="no change")
+maplowinccat <- st_as_sf(maplowinccat)
+
 
 urban_colors4 <- c("#f5cbdf","#cfe8f3","#fce39e")
 
 
 ggplot() +
   geom_sf(data = maplowinccat, aes(fill = `neighborhood category`)) +
-  scale_fill_manual(name = "Neighborhood Change Type", values = urban_colors4, 
+  scale_fill_manual(name = "Neighborhood change type", values = urban_colors4, 
                     guide = guide_legend(override.aes = list(linetype = "blank", shape = NA))) + 
   geom_sf(data = water_sf, fill = "#dcdbdb", color = "#dcdbdb", size = 0.05) +
   geom_sf(data = tractboundary_20, fill = "transparent", color = "#adabac") +
