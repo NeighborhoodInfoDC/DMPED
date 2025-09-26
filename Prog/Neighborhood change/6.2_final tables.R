@@ -141,7 +141,7 @@ map_report3 <- merge(analysismaster,tractboundary_20, by=c("GEOID")) %>%
   st_as_sf() %>% 
   filter(GEOID!=11001010900 & GEOID!=11001007301)
 
-map_report3 <- merge(analysismaster,tractboundary_20, by=c("GEOID")) %>% 
+map_report4 <- merge(analysismaster,tractboundary_20, by=c("GEOID")) %>% 
   mutate(change_lowinc_22_12=total_hh_2022-total_hh_2012_2020,
          change_lowinc_12_00=total_hh_2012_2020-total_hh_2000_2020) %>% 
   select(GEOID, geometry,change_lowinc_22_12, change_lowinc_12_00) %>% 
@@ -171,20 +171,55 @@ ggplot() +
 ggplot() +
   geom_sf(data =map_report3, aes( fill = value), color = NA)+
   scale_fill_gradient2(low = "#ec008b", mid = "white", high = "#46abdb", midpoint = 0, 
-                       name = "Change in low-income households") +  geom_sf(water_sf, mapping=aes(), fill="#dcdbdb", color="#dcdbdb", size=0.05)+
+                       name = "Black population\nchange") +  geom_sf(water_sf, mapping=aes(), fill="#dcdbdb", color="#dcdbdb", size=0.05)+
   coord_sf(datum = NA)+
   facet_wrap(~ variable, ncol = 2, labeller = labeller(
-    variable = c("change_lowinc_12_00" = "2000 to 2010",
-                 "change_lowinc_22_12" = "2010 to 2020"
+    variable = c("change_black_12_00" = "2000 to 2010",
+                 "change_black_22_12" = "2010 to 2020"
                  ))) +
   # labs(title = "Population and Household Change in DC during 2012-2022",
   #      caption = "Source: Your Data Source") +
   theme_minimal() +
-  theme(legend.position = "right")+
+  theme(
+    legend.position = "right",
+    legend.title = element_text(size = 14),        # Larger legend title
+    legend.text = element_text(size = 12, family = "Lato"),                       # Larger legend text
+    legend.key.size = unit(0.8, "cm"),                          # Larger legend keys
+    strip.text = element_text(size = 24, family = "Lato"),        # Even larger facet titles
+    strip.text.x = element_text(hjust = 0.35),  # Left-align facet titles
+    strip.background = element_rect(fill = NA, color = NA) # Background for subtitles
+  ) +
   guides(color = guide_legend(override.aes = list(size=5)))+
   theme(
     legend.position = "right",
-    strip.text = element_text(size = 14, face = "bold")  # Increases facet title size and makes it bold
+    strip.text = element_text(size = 18)  # Increases facet title size and makes it bold
+  )
+
+ggplot() +
+  geom_sf(data =map_report4, aes( fill = value), color = NA)+
+  scale_fill_gradient2(low = "#ec008b", mid = "white", high = "#46abdb", midpoint = 0, 
+                       name = "Change in \nlow income household") +  geom_sf(water_sf, mapping=aes(), fill="#dcdbdb", color="#dcdbdb", size=0.05)+
+  coord_sf(datum = NA)+
+  facet_wrap(~ variable, ncol = 2, labeller = labeller(
+    variable = c("change_lowinc_12_00" = "2000 to 2010",
+                 "change_lowinc_22_12" = "2010 to 2020"
+    ))) +
+  # labs(title = "Population and Household Change in DC during 2012-2022",
+  #      caption = "Source: Your Data Source") +
+  theme_minimal() +
+  theme(
+    legend.position = "right",
+    legend.title = element_text(size = 14),        # Larger legend title
+    legend.text = element_text(size = 12),                       # Larger legend text
+    legend.key.size = unit(0.8, "cm"),                          # Larger legend keys
+    strip.text = element_text(size = 24),        # Even larger facet titles
+    strip.text.x = element_text(hjust = 0.35),  # Left-align facet titles
+    strip.background = element_rect(fill = NA, color = NA) # Background for subtitles
+  ) +
+  guides(color = guide_legend(override.aes = list(size=5)))+
+  theme(
+    legend.position = "right",
+    strip.text = element_text(size = 18)  # Increases facet title size and makes it bold
   )
 
 #map of low income household loss
@@ -315,22 +350,36 @@ urban_colors4 <- c("#f5cbdf","#cfe8f3","#fce39e")
 
 ggplot() +
   geom_sf(data = maplowinccat, aes(fill = `neighborhood category`)) +
-  scale_fill_manual(name = "Neighborhood change type", values = urban_colors4, 
+  scale_fill_manual(name = "Neighborhood change type", 
+                    values = urban_colors4, 
+                    # labels = c(
+                    #   "Loss of households\nwith low incomes",
+                    #   "Gain of households\nwith low incomes", 
+                    #   "Exclusion of households\nwith low incomes"
+                    # ),  # Add line breaks in the actual legend text
                     guide = guide_legend(override.aes = list(linetype = "blank", shape = NA))) + 
   geom_sf(data = water_sf, fill = "#dcdbdb", color = "#dcdbdb", size = 0.05) +
   geom_sf(data = tractboundary_20, fill = "transparent", color = "#adabac") +
   coord_sf(expand = FALSE) +  # Prevents extra padding
-  labs(
-    title = "Neighborhood Change in DC",
-    subtitle = "Types by change in households with low-income",
-    caption = "Source: Census 2000, ACS 5-year estimates 2008-2012, 2018-2022, Real Property Tax Database"
-  ) +
+  # labs(
+  #   title = "Neighborhood Change in DC",
+  #   subtitle = "Types by change in households with low-income",
+  #   caption = "Source: Census 2000, ACS 5-year estimates 2008-2012, 2018-2022, Real Property Tax Database"
+  # ) +
   theme_void() +  # Ensures no background/grid elements
   theme(
-    panel.border = element_blank(),    # Removes panel border
-    panel.background = element_blank(), # Removes panel background
-    plot.background = element_blank(),  # Ensures no gray background
-    legend.background = element_blank() # Removes legend background
+    panel.border = element_blank(),
+    panel.background = element_blank(),
+    plot.background = element_blank(),
+    legend.background = element_blank(),
+    legend.title = element_text(size = 12, family = "Lato"),  # Larger title
+    legend.text = element_text(size = 10, family = "Lato"),                 # Larger text
+    legend.key.size = unit(0.6, "cm"),                                      # Larger keys
+    legend.spacing.y = unit(0.4, "cm"),                                     # More spacing
+    legend.position = "right",
+    legend.justification = "right",                                           # Align legend to top
+    legend.margin = margin(l = 20),                                         # Add left margin
+    plot.margin = margin(10, 10, 10, 10)                                   # Adjust plot margins
   )
 
 
