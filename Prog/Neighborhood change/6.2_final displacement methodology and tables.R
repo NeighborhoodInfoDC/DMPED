@@ -394,7 +394,7 @@ neighbors <- lowinccat %>%
   mutate(type="neighbor")
 
 
-#future displacement calculation
+#future displacement calculation based on NYC displacement map methodology https://storymaps.arcgis.com/stories/79237333bb90492ba0de486c0705f9f7
 neighborhoodtype_Jan <- lowinccat %>% 
   select(GEOID, neighborhoodtype, NBH_NAMES) %>% 
   st_drop_geometry()
