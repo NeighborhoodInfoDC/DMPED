@@ -58,6 +58,7 @@ raceethnicity <- read_csv("Clean/race_ethnicity.csv")
 neighborhoodtype_OTR <- read_csv("Clean/neighborhoodtype_homevalueOTR.csv") %>% 
   select(GEOID, neighborhoodtype, NBH_NAMES)
 
+#read  in data prepped https://github.com/NeighborhoodInfoDC/DMPED/pull/127/files
 vacancy <- read_csv("Clean/vacancy.csv") %>% 
   mutate(GEOID=geoid) %>% 
   select(GEOID, year, vacancyrate) %>% 
@@ -67,6 +68,7 @@ vacancy <- read_csv("Clean/vacancy.csv") %>%
 
 distance <- read_csv("Clean/distance_downtown.csv")
 
+#read  in data prepped  https://github.com/NeighborhoodInfoDC/DMPED/pull/129/files
 lowincjobs <- read_csv("Clean/lowincome_jobs.csv")
 
 HUDsubsidy <- read_csv("Clean/HUD_subsidy.csv")
@@ -263,7 +265,7 @@ predictionmaster2$predicted_class <- predicted_class
 
 Testresult <- predictionmaster2 %>% 
   left_join(neighborhoodname, by=c("GEOID")) %>% 
-  select(GEOID, NBH_NAMES,Ward, NAME.y, displacement, predicted_probs,predicted_class )
+  select(GEOID, NBH_NAMES.x ,Ward, NAME.y, displacement, predicted_probs,predicted_class )
 
 write.csv(Testresult,"C:/Users/Ysu/Box/Greater DC/Projects/DMPED Housing Assessment 2024/Task 2 - Nbrhd Change and Displacement Risk Assessment/Data collection/Clean/Prediction_v1_OTR.csv")
 
@@ -286,7 +288,6 @@ predict_map <- predicteddisplacementmap %>%
 write.csv(predict_map,"C:/Users/Ysu/Box/Greater DC/Projects/DMPED Housing Assessment 2024/Task 2 - Nbrhd Change and Displacement Risk Assessment/Data collection/Clean/Prediction_map_shiny.csv")
 
   
-
 newtype <- predicteddisplacementmap %>% 
   # select(displacement, predicted_class, predictiontype,neighborhoodtype.x) %>% 
   # filter(predictiontype=="continued displacement risk")
