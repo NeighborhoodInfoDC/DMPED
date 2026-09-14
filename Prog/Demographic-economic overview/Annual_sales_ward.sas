@@ -79,7 +79,7 @@
   ods csvall body="&_dcdata_default_path\DMPED\Prog\Demographic-economic overview\Annual_sales_&geosuffix..csv";
 
   proc print data=Annual_sales_&geosuffix label;
-    by ward2022;
+    by &geo;
     id type;
     var r_mprice_&start_yr-r_mprice_&end_yr;
     format type $type.;
