@@ -1,14 +1,14 @@
 /**************************************************************************
- Program:  Annual_sales_ward.sas
+ Program:  Annual_sales_city.sas
  Library:  DMPED
  Project:  Urban-Greater DC
  Author:   P. Tatian
- Created:  01/07/25
+ Created:  09/14/26
  Version:  SAS 9.4
  Environment:  Local Windows session (desktop)
- GitHub issue:  130
+ GitHub issue:  134
  
- Description:  Download data for annual sales by ward chart.
+ Description:  Download data for annual sales by city.
 
  Modifications:
 **************************************************************************/
@@ -94,6 +94,6 @@
 /** End Macro Definition **/
 
 
-%Annual_sales( start_yr=1995, end_yr=2023, geo=ward2022, geosuffix=wd22 )
+%Annual_sales( start_yr=1995, end_yr=2023, geo=city, geosuffix=city )
 
 
